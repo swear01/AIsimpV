@@ -306,7 +306,10 @@ def record_verification(run, feedback, seconds):
     attempt = ledger['attempts'][-1]
     if attempt['status'] == 'RUNNING':
         raise ValueError('generation has not terminated')
-    if candidate_hashes(run / f'attempt-{attempt["number"]:02d}' / 'candidate', ledger['mode']) != attempt.get('candidate_sha256'):
+    if attempt['status'] == 'ISOLATION_OR_RUNNER_ERROR' and 'candidate_sha256' not in attempt:
+        if feedback.get('status') != 'ISOLATION_OR_RUNNER_ERROR':
+            raise ValueError('infrastructure failure requires infrastructure error feedback')
+    elif candidate_hashes(run / f'attempt-{attempt["number"]:02d}' / 'candidate', ledger['mode']) != attempt.get('candidate_sha256'):
         raise ValueError('raw candidate changed after generation')
     attempt['verification'] = feedback
     attempt['verification_seconds'] = seconds

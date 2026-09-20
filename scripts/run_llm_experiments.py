@@ -253,6 +253,8 @@ def run(workspace, mode):
         _, ledger = load(run_dir)
         if ledger['attempts'] and 'verification' not in ledger['attempts'][-1]:
             raise ValueError('incomplete previous attempt: parent verification is required before resuming')
+        if ledger['attempts'] and ledger['attempts'][-1]['status'] == 'ISOLATION_OR_RUNNER_ERROR':
+            return ledger
         ledger['trusted'][str(snapshot)] = file_hashes(snapshot)
         ledger['human_intervention'].append({'type': 'runner_infrastructure_fix', 'description': 'Continue same budget/attempt ledger with separately frozen runtime disabling code_mode_host and unified_exec; filesystem/network permissions unchanged', 'snapshot': snapshot.name})
         save(run_dir, ledger)
@@ -272,7 +274,7 @@ def run(workspace, mode):
         if record['status'] == 'GENERATED':
             feedback = evaluate(snapshot, mode, candidate, run_dir / f'evaluation-{record["number"]:02d}', max(0, 900 - ledger['charged_seconds']))
         else:
-            feedback = {'status': record['status'], 'reason': 'generation did not complete normally'}
+            feedback = {'status': record['status'], 'reason': record.get('error', 'generation did not complete normally')}
         record_verification(run_dir, feedback, time.monotonic() - started)
         print(json.dumps({'mode': mode, 'attempt': record['number'], 'status': feedback['status']}), flush=True)
         _, ledger = load(run_dir)

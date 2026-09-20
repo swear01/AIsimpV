@@ -91,7 +91,7 @@ class PilotBoundaryTests(unittest.TestCase):
             pilot.os.fstat(wrap.call_args.args[0])
         self.assertEqual(output.read_text(), 'preserved')
 
-    def test_resume_refuses_incomplete_attempt_before_mutating_ledger(self):
+    def prepare_driver(self):
         scripts = str(Path(__file__).parents[1] / 'scripts')
         sys.path.insert(0, scripts)
         self.addCleanup(lambda: sys.path.remove(scripts))
@@ -100,10 +100,6 @@ class PilotBoundaryTests(unittest.TestCase):
         target = self.root / 'bundle-certificate'
         self.bundle.rename(target)
         self.bundle = target
-        ledger = self.initialize()
-        ledger['attempts'] = [{'number': 1, 'status': 'RUNNING'}]
-        pilot.save(self.run, ledger)
-        previous = (self.run / 'ledger.json').read_bytes()
         snapshot = self.root / 'snapshot'
         snapshot.mkdir()
         (snapshot / 'marker').write_text('frozen test snapshot')
@@ -113,12 +109,67 @@ class PilotBoundaryTests(unittest.TestCase):
                  'bundles': {'certificate': pilot.file_hashes(self.bundle)},
                  'prompts': {'certificate': hashlib.sha256(prompt.read_bytes()).hexdigest()}}
         (self.root / 'audit.json').write_text(json.dumps(audit))
+        return experiments, snapshot
+
+    def test_resume_refuses_incomplete_attempt_before_mutating_ledger(self):
+        experiments, snapshot = self.prepare_driver()
+        ledger = self.initialize()
+        ledger['attempts'] = [{'number': 1, 'status': 'RUNNING'}]
+        pilot.save(self.run, ledger)
+        previous = (self.run / 'ledger.json').read_bytes()
         with patch.object(experiments, '__file__', str(snapshot / 'scripts/run_llm_experiments.py')), \
                 patch.object(experiments, 'generate') as generate:
             with self.assertRaisesRegex(ValueError, 'incomplete previous attempt'):
                 experiments.run(self.root, 'certificate')
         generate.assert_not_called()
         self.assertEqual((self.run / 'ledger.json').read_bytes(), previous)
+
+    def test_driver_records_preflight_failure_and_resumes_without_retry(self):
+        experiments, snapshot = self.prepare_driver()
+        mkdir = Path.mkdir
+
+        def fail_candidate(path, *args, **kwargs):
+            if path.name == 'candidate':
+                raise OSError('candidate setup failed')
+            return mkdir(path, *args, **kwargs)
+
+        with patch.object(experiments, '__file__', str(snapshot / 'scripts/run_llm_experiments.py')), \
+                patch.object(Path, 'home', return_value=self.root), \
+                patch.object(pilot.shutil, 'which', return_value='/usr/bin/codex'), \
+                patch.object(pilot.subprocess, 'check_output', return_value='codex-cli test'), \
+                patch.object(pilot.subprocess, 'Popen') as launch, \
+                patch.object(Path, 'mkdir', autospec=True, side_effect=fail_candidate), \
+                patch.object(pilot.time, 'monotonic', side_effect=[100, 102, 103, 104]):
+            ledger = experiments.run(self.root, 'certificate')
+            previous = (self.run / 'ledger.json').read_bytes()
+            resumed = experiments.run(self.root, 'certificate')
+        launch.assert_not_called()
+        self.assertEqual(len(ledger['attempts']), 1)
+        record = ledger['attempts'][0]
+        self.assertEqual(record['status'], 'ISOLATION_OR_RUNNER_ERROR')
+        self.assertEqual(record['error'], 'candidate setup failed')
+        self.assertEqual(record['verification'], {'status': 'ISOLATION_OR_RUNNER_ERROR',
+                                                  'reason': 'candidate setup failed'})
+        self.assertEqual(ledger['charged_seconds'], 3)
+        self.assertEqual(record['generation_seconds'], 2)
+        self.assertEqual(record['verification_seconds'], 1)
+        self.assertFalse((self.run / 'attempt-01/candidate').exists())
+        self.assertEqual(ledger, resumed)
+        self.assertEqual((self.run / 'ledger.json').read_bytes(), previous)
+
+    def test_missing_candidate_hash_cannot_be_recorded_as_formal_success(self):
+        ledger = self.initialize()
+        ledger['attempts'] = [{'number': 1, 'status': 'ISOLATION_OR_RUNNER_ERROR'}]
+        pilot.save(self.run, ledger)
+        with self.assertRaisesRegex(ValueError, 'infrastructure error feedback'):
+            pilot.record_verification(self.run, {'status': 'SUCCESS'}, 0)
+        candidate = self.run / 'attempt-01/candidate'
+        candidate.mkdir(parents=True)
+        (candidate / 'certificate.json').write_text('{}')
+        ledger['attempts'][0]['status'] = 'GENERATED'
+        pilot.save(self.run, ledger)
+        with self.assertRaisesRegex(ValueError, 'raw candidate changed'):
+            pilot.record_verification(self.run, {'status': 'SUCCESS'}, 0)
 
     def test_bundle_symlink_parent_traversal_and_rules_are_rejected(self):
         (self.bundle / 'leak').symlink_to(self.trusted / 'contract.json')
