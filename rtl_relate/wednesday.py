@@ -286,12 +286,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--task", choices=TASKS, action="append")
+    parser.add_argument("--task-budget", type=float, default=1800,
+                        help="positive finite wall-time budget per task, in seconds (default: 1800)")
     args = parser.parse_args()
+    if args.task and len(args.task) != len(set(args.task)):
+        parser.error("--task values must be unique")
+    if not math.isfinite(args.task_budget) or args.task_budget <= 0:
+        parser.error("--task-budget must be a positive finite number")
     args.out.mkdir(parents=True, exist_ok=False)
     start = time.perf_counter()
     rows, tasks = [], []
     for task in args.task or TASKS:
-        records, task_record = run_task(task, args.out)
+        records, task_record = run_task(task, args.out, task_budget=args.task_budget)
         rows.extend(records)
         tasks.append(task_record)
     source = {str(p.relative_to(Path(__file__).parent)): p.read_text()

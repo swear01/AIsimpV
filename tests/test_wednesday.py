@@ -1,5 +1,6 @@
 """Runner regressions: contradictory evidence, shared deadlines and failed costs."""
 from copy import deepcopy
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -132,6 +133,32 @@ class WednesdayTests(unittest.TestCase):
             row = self.run_one()
         self.assertEqual(row["status"], "ERROR")
         self.assertIn("binding differs", row["reason"])
+
+
+class CLITests(unittest.TestCase):
+    def test_invalid_task_and_budget_fail_before_creating_output(self):
+        cases = [["--task", "R1-fsm", "--task", "R1-fsm"]]
+        cases += [["--task-budget=" + value] for value in ("0", "-1", "nan", "inf", "-inf")]
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "must-not-exist"
+            for options in cases:
+                with self.subTest(options=options), patch.object(w.sys, "argv", [
+                        "wednesday", "--out", str(out), *options]), patch.object(w, "run_task") as run, \
+                        patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit) as error:
+                    w.main()
+                self.assertEqual(error.exception.code, 2)
+                run.assert_not_called()
+                self.assertFalse(out.exists())
+
+    def test_default_and_explicit_budget_reach_each_selected_task(self):
+        for options, expected in (([], 1800), (["--task-budget", "120"], 120)):
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "result"
+                with patch.object(w.sys, "argv", ["wednesday", "--out", str(out), *options]), \
+                        patch.object(w, "run_task", return_value=([{"expected_met": True}], {})) as run:
+                    self.assertEqual(w.main(), 0)
+                self.assertEqual([call.args[0] for call in run.call_args_list], list(w.TASKS))
+                self.assertTrue(all(call.kwargs == {"task_budget": expected} for call in run.call_args_list))
 
 
 class DeadlineAndManifestTests(unittest.TestCase):
