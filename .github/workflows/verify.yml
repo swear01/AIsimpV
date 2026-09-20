@@ -35,7 +35,7 @@ jobs:
       - name: Run the complete feasibility demo
         run: python -m rtl_relate demo --out results/ci-pilot
       - name: Run the frozen public RTL rewrite matrix
-        run: python -m rtl_relate.wednesday --out results/ci-wednesday
+        run: python -m rtl_relate.wednesday --out results/ci-wednesday --task-budget 120
       - name: Retain verification evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

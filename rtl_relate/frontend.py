@@ -296,8 +296,10 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
             raise Unsupported("v0 requires one flattened module")
         module = modules[top]
         for key, value in parameters.items():
-            if int(module.get("parameter_default_values", {}).get(key, "-1"), 2) != value:
-                raise Unsupported(f"parameter {key} was not applied")
+            raw = module.get("parameter_default_values", {}).get(key)
+            if (not isinstance(raw, str) or not raw or set(raw) - {"0", "1"}
+                    or int(raw, 2) != value):
+                raise Unsupported(f"parameter {key} was not applied as a defined binary value")
         _check_netlist(module, clock)
         if profile:
             original = json.loads((out_dir / "original-netlist.json").read_text())["modules"][top]
