@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "semantics": "single-clock-bv-v0",
+  "clock": {
+    "name": "clk",
+    "edge": "positive"
+  },
+  "reset": null,
+  "environment": true,
+  "sampling": "before_update",
+  "inputs": {
+    "en": 1,
+    "ready": 1
+  },
+  "observations": {
+    "q": 2,
+    "v": 1
+  },
+  "property": {
+    "id": "hold-while-stalled",
+    "step": {
+      "op": "or",
+      "args": [
+        {
+          "op": "not",
+          "args": [
+            {
+              "op": "and",
+              "args": [
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "o.v"
+                    },
+                    {
+                      "bv": 1,
+                      "width": 1
+                    }
+                  ]
+                },
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "u.ready"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "and",
+          "args": [
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "n.v"
+                },
+                {
+                  "bv": 1,
+                  "width": 1
+                }
+              ]
+            },
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "n.q"
+                },
+                {
+                  "ref": "o.q"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

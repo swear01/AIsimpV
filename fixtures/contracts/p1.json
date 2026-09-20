@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "semantics": "single-clock-bv-v0",
+  "clock": {
+    "name": "clk",
+    "edge": "positive"
+  },
+  "reset": null,
+  "environment": true,
+  "sampling": "before_update",
+  "inputs": {},
+  "observations": {
+    "done": 1
+  },
+  "property": {
+    "id": "done-is-monotonic",
+    "step": {
+      "op": "or",
+      "args": [
+        {
+          "op": "not",
+          "args": [
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "o.done"
+                },
+                {
+                  "bv": 1,
+                  "width": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "eq",
+          "args": [
+            {
+              "ref": "n.done"
+            },
+            {
+              "bv": 1,
+              "width": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
