@@ -90,7 +90,7 @@ def initialize(run, bundle, trusted, mode):
               'config_sha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
               'created_at_unix': time.time(), 'charged_seconds': 0.0,
               'max_attempts': 4, 'budget_seconds': 900, 'attempts': [],
-              'cost_usd': None, 'human_intervention': [], 'isolation': 'REQUIRES_PROBE'}
+              'cost_usd': None, 'human_intervention': [], 'transport': 'inline-json', 'isolation': 'REQUIRES_PROBE'}
     save(run, ledger)
     return ledger
 
@@ -160,6 +160,30 @@ def candidate_hashes(candidate, mode):
     return file_hashes(candidate)
 
 
+
+def materialize_response(text, candidate, mode):
+    outputs = {'certificate_json': 'certificate.json'}
+    if mode == 'rewrite':
+        outputs['abstract_rtl'] = 'abstract.v'
+    response = json.loads(text)
+    if (not isinstance(response, dict) or set(response) != set(outputs)
+            or any(not isinstance(v, str) or len(v.encode()) > 65536 for v in response.values())):
+        raise ValueError('response does not match the bounded string output schema')
+    candidate_hashes(candidate, mode)
+    directory = os.open(candidate, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        for key, name in outputs.items():
+            descriptor = os.open(name, os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+            with os.fdopen(descriptor, 'wb') as output:
+                info = os.fstat(output.fileno())
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    raise ValueError('candidate output must be a private regular file')
+                output.truncate(0)
+                output.write(response[key].encode('utf-8'))
+    finally:
+        os.close(directory)
+
+
 def generate(run, prompt):
     run, ledger = load(run)
     if len(ledger['attempts']) >= ledger['max_attempts']:
@@ -177,9 +201,27 @@ def generate(run, prompt):
     if ledger['isolation'] == 'REQUIRES_PROBE':
         probe(run, ledger, candidate)
         (candidate / 'certificate.json').write_text('')
-    instructions = ('Use only the supplied task inputs. Write the proposal only to these permitted files: '
-                    + ', '.join(str(candidate / name) for name in ALLOWED[ledger['mode']])
-                    + '. Do not write a verdict. The independent parent verifier decides correctness.\n\n' + prompt)
+    bundle = {name: (Path(ledger['bundle']) / name).read_text()
+              for name in ledger['trusted'][ledger['bundle']]}
+    bindings = {name.removesuffix('.json') + '_sha256': hashlib.sha256(
+        json.dumps(json.loads(content), sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+        for name, content in bundle.items() if name in {'concrete.json', 'abstract.json', 'contract.json'}}
+    outputs = {'certificate_json': 'certificate.json'}
+    if ledger['mode'] == 'rewrite':
+        outputs['abstract_rtl'] = 'abstract.v'
+    schema = {'type': 'object', 'additionalProperties': False,
+              'properties': {key: {'type': 'string'} for key in outputs}, 'required': list(outputs)}
+    schema_path = attempt / 'output-schema.json'
+    schema_path.write_text(json.dumps(schema, indent=2) + '\n')
+    instructions = ('All task data is inline below. DO NOT CALL TOOLS or read files; no tools are needed. '
+        'Return only the structured JSON response: certificate_json is the exact certificate file text'
+        + (' and abstract_rtl is the exact RTL file text' if ledger['mode'] == 'rewrite' else '')
+        + '. The parent materializes these strings verbatim and independently verifies them; do not emit a verdict. '
+        'This transport instruction replaces file-writing instructions below without changing the task.\n\n'
+        + prompt + '\nCanonical input JSON bindings (metadata only):\n' + json.dumps(bindings)
+        + '\nComplete audited input bundle, filename -> exact content:\n' + json.dumps(bundle))
+    record_inputs = {'bundle_file_sha256': ledger['trusted'][ledger['bundle']], 'canonical_bindings': bindings}
+    (attempt / 'inline-inputs.json').write_text(json.dumps(record_inputs, indent=2) + '\n')
     (attempt / 'prompt.txt').write_text(instructions)
     command = [ledger['codex'], 'exec', '--ignore-user-config', '--ignore-rules', '--ephemeral',
                '--skip-git-repo-check', '--json', '--color', 'never', '-C', ledger['bundle'],
@@ -191,6 +233,8 @@ def generate(run, prompt):
                '-c', 'shell_environment_policy.inherit="none"',
                '--disable', 'apps', '--disable', 'plugins', '--disable', 'hooks',
                '--disable', 'multi_agent', '--disable', 'multi_agent_v2',
+               '--disable', 'code_mode_host', '--disable', 'unified_exec', '--disable', 'shell_tool',
+               '--output-schema', str(schema_path),
                '--enable', 'skip_host_skill_discovery', *permissions(ledger, candidate), '-']
     (attempt / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
     record = {'number': len(ledger['attempts']) + 1, 'status': 'RUNNING', 'usage': None}
@@ -219,6 +263,12 @@ def generate(run, prompt):
                 continue
             if event.get('type') == 'turn.completed':
                 record['usage'] = event.get('usage')
+        if record['status'] == 'GENERATED':
+            try:
+                materialize_response((attempt / 'final.txt').read_text(), candidate, ledger['mode'])
+            except (OSError, ValueError) as exc:
+                record.update(status='CANDIDATE_FORMAT_ERROR', error=str(exc))
+        record['transport'] = 'inline-json'
         record['candidate_sha256'] = candidate_hashes(candidate, ledger['mode'])
         load(run)  # Recheck C, contracts, checker and harness after generation.
     except (OSError, ValueError) as exc:

@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -99,6 +100,40 @@ class PilotBoundaryTests(unittest.TestCase):
         for seconds in (-1, float('inf'), float('nan')):
             with self.assertRaises(ValueError):
                 pilot.record_verification(self.run, {}, seconds)
+
+    def test_inline_transport_is_verbatim_and_rejects_path_link_attacks(self):
+        candidate = self.root / 'candidate'
+        candidate.mkdir()
+        output = candidate / 'certificate.json'
+        output.write_text('')
+        raw = '{"h":{},"J":{"bool":true}}\n'
+        pilot.materialize_response(json.dumps({'certificate_json': raw}), candidate, 'certificate')
+        self.assertEqual(output.read_bytes(), raw.encode())
+        with self.assertRaises(ValueError):
+            pilot.materialize_response(json.dumps({'../contract.json': raw}), candidate, 'certificate')
+        output.unlink()
+        output.symlink_to(self.trusted / 'contract.json')
+        with self.assertRaises(ValueError):
+            pilot.materialize_response(json.dumps({'certificate_json': raw}), candidate, 'certificate')
+        output.unlink()
+        import os
+        os.link(self.trusted / 'contract.json', output)
+        with self.assertRaisesRegex(ValueError, 'private regular'):
+            pilot.materialize_response(json.dumps({'certificate_json': raw}), candidate, 'certificate')
+        self.assertEqual((self.trusted / 'contract.json').read_text(), '{}')
+
+    def test_generated_rtl_cannot_read_external_files_through_yosys(self):
+        scripts = str(Path(__file__).parents[1] / 'scripts')
+        sys.path.insert(0, scripts)
+        self.addCleanup(lambda: sys.path.remove(scripts))
+        from run_llm_experiments import validate_candidate_rtl
+        source = self.root / 'abstract.v'
+        for text in ('`include "outside.v"', '$readmemh("secret", mem);', 'x' * 65537):
+            source.write_text(text)
+            with self.assertRaises(ValueError):
+                validate_candidate_rtl(source)
+        source.write_text('module abstract_design; endmodule')
+        validate_candidate_rtl(source)
 
     @unittest.skipUnless(shutil.which('codex') and Path('/usr/bin/python3').exists(), 'live Codex sandbox unavailable')
     def test_live_os_boundary_blocks_gold_contract_write_and_network(self):
