@@ -23,3 +23,8 @@ No sudo, system package installation, Python Z3 package, or NeuroAbs dependency 
 Independence smoke was executed with PYTHONPATH cleared and Python isolated mode; adding only this project directory to sys.path still imported the package and accepted P1. Full commands and test results are recorded in `SPRINT_REPORT.md`.
 
 The September 21 public matrix uses the bundled `yowasp-yosys-smtbmc` and Z3 for base plus k-induction; SymbiYosys was not used. LLM pilots use Codex CLI 0.154.0 with the existing `gpt-5.6-sol` / `high` setting. Exact per-run tool identities and costs remain in the report evidence. No new system package was required.
+
+The matrix CLI defaults to a 1,800-second wall budget per task; `--task-budget`
+accepts a positive finite number. CI uses `--task-budget 120` for all four tasks
+inside its 15-minute job limit. This CI limit does not replace the frozen research
+budget or measurements. Duplicate `--task` selections fail before creating output.

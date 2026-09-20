@@ -71,6 +71,22 @@ class FrontendTests(unittest.TestCase):
             export_rtl(ROOT / 'fixtures/rtl/p1_concrete.v', 'p1_concrete',
                        self.output / 'shared-deadline', executable=tool, timeout=0.5)
 
+    def test_malformed_parameter_metadata_is_unsupported(self):
+        tool = self.output / 'malformed-yosys'
+        for index, raw in enumerate((None, '', '10x', '10z', 8, '0010')):
+            with self.subTest(raw=raw):
+                module = {'parameter_default_values': {} if raw is None else {'DW': raw}}
+                netlist = json.dumps({'modules': {'p1_concrete': module}})
+                tool.write_text('#!/usr/bin/env python3\nimport pathlib, sys\n'
+                                'if "-V" in sys.argv: print("Yosys test")\n'
+                                f'else: pathlib.Path("netlist.json").write_text({netlist!r})\n')
+                tool.chmod(0o755)
+                out = self.output / f'malformed-parameter-{index}'
+                with self.assertRaisesRegex(Unsupported, 'defined binary value'):
+                    export_rtl(ROOT / 'fixtures/rtl/p1_concrete.v', 'p1_concrete',
+                               out, executable=tool, parameters={'DW': 8})
+                self.assertEqual(json.loads((out / 'frontend.json').read_text())['status'], 'UNSUPPORTED')
+
     def test_nondeterminism_is_registered_and_provenance_retained(self):
         for name, model in self.models.items():
             metadata = json.loads((self.output / name / 'frontend.json').read_text())
