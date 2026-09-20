@@ -1,4 +1,4 @@
-# rtl-relate
+# AIsimpV
 
 Independent research prototype for checking finite bit-vector RTL abstraction certificates. It does not import NeuroAbs. The current experiments use authored P1/P5 abstractions and certificates; no LLM discovery or verification speedup is claimed.
 
@@ -6,7 +6,7 @@ Independent research prototype for checking finite bit-vector RTL abstraction ce
 
 The [September 23 pilot plan](docs/wednesday_plan.md) covers four new tasks: FSM re-encoding, public skidbuffer instances at 8/32 bits, and a public 32-bit pipeline. It also includes two bounded LLM pilots: certificate discovery for a fixed pair, then joint RTL/certificate generation. These are planned experiments, not completed results.
 
-See the [benchmark source survey](docs/benchmark_shortlist.md), [pending results template](docs/rewrite_results_template.csv), and [GitHub issues](https://github.com/swear01/rtl-relate/issues) for dependencies, file ownership, and acceptance evidence. The two skidbuffer widths count as one design family. The skidbuffer task uses a documented derived contract; it is not a reproduction of the full upstream formal suite.
+See the [benchmark source survey](docs/benchmark_shortlist.md), [pending results template](docs/rewrite_results_template.csv), and [GitHub issues](https://github.com/swear01/AIsimpV/issues) for dependencies, file ownership, and acceptance evidence. The two skidbuffer widths count as one design family. The skidbuffer task uses a documented derived contract; it is not a reproduction of the full upstream formal suite.
 
 ## Reproduce
 

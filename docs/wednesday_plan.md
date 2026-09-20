@@ -143,7 +143,7 @@ A-coarse 把 `stageTwo_view` 改成獨立自由 z2，其餘保持上述結構；
 
 ## 5. 最小工程工作與驗收
 
-所有 code changes 使用獨立 branch/worktree，基底目前為 `rtl-relate` 的 `5606127cf7b85eb1e3ba59fb5c1c008774868847`。只使用 Codex 內建 subagents 或 Codex on HAPI。以下是待實作工單，不是假裝已有的 CLI。
+所有 code changes 使用獨立 branch/worktree，初始實作基底為 `AIsimpV` 的 `5606127cf7b85eb1e3ba59fb5c1c008774868847`。只使用 Codex 內建 subagents 或 Codex on HAPI。以下是待實作工單，不是假裝已有的 CLI。
 
 | 工單 | 內容 | 完成條件／預算 |
 | --- | --- | --- |
@@ -283,20 +283,20 @@ model size 同時報 design state、monitor state、nondet bits、正常 preproc
 
 ## 12. GitHub 工單與平行順序
 
-公開專案：[swear01/rtl-relate](https://github.com/swear01/rtl-relate)。[總追蹤 #1](https://github.com/swear01/rtl-relate/issues/1) 與 [週三里程碑](https://github.com/swear01/rtl-relate/milestone/1) 記錄實際進度。下表是發布時的依賴；即時狀態以 issue 為準，新實驗初始均為 NOT_RUN。
+公開專案：[swear01/AIsimpV](https://github.com/swear01/AIsimpV)。[總追蹤 #1](https://github.com/swear01/AIsimpV/issues/1) 與 [週三里程碑](https://github.com/swear01/AIsimpV/milestone/1) 記錄實際進度。下表是發布時的依賴；即時狀態以 issue 為準，新實驗初始均為 NOT_RUN。
 
 | 工單 | 執行前置 | 責任範圍 |
 | --- | --- | --- |
-| [#2 來源與 contracts](https://github.com/swear01/rtl-relate/issues/2) | 可立即認領 | 固定上游來源、四題 contract、同步 reset profile |
-| [#3 B0 與正式 property backend](https://github.com/swear01/rtl-relate/issues/3) | #2；工具資格檢查可先做 | proof driver、SAFE／BUG／UNKNOWN 校準 |
-| [#4 前端接入](https://github.com/swear01/rtl-relate/issues/4) | #2 | BTOR2 adapter、原 assertion／monitor 保持 |
-| [#5 skidbuffer 8/32](https://github.com/swear01/rtl-relate/issues/5) | #2、#3、#4 | R2/R3 gold、coarse、bad certificate 與證據 |
-| [#6 pipeline32](https://github.com/swear01/rtl-relate/issues/6) | #2、#3、#4 | R4 sum-state 改寫、monitor、負例 |
-| [#7 FSM 與獨立負例檢查](https://github.com/swear01/rtl-relate/issues/7) | #2、#3、#4；公開案例 review 待 #5/#6 | R1 非平凡 J、重編碼與獨立核對 |
-| [#8 LLM 工作區與記錄](https://github.com/swear01/rtl-relate/issues/8) | #2 | 最小生成隔離、可信輸入與完整 provenance |
-| [#9 固定 C/A 找 certificate](https://github.com/swear01/rtl-relate/issues/9) | #3、#4、#8，以及 #5 的 R2 gold 證據 | 最多 4 次／15 分鐘的真實 Codex pilot |
-| [#10 自動 RTL＋certificate](https://github.com/swear01/rtl-relate/issues/10) | #9 有真實終態即可，不要求成功；其餘同 #9 | 獨立 context，最多 4 次／15 分鐘 |
-| [#11 重跑、證據包與報告](https://github.com/swear01/rtl-relate/issues/11) | #2–#10 有結果或明確阻礙；表格可先做 | 人工／LLM 分表、成本、八頁報告與重跑命令 |
-| [#12 FIFO 額外挑戰](https://github.com/swear01/rtl-relate/issues/12) | #11 完成後 | 可延期，不計入週三必要里程碑 |
+| [#2 來源與 contracts](https://github.com/swear01/AIsimpV/issues/2) | 可立即認領 | 固定上游來源、四題 contract、同步 reset profile |
+| [#3 B0 與正式 property backend](https://github.com/swear01/AIsimpV/issues/3) | #2；工具資格檢查可先做 | proof driver、SAFE／BUG／UNKNOWN 校準 |
+| [#4 前端接入](https://github.com/swear01/AIsimpV/issues/4) | #2 | BTOR2 adapter、原 assertion／monitor 保持 |
+| [#5 skidbuffer 8/32](https://github.com/swear01/AIsimpV/issues/5) | #2、#3、#4 | R2/R3 gold、coarse、bad certificate 與證據 |
+| [#6 pipeline32](https://github.com/swear01/AIsimpV/issues/6) | #2、#3、#4 | R4 sum-state 改寫、monitor、負例 |
+| [#7 FSM 與獨立負例檢查](https://github.com/swear01/AIsimpV/issues/7) | #2、#3、#4；公開案例 review 待 #5/#6 | R1 非平凡 J、重編碼與獨立核對 |
+| [#8 LLM 工作區與記錄](https://github.com/swear01/AIsimpV/issues/8) | #2 | 最小生成隔離、可信輸入與完整 provenance |
+| [#9 固定 C/A 找 certificate](https://github.com/swear01/AIsimpV/issues/9) | #3、#4、#8，以及 #5 的 R2 gold 證據 | 最多 4 次／15 分鐘的真實 Codex pilot |
+| [#10 自動 RTL＋certificate](https://github.com/swear01/AIsimpV/issues/10) | #9 有真實終態即可，不要求成功；其餘同 #9 | 獨立 context，最多 4 次／15 分鐘 |
+| [#11 重跑、證據包與報告](https://github.com/swear01/AIsimpV/issues/11) | #2–#10 有結果或明確阻礙；表格可先做 | 人工／LLM 分表、成本、八頁報告與重跑命令 |
+| [#12 FIFO 額外挑戰](https://github.com/swear01/AIsimpV/issues/12) | #11 完成後 | 可延期，不計入週三必要里程碑 |
 
 整合負責人為 @swear01；執行 agent 認領時在 issue 記錄 branch、worktree 與檔案責任。第一波可平行做 #2 的語意／來源凍結及 #3 的工具資格檢查；第二波 #3/#4/#8；介面固定後 #5/#6/#7 各自獨立。共享 checker/schema/CLI 修改由主 agent 整合。#9 只需 #5 的 R2 部分有可靠證據，不必等待 skid32 完成。
