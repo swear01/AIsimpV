@@ -2,6 +2,8 @@
 
 2026-09-20. Build a new local project and one Yosys→BTOR2 adapter. NeuroAbs is an external future baseline, not imported or changed. No baseline snapshot has been acquired, and no old LLM calls were rerun.
 
+Historical decision: the local-only publication scope and follow-up order below were superseded on 2026-09-21 by the [public Wednesday plan](wednesday_plan.md). The original feasibility results and semantic limits remain unchanged.
+
 The checker uses the Python standard library and an existing Z3 CLI. YoWASP Yosys is isolated and pinned under the project `.tools/` directory. There is one RTL semantic export path; SMT-LIB is the solver encoding, not a second RTL parser. State IDs and clock identity come from validated export metadata. Human-authored templates bind to that manifest and are then checked; names alone do not establish correspondence.
 
 The Wednesday slice is P1 and P5, including correct, too-coarse, and bug variants. FIFO, credit, FSM re-encoding, LLM discovery, summary reuse, general relations, and a may–must scheduler are not implemented. The first follow-up should be P2 with a positive nontrivial inductive invariant, because current accepted P1/P5 certificates use J=true.

@@ -58,7 +58,7 @@ python3 -m rtl_relate check results/pilot-20260920-release/rtl/p1/certificate/co
 
 工具：Python 3.14.6；Z3 4.15.4；YoWASP Yosys 0.69.0.0.post1233／Yosys 0.69 git 9f75ca1f9。安裝隔離於 `.tools/yosys-venv`，未安裝系統套件。詳見 `docs/environment.md`。
 
-本次執行的 Python source-set digest：`40fa84d5674914906290fc1a80971c29859226748743aeaf6b6cd1518eb780b0`。實驗執行於尚未提交的 task worktree，環境檔記錄的 Git bootstrap HEAD `8253476b91fd84acaa0ab344a187288e65629764` 不是實作完成版本；以上 source digest 才是這次程式內容的識別。提交後會另保存 revision 對應。
+本次執行的 Python source-set digest：`40fa84d5674914906290fc1a80971c29859226748743aeaf6b6cd1518eb780b0`。實驗執行於尚未提交的 task worktree，環境檔記錄的 Git bootstrap HEAD `8253476b91fd84acaa0ab344a187288e65629764` 不是實作完成版本；以上 source digest 才是這次程式內容的識別。已核對它與最終實作 commit `5606127cf7b85eb1e3ba59fb5c1c008774868847` 的 Python source-set 相同，並在本地 `results/revision.json` 保存對應。歷史 results 與工具安裝未加入 Git；公開 checkout 可用上述命令產生新的完整證據。
 
 ## 5. 工單完成範圍與限制
 
@@ -85,4 +85,4 @@ Certificate gate 與 property backend 的信任邊界仍包含 Yosys、adapter�
 4. 真／假反例及 checker 防線：展示 clock regression、共同 witness、exact replay 和不同 concrete bug trace 的來源。
 5. 實測成本與限制：可驗證／有用已有 tiny RTL 證據，值得／加速仍未證成。
 
-**下一個唯一優先項：P2 one-hot → binary，配合正確且非平凡的 J。**目前 accepted gold 都是 J=true；P2 可以補足 invariant 與不同 encoding 的正向可表達性證據，再決定是否擴大 certificate discovery。
+本報告當時的下一步為 P2 one-hot → binary，配合正確且非平凡的 J；目前 accepted gold 都是 J=true。後續範圍已擴大為公開 RTL 與兩個 LLM pilots，最新排程見 [9/23 執行計畫](docs/wednesday_plan.md)；本報告中的既有結果保持原始範圍。
