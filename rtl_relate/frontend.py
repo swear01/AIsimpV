@@ -261,6 +261,14 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
               f"{normalize}write_verilog -noattr normalized.v\n")
     (out_dir / "export.ys").write_text(script)
     started = time.monotonic()
+    deadline = started + timeout
+
+    def remaining():
+        seconds = deadline - time.monotonic()
+        if seconds <= 0:
+            raise subprocess.TimeoutExpired("Yosys export", timeout)
+        return seconds
+
     command = [executable, "-Q", "-T", "-s", "export.ys"]
     metadata = {"command": command, "top": top, "clock": clock, "nondet": sorted(nondet),
                 "source_path": str(source), "source_sha256": source_sha256,
@@ -270,14 +278,14 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
         if profile and (source_sha256 != PIPELINE_SHA256 or top != "main" or clock != "clock" or
                         parameters or nondet):
             raise Unsupported("avr_pipeline32 requires the exact pinned source and interface")
-        version = subprocess.run([executable, "-V"], capture_output=True, text=True, timeout=timeout, check=True)
+        version = subprocess.run([executable, "-V"], capture_output=True, text=True, timeout=remaining(), check=True)
         metadata["version"] = version.stdout.strip()
         metadata["executable_sha256"] = hashlib.sha256(Path(executable).read_bytes()).hexdigest()
         tools_root = Path(executable).parent.parent
         wasm = list(tools_root.glob("lib/python*/site-packages/yowasp_yosys/yosys.wasm"))
         if wasm:
             metadata["wasm_sha256"] = hashlib.sha256(wasm[0].read_bytes()).hexdigest()
-        result = subprocess.run(command, cwd=out_dir, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(command, cwd=out_dir, capture_output=True, text=True, timeout=remaining())
         (out_dir / "yosys.stdout.log").write_text(result.stdout)
         (out_dir / "yosys.stderr.log").write_text(result.stderr)
         metadata["returncode"] = result.returncode

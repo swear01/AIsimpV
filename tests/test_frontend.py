@@ -63,6 +63,14 @@ class FrontendTests(unittest.TestCase):
                 checked += 1
         self.assertEqual(checked, 520)
 
+    def test_export_version_and_compile_share_one_deadline(self):
+        tool = self.output / 'slow-yosys'
+        tool.write_text('#!/usr/bin/python3\nimport time\ntime.sleep(0.3)\nprint("fake version")\n')
+        tool.chmod(0o755)
+        with self.assertRaisesRegex(Unsupported, 'Yosys timeout'):
+            export_rtl(ROOT / 'fixtures/rtl/p1_concrete.v', 'p1_concrete',
+                       self.output / 'shared-deadline', executable=tool, timeout=0.5)
+
     def test_nondeterminism_is_registered_and_provenance_retained(self):
         for name, model in self.models.items():
             metadata = json.loads((self.output / name / 'frontend.json').read_text())
