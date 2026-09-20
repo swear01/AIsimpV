@@ -14,6 +14,9 @@ class Unsupported(ValueError):
     pass
 
 
+PIPELINE_SHA256 = "9a28c1109682583337c71df11383cd451dc941bf0724ca51c820c1e7bf8d2eaa"
+
+
 def _bv(value, width):
     return {"bv": value, "width": width}
 
@@ -128,7 +131,7 @@ def parse_btor2(text, *, name, source_sha256, nondet=(), clock="clk", signed=Non
                 unary = {"not": "bvnot"}
                 binary = {"and": "bvand", "or": "bvor", "xor": "bvxor", "add": "add",
                           "sub": "sub", "concat": "concat"}
-                comparisons = {"eq": "eq", "ult": "ult", "ulte": "ule"}
+                comparisons = {"eq": "eq", "neq": "eq", "ult": "ult", "ulte": "ule"}
                 arity = 1 if tag in unary else 2 if tag in binary or tag in comparisons else 3 if tag == "ite" else None
                 if arity is not None:
                     if len(line) not in {3 + arity, 4 + arity}:
@@ -139,11 +142,17 @@ def parse_btor2(text, *, name, source_sha256, nondet=(), clock="clk", signed=Non
                     elif tag in comparisons:
                         if width != 1:
                             raise Unsupported("comparison result must be BV1")
-                        nodes[node] = bit(_op(comparisons[tag], *args))
+                        comparison = _op(comparisons[tag], *args)
+                        nodes[node] = bit(_op("not", comparison) if tag == "neq" else comparison)
                     else:
                         if widths[int(line[3])] != 1:
                             raise Unsupported("ite condition must be BV1")
                         nodes[node] = _op("ite", pred(args[0]), args[1], args[2])
+                elif tag == "redor":
+                    if len(line) not in {4, 5} or width != 1:
+                        raise Unsupported("invalid reduction-or")
+                    nodes[node] = bit(_op("not", _op("eq", get(line[3]),
+                                                   _bv(0, widths[int(line[3])]))))
                 elif tag in {"uext", "sext"}:
                     if len(line) not in {5, 6}:
                         raise Unsupported("invalid extension")
@@ -217,12 +226,21 @@ def _check_netlist(module, clock):
             raise Unsupported("partially/uninitialized RTL state")
 
 
-def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None, timeout=60):
+def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None, timeout=60,
+               parameters=None, profile=None):
     """Export real RTL, retain provenance/logs, and return the root typed model."""
     source, out_dir = Path(source).resolve(), Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", top):
         raise Unsupported("top must be a simple Verilog identifier")
+    parameters = {} if parameters is None else parameters
+    if not isinstance(parameters, dict) or any(
+            not isinstance(key, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) or
+            type(value) is not int or not 0 <= value < 1 << 32
+            for key, value in parameters.items()):
+        raise Unsupported("parameters require simple names and unsigned 32-bit integers")
+    if profile not in {None, "avr_pipeline32"}:
+        raise Unsupported("unknown trusted extraction profile")
     executable = executable or os.environ.get("RTL_RELATE_YOSYS")
     if not executable:
         local = Path(__file__).resolve().parents[1] / ".tools/yosys-venv/bin/yowasp-yosys"
@@ -233,15 +251,25 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
     # Work on a retained source copy: shell/command quoting cannot alter the input path.
     source_bytes = source.read_bytes()
     (out_dir / "source.v").write_bytes(source_bytes)
-    script = (f"read_verilog -sv source.v; hierarchy -check -top {top}; proc; opt_clean; "
-              "check -assert; write_json netlist.json; write_btor -i model.info model.btor2\n")
+    source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+    chparam = "".join(f" -chparam {key} {value}" for key, value in sorted(parameters.items()))
+    extraction = ("write_json original-netlist.json; expose main/tmp_stageOne main/tmp_stageTwo main/prop; "
+                  "chformal -assert -remove; ") if profile else ""
+    normalize = "delete -output main/prop; " if profile else ""
+    script = (f"read_verilog -sv source.v; hierarchy -check -top {top}{chparam}; proc; {extraction}opt_clean; "
+              "check -assert; write_json netlist.json; write_btor -i model.info model.btor2; "
+              f"{normalize}write_verilog -noattr normalized.v\n")
     (out_dir / "export.ys").write_text(script)
     started = time.monotonic()
     command = [executable, "-Q", "-T", "-s", "export.ys"]
     metadata = {"command": command, "top": top, "clock": clock, "nondet": sorted(nondet),
-                "source_path": str(source), "source_sha256": hashlib.sha256(source_bytes).hexdigest(),
+                "source_path": str(source), "source_sha256": source_sha256,
+                "parameters": parameters, "profile": profile,
                 "script_sha256": hashlib.sha256(script.encode()).hexdigest(), "status": "UNSUPPORTED"}
     try:
+        if profile and (source_sha256 != PIPELINE_SHA256 or top != "main" or clock != "clock" or
+                        parameters or nondet):
+            raise Unsupported("avr_pipeline32 requires the exact pinned source and interface")
         version = subprocess.run([executable, "-V"], capture_output=True, text=True, timeout=timeout, check=True)
         metadata["version"] = version.stdout.strip()
         metadata["executable_sha256"] = hashlib.sha256(Path(executable).read_bytes()).hexdigest()
@@ -259,7 +287,22 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
         if set(modules) != {top}:
             raise Unsupported("v0 requires one flattened module")
         module = modules[top]
+        for key, value in parameters.items():
+            if int(module.get("parameter_default_values", {}).get(key, "-1"), 2) != value:
+                raise Unsupported(f"parameter {key} was not applied")
         _check_netlist(module, clock)
+        if profile:
+            original = json.loads((out_dir / "original-netlist.json").read_text())["modules"][top]
+            checks = [(key, cell) for key, cell in original["cells"].items()
+                      if cell["type"] in {"$check", "$assert", "$assume", "$cover", "$live", "$fair"}]
+            if len(checks) != 1:
+                raise Unsupported("pipeline extraction requires exactly one original assertion")
+            cell_name, cell = checks[0]
+            if (cell["type"] != "$check" or cell["parameters"].get("FLAVOR") != "assert" or
+                    int(cell["parameters"].get("TRG_ENABLE", "1"), 2) != 0 or
+                    cell["connections"] != {"A": original["netnames"]["prop"]["bits"],
+                                            "ARGS": [], "EN": ["1"], "TRG": []}):
+                raise Unsupported("pipeline assertion has changed enable, sampling, or predicate")
         info = (out_dir / "model.info").read_text().splitlines()
         if len([line for line in info if line.startswith("posedge ")]) != 1 or any(line.startswith("negedge ") for line in info):
             raise Unsupported("BTOR2 clock metadata must contain one positive edge")
@@ -268,9 +311,19 @@ def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None,
             "nondet": sorted(nondet), "script": script, "version": metadata["version"]}, sort_keys=True).encode()).hexdigest()
         model = parse_btor2(btor, name=top, source_sha256=source_hash, nondet=nondet, clock=clock,
                            signed={name: net.get("signed", 0) for name, net in module["netnames"].items()})
+        if profile:
+            from .ir import digest
+            predicate = _op("eq", model["observe"].pop("prop"), _bv(1, 1))
+            assertion = {"profile": profile, "source_sha256": source_sha256,
+                         "model_sha256": digest(model), "cell": cell_name, "sampling": "before_update",
+                         "predicate": predicate, "monitor_states": ["tmp_stageOne", "tmp_stageTwo"]}
+            (out_dir / "assertion.json").write_text(json.dumps(assertion, indent=2) + "\n")
+            metadata["assertion_sha256"] = hashlib.sha256((out_dir / "assertion.json").read_bytes()).hexdigest()
+            metadata["original_netlist_sha256"] = hashlib.sha256((out_dir / "original-netlist.json").read_bytes()).hexdigest()
         (out_dir / "model.json").write_text(json.dumps(model, indent=2) + "\n")
         metadata["btor2_sha256"] = hashlib.sha256(btor.encode()).hexdigest()
         metadata["netlist_sha256"] = hashlib.sha256((out_dir / "netlist.json").read_bytes()).hexdigest()
+        metadata["normalized_sha256"] = hashlib.sha256((out_dir / "normalized.v").read_bytes()).hexdigest()
         metadata["status"] = "EXPORTED"
         return model
     except subprocess.TimeoutExpired as error:
