@@ -96,6 +96,7 @@ def render_harness(top, contract, ports, nondet=()):
         lines.append(f"wire [{width-1}:0] out_{i};")
     connections = ", ".join(f".{name}({bindings[name]})" for name in ports)
     lines.append(f"{top} dut({connections});")
+    # The first captured edge includes the DUT's initial observation; history is masked until then.
     lines.append("reg past_valid = 1'b0;")
     expression_bindings = {}
     captures = []
@@ -158,7 +159,7 @@ def prove_rtl(source, top, contract, out_dir, *, nondet=(), parameters=None,
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
     result = {"status": "ERROR", "method": "yosys-smtbmc z3 base + k-induction",
-              "mode": mode, "depth": depth, "free_nondeterminism": True, "stages": {}}
+              "mode": mode, "requested_depth": depth, "free_nondeterminism": True, "stages": {}}
     if any(out.iterdir()):
         result.update(reason="formal output directory must be empty; preserve earlier attempts",
                       seconds=time.monotonic() - started)
@@ -265,17 +266,20 @@ def prove_rtl(source, top, contract, out_dir, *, nondet=(), parameters=None,
                 raise TimeoutError(f"{stage} exceeded shared wall-clock budget")
             if status == "FAILED" and row["returncode"] == 1:
                 result.update(status="CEX" if stage == "base" else "BOUNDED",
-                              reason="reachable property violation" if stage == "base" else "induction inconclusive",
-                              bounded_depth=depth, bounded_edges=depth - 1)
+                              reason="reachable property violation" if stage == "base" else "induction inconclusive")
+                if stage == "base":
+                    checked_steps = re.findall(r"Checking assertions in step (\d+)\.\.", stdout)
+                    if checked_steps:
+                        result["counterexample_step"] = int(checked_steps[-1])
                 break
             if status != "PASSED" or row["returncode"] != 0:
                 result.update(status="UNKNOWN" if status in {"UNKNOWN", "PREUNSAT"} else "ERROR",
                               reason=f"{stage} did not establish a proof: {status}")
                 break
+            if stage == "base":
+                result.update(bounded_depth=depth, bounded_edges=depth - 1)
         else:
             result["status"] = "SAFE" if mode == "prove" else "BOUNDED"
-            result["bounded_depth"] = depth
-            result["bounded_edges"] = depth - 1
     except (Unsupported, FrontendUnsupported) as error:
         result.update(status="UNSUPPORTED", reason=str(error))
     except TimeoutError as error:

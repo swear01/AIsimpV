@@ -62,6 +62,13 @@ class FormalTests(unittest.TestCase):
             result = prove_rtl(ROOT / "fixtures/formal/qualification.v", "delayed_bug", contract,
                                self.out / f"delayed-{depth}", depth=depth)
             self.assertEqual(result["status"], expected, result)
+            self.assertEqual(result["requested_depth"], depth)
+            if expected == "CEX":
+                self.assertEqual(result["counterexample_step"], 3)
+                self.assertNotIn("bounded_depth", result)
+                self.assertNotIn("bounded_edges", result)
+            else:
+                self.assertEqual(result["bounded_edges"], depth - 1)
 
     def test_32_bit_overflow_is_preserved_before_extension(self):
         contract = copy.deepcopy(self.contract)
