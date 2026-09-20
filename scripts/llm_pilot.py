@@ -269,7 +269,10 @@ def generate(run, prompt):
                 record['returncode'] = process.returncode
                 record['status'] = 'GENERATED' if process.returncode == 0 else 'GENERATION_ERROR'
             except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
                 process.communicate()
                 record['status'] = 'TIMEOUT'
         for line in (attempt / 'events.jsonl').read_text().splitlines():

@@ -47,6 +47,23 @@ class PilotBoundaryTests(unittest.TestCase):
         self.assertEqual(pilot.load(self.run)[1]['charged_seconds'], 0)
         self.assertEqual(list(self.run.glob('.ledger-*')), [])
 
+    def test_timeout_keeps_its_status_when_the_process_group_has_exited(self):
+        ledger = self.initialize()
+        ledger['isolation'] = 'LOCAL_COMMAND_READ_WRITE_NETWORK_PROBE_PASSED'
+        pilot.save(self.run, ledger)
+        with patch.object(pilot.subprocess, 'Popen') as launch, \
+                patch.object(pilot.os, 'killpg', side_effect=ProcessLookupError) as kill:
+            process = launch.return_value
+            process.communicate.side_effect = [pilot.subprocess.TimeoutExpired('codex', 900), None]
+            record = pilot.generate(self.run, 'unused')
+        kill.assert_called_once_with(process.pid, pilot.signal.SIGKILL)
+        self.assertEqual(process.communicate.call_count, 2)
+        self.assertEqual(record['status'], 'TIMEOUT')
+        pilot.record_verification(self.run, {'status': 'TIMEOUT'}, 0)
+        ledger = pilot.load(self.run)[1]
+        self.assertEqual(ledger['attempts'][0]['verification']['status'], 'TIMEOUT')
+        self.assertEqual(ledger['charged_seconds'], record['generation_seconds'])
+
     def test_preflight_failure_reserves_and_charges_attempt_without_model_call(self):
         self.initialize()
         with patch.object(pilot, 'probe', side_effect=pilot.subprocess.TimeoutExpired('probe', 20)), \
