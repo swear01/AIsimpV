@@ -10,6 +10,7 @@ import shutil
 import signal
 import stat
 import subprocess
+import tempfile
 import time
 import tomllib
 
@@ -44,7 +45,16 @@ def file_hashes(root):
 
 def save(run, ledger):
     ledger['wall_seconds'] = time.time() - ledger['created_at_unix']
-    (run / 'ledger.json').write_text(json.dumps(ledger, indent=2) + '\n')
+    payload = json.dumps(ledger, indent=2) + '\n'
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', dir=run, prefix='.ledger-', delete=False) as output:
+            temporary = Path(output.name)
+            output.write(payload)
+        os.replace(temporary, run / 'ledger.json')
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def load(run):
@@ -174,7 +184,12 @@ def materialize_response(text, candidate, mode):
     try:
         for key, name in outputs.items():
             descriptor = os.open(name, os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
-            with os.fdopen(descriptor, 'wb') as output:
+            try:
+                output = os.fdopen(descriptor, 'wb')
+            except BaseException:
+                os.close(descriptor)
+                raise
+            with output:
                 info = os.fstat(output.fileno())
                 if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
                     raise ValueError('candidate output must be a private regular file')
@@ -195,61 +210,62 @@ def generate(run, prompt):
         raise ValueError('900-second shared budget exhausted')
     attempt = run / f'attempt-{len(ledger["attempts"]) + 1:02d}'
     candidate = attempt / 'candidate'
-    candidate.mkdir(parents=True)
-    for name in ALLOWED[ledger['mode']]:
-        (candidate / name).write_text('')
-    if ledger['isolation'] == 'REQUIRES_PROBE':
-        probe(run, ledger, candidate)
-        (candidate / 'certificate.json').write_text('')
-    bundle = {name: (Path(ledger['bundle']) / name).read_text()
-              for name in ledger['trusted'][ledger['bundle']]}
-    bindings = {name.removesuffix('.json') + '_sha256': hashlib.sha256(
-        json.dumps(json.loads(content), sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
-        for name, content in bundle.items() if name in {'concrete.json', 'abstract.json', 'contract.json'}}
-    outputs = {'certificate_json': 'certificate.json'}
-    if ledger['mode'] == 'rewrite':
-        outputs['abstract_rtl'] = 'abstract.v'
-    schema = {'type': 'object', 'additionalProperties': False,
-              'properties': {key: {'type': 'string'} for key in outputs}, 'required': list(outputs)}
-    schema_path = attempt / 'output-schema.json'
-    schema_path.write_text(json.dumps(schema, indent=2) + '\n')
-    instructions = ('All task data is inline below. DO NOT CALL TOOLS or read files; no tools are needed. '
-        'Return only the structured JSON response: certificate_json is the exact certificate file text'
-        + (' and abstract_rtl is the exact RTL file text' if ledger['mode'] == 'rewrite' else '')
-        + '. The parent materializes these strings verbatim and independently verifies them; do not emit a verdict. '
-        'This transport instruction replaces file-writing instructions below without changing the task.\n\n'
-        + prompt + '\nCanonical input JSON bindings (metadata only):\n' + json.dumps(bindings)
-        + '\nComplete audited input bundle, filename -> exact content:\n' + json.dumps(bundle))
-    record_inputs = {'bundle_file_sha256': ledger['trusted'][ledger['bundle']], 'canonical_bindings': bindings}
-    (attempt / 'inline-inputs.json').write_text(json.dumps(record_inputs, indent=2) + '\n')
-    (attempt / 'prompt.txt').write_text(instructions)
-    command = [ledger['codex'], 'exec', '--ignore-user-config', '--ignore-rules', '--ephemeral',
-               '--skip-git-repo-check', '--json', '--color', 'never', '-C', ledger['bundle'],
-               '-o', str(attempt / 'final.txt'), '-m', ledger['model'],
-               '-c', 'model_reasoning_effort=' + json.dumps(ledger['reasoning_effort']),
-               '-c', 'approval_policy="never"', '-c', 'default_permissions="pilot"',
-               '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
-               '-c', 'memories.use_memories=false', '-c', 'memories.generate_memories=false',
-               '-c', 'shell_environment_policy.inherit="none"',
-               '--disable', 'apps', '--disable', 'plugins', '--disable', 'hooks',
-               '--disable', 'multi_agent', '--disable', 'multi_agent_v2',
-               '--disable', 'code_mode_host', '--disable', 'unified_exec', '--disable', 'shell_tool',
-               '--output-schema', str(schema_path),
-               '--enable', 'skip_host_skill_discovery', *permissions(ledger, candidate), '-']
-    (attempt / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
     record = {'number': len(ledger['attempts']) + 1, 'status': 'RUNNING', 'usage': None}
     ledger['attempts'].append(record)
     save(run, ledger)  # Reserve the attempt even if the process crashes.
     started = time.monotonic()
-    environment = {k: v for k, v in os.environ.items() if k in
-                   {'PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'LANG', 'LC_ALL', 'TERM',
-                    'SSL_CERT_FILE', 'SSL_CERT_DIR', 'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY'}}
     try:
+        attempt.mkdir()
+        candidate.mkdir()
+        for name in ALLOWED[ledger['mode']]:
+            (candidate / name).write_text('')
+        if ledger['isolation'] == 'REQUIRES_PROBE':
+            probe(run, ledger, candidate)
+            (candidate / 'certificate.json').write_text('')
+        bundle = {name: (Path(ledger['bundle']) / name).read_text()
+                  for name in ledger['trusted'][ledger['bundle']]}
+        bindings = {name.removesuffix('.json') + '_sha256': hashlib.sha256(
+            json.dumps(json.loads(content), sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+            for name, content in bundle.items() if name in {'concrete.json', 'abstract.json', 'contract.json'}}
+        outputs = {'certificate_json': 'certificate.json'}
+        if ledger['mode'] == 'rewrite':
+            outputs['abstract_rtl'] = 'abstract.v'
+        schema = {'type': 'object', 'additionalProperties': False,
+                  'properties': {key: {'type': 'string'} for key in outputs}, 'required': list(outputs)}
+        schema_path = attempt / 'output-schema.json'
+        schema_path.write_text(json.dumps(schema, indent=2) + '\n')
+        instructions = ('All task data is inline below. DO NOT CALL TOOLS or read files; no tools are needed. '
+            'Return only the structured JSON response: certificate_json is the exact certificate file text'
+            + (' and abstract_rtl is the exact RTL file text' if ledger['mode'] == 'rewrite' else '')
+            + '. The parent materializes these strings verbatim and independently verifies them; do not emit a verdict. '
+            'This transport instruction replaces file-writing instructions below without changing the task.\n\n'
+            + prompt + '\nCanonical input JSON bindings (metadata only):\n' + json.dumps(bindings)
+            + '\nComplete audited input bundle, filename -> exact content:\n' + json.dumps(bundle))
+        record_inputs = {'bundle_file_sha256': ledger['trusted'][ledger['bundle']], 'canonical_bindings': bindings}
+        (attempt / 'inline-inputs.json').write_text(json.dumps(record_inputs, indent=2) + '\n')
+        (attempt / 'prompt.txt').write_text(instructions)
+        command = [ledger['codex'], 'exec', '--ignore-user-config', '--ignore-rules', '--ephemeral',
+                   '--skip-git-repo-check', '--json', '--color', 'never', '-C', ledger['bundle'],
+                   '-o', str(attempt / 'final.txt'), '-m', ledger['model'],
+                   '-c', 'model_reasoning_effort=' + json.dumps(ledger['reasoning_effort']),
+                   '-c', 'approval_policy="never"', '-c', 'default_permissions="pilot"',
+                   '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
+                   '-c', 'memories.use_memories=false', '-c', 'memories.generate_memories=false',
+                   '-c', 'shell_environment_policy.inherit="none"',
+                   '--disable', 'apps', '--disable', 'plugins', '--disable', 'hooks',
+                   '--disable', 'multi_agent', '--disable', 'multi_agent_v2',
+                   '--disable', 'code_mode_host', '--disable', 'unified_exec', '--disable', 'shell_tool',
+                   '--output-schema', str(schema_path),
+                   '--enable', 'skip_host_skill_discovery', *permissions(ledger, candidate), '-']
+        (attempt / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
+        environment = {k: v for k, v in os.environ.items() if k in
+                       {'PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'LANG', 'LC_ALL', 'TERM',
+                        'SSL_CERT_FILE', 'SSL_CERT_DIR', 'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY'}}
         with (attempt / 'events.jsonl').open('w') as stdout, (attempt / 'stderr.txt').open('w') as stderr:
             process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout, stderr=stderr,
                                        text=True, env=environment, start_new_session=True)
             try:
-                process.communicate(instructions, timeout=remaining)
+                process.communicate(instructions, timeout=max(0, remaining - (time.monotonic() - started)))
                 record['returncode'] = process.returncode
                 record['status'] = 'GENERATED' if process.returncode == 0 else 'GENERATION_ERROR'
             except subprocess.TimeoutExpired:
@@ -271,7 +287,7 @@ def generate(run, prompt):
         record['transport'] = 'inline-json'
         record['candidate_sha256'] = candidate_hashes(candidate, ledger['mode'])
         load(run)  # Recheck C, contracts, checker and harness after generation.
-    except (OSError, ValueError) as exc:
+    except Exception as exc:
         record['status'] = 'ISOLATION_OR_RUNNER_ERROR'
         record['error'] = str(exc)
     finally:

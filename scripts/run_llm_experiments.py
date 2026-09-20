@@ -251,6 +251,8 @@ def run(workspace, mode):
     run_dir = workspace / f'run-{mode}'
     if run_dir.exists():
         _, ledger = load(run_dir)
+        if ledger['attempts'] and 'verification' not in ledger['attempts'][-1]:
+            raise ValueError('incomplete previous attempt: parent verification is required before resuming')
         ledger['trusted'][str(snapshot)] = file_hashes(snapshot)
         ledger['human_intervention'].append({'type': 'runner_infrastructure_fix', 'description': 'Continue same budget/attempt ledger with separately frozen runtime disabling code_mode_host and unified_exec; filesystem/network permissions unchanged', 'snapshot': snapshot.name})
         save(run_dir, ledger)
