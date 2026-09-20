@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "semantics": "single-clock-bv-v1",
+  "clock": {
+    "name": "clock",
+    "edge": "positive"
+  },
+  "reset": {
+    "kind": "synchronous",
+    "port": "reset",
+    "active": 1,
+    "assumption": "unconstrained"
+  },
+  "environment": true,
+  "sampling": "before_update",
+  "inputs": {
+    "dataIn": 32,
+    "c1": 32,
+    "c2": 32,
+    "reset": 1
+  },
+  "observations": {
+    "dataOut": 32,
+    "tmp_stageOne": 32,
+    "tmp_stageTwo": 32
+  },
+  "property": {
+    "id": "pipeline-original-history-sum",
+    "step": {
+      "op": "or",
+      "args": [
+        {
+          "op": "eq",
+          "args": [
+            {
+              "ref": "o.dataOut"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "ref": "o.tmp_stageTwo"
+                },
+                {
+                  "ref": "o.tmp_stageOne"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "eq",
+          "args": [
+            {
+              "ref": "o.dataOut"
+            },
+            {
+              "bv": 0,
+              "width": 32
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

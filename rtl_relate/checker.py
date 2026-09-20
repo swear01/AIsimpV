@@ -14,9 +14,11 @@ def validate_contract(contract):
     fields(contract, {"version", "semantics", "clock", "reset", "environment", "sampling",
                       "inputs", "observations", "property"}, "contract")
     if (type(contract["version"]) is not int or contract["version"] != 1 or
-            contract["semantics"] != "single-clock-bv-v0" or contract["reset"] is not None or
+            contract["semantics"] not in ("single-clock-bv-v0", "single-clock-bv-v1") or
             contract["environment"] is not True or contract["sampling"] != "before_update"):
-        raise Unsupported("only v0 single-clock explicit-init E=true before-update semantics supported")
+        raise Unsupported("only single-clock explicit-init E=true before-update semantics supported")
+    if contract["semantics"] == "single-clock-bv-v0" and contract["reset"] is not None:
+        raise Unsupported("v0 has no reset profile")
     fields(contract["clock"], {"name", "edge"}, "clock")
     if contract["clock"]["edge"] != "positive" or not isinstance(contract["clock"]["name"], str) or not contract["clock"]["name"]:
         raise Unsupported("one named positive-edge clock required")
@@ -27,6 +29,15 @@ def validate_contract(contract):
             if not isinstance(key, str) or not key:
                 raise Invalid(f"invalid {group} name")
             valid_type(typ)
+    if contract["reset"] is not None:
+        reset = contract["reset"]
+        fields(reset, {"kind", "port", "active", "assumption"}, "reset")
+        if (reset["kind"] != "synchronous" or type(reset["active"]) is not int or
+                reset["active"] != 1 or reset["assumption"] != "unconstrained"):
+            raise Unsupported("v1 reset must be synchronous, active-high, and unconstrained")
+        if (not isinstance(reset["port"], str) or not reset["port"] or
+                contract["inputs"].get(reset["port"]) != 1 or reset["port"] == contract["clock"]["name"]):
+            raise Invalid("reset must name a public BV1 input distinct from the clock")
     fields(contract["property"], {"id", "step"}, "property")
     if not isinstance(contract["property"]["id"], str) or not contract["property"]["id"]:
         raise Invalid("property ID required")
