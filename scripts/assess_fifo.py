@@ -109,19 +109,19 @@ def assessment(out, yosys):
     out.mkdir(parents=True, exist_ok=False)
     fixture = ROOT / 'fixtures/public/sfifo'
     source = fixture / 'sfifo.v'
-    provenance = json.loads((fixture / 'provenance.json').read_text())
     result = {'task_id': 'F1-sfifo4x8-assessment', 'run_id': out.name,
               'candidate_id': 'finite-memory-map-only', 'core_matrix_member': False,
-              'source_revision': REVISION, 'source_sha256': sha(source),
-              'parameters': PARAMETERS, 'script_sha256': sha(Path(__file__)),
-              'provenance_sha256': sha(fixture / 'provenance.json'),
+              'source_revision': REVISION, 'parameters': PARAMETERS,
               'contract_sha256': None, 'contract_note': 'Assessment only; no property contract created.',
               'status': 'ERROR', 'equivalence': 'NOT_RUN', 'certificate': 'NOT_RUN',
               'property': 'NOT_RUN', 'stages': {}}
     stages = result['stages']
     try:
         shutil.copyfile(__file__, out / 'assessment-driver.py')
-        if (sha(source) != SOURCE_SHA256 or provenance['source_sha256'] != SOURCE_SHA256
+        result.update(source_sha256=sha(source), script_sha256=sha(Path(__file__)),
+                      provenance_sha256=sha(fixture / 'provenance.json'))
+        provenance = json.loads((fixture / 'provenance.json').read_text())
+        if (result['source_sha256'] != SOURCE_SHA256 or provenance['source_sha256'] != SOURCE_SHA256
                 or provenance['revision'] != REVISION or provenance['parameters'] != PARAMETERS):
             raise ValueError('pinned source, provenance, or parameters changed')
         shutil.copyfile(fixture / 'provenance.json', out / 'provenance.json')
@@ -192,7 +192,7 @@ def assessment(out, yosys):
         result['status'] = ('UNSUPPORTED' if any(row['status'] == 'UNSUPPORTED' for row in
                             (stages['expanded_netlist'], stages['expanded_parser'])) else 'FRONTEND_SUPPORTED')
         return result
-    except (OSError, ValueError, KeyError) as error:
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as error:
         result['error'] = str(error)
         return result
     finally:

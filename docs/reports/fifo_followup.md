@@ -75,9 +75,14 @@ python3 -m unittest discover -s tests -p test_fifo_frontend.py -v
 
 The assessment independently attempts expansion even if original export fails.
 Expected semantic `UNSUPPORTED` exits 0; process/error/timeout failure exits 1.
-Existing output directories are refused. The two stdlib tests check hidden
-initialization aliases, wrong control init/clock, and preservation of required
-stage failures. No production frontend, IR, checker, or matrix was modified.
+Existing output directories are refused. Four stdlib tests check hidden
+initialization aliases, wrong control init/clock, required stage failures,
+malformed tool output, and missing or malformed provenance. After an output
+directory is created, input and parsing failures retain an `ERROR` summary with
+diagnostics; a pre-existing output directory is never overwritten. The last two
+tests were added during PR review; the four archived research runs above retain
+their original driver snapshots and costs. No production frontend, IR, checker,
+or matrix was modified.
 
 The next bounded step is to justify any elimination of disabled-write X branches
 and permit arbitrary initial values for the explicitly identified finite state

@@ -1,5 +1,6 @@
 """Finite FIFO init evidence must reject hidden constraints on memory aliases."""
 from copy import deepcopy
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -45,3 +46,40 @@ class FifoAuditTests(unittest.TestCase):
             result = assessment(Path(temporary) / 'run', '/missing/yosys')
         self.assertEqual(result['stages']['expand']['status'], 'UNKNOWN')
         self.assertEqual(result['status'], 'ERROR')
+
+    def test_malformed_tool_data_returns_error_details_and_preserves_evidence(self):
+        def run(argv, directory, name):
+            (directory / f'{name}.stdout.log').write_text('retained tool output')
+            return {'status': 'OK'}
+
+        for error in (IndexError('truncated BTOR'), TypeError('invalid netlist type')):
+            with self.subTest(error=type(error).__name__), tempfile.TemporaryDirectory() as temporary, \
+                    patch('scripts.assess_fifo.command', side_effect=run), \
+                    patch('scripts.assess_fifo.export_rtl', side_effect=error):
+                out = Path(temporary) / 'run'
+                result = assessment(out, '/missing/yosys')
+                self.assertEqual(result['status'], 'ERROR')
+                self.assertEqual(result['error'], str(error))
+                self.assertEqual(json.loads((out / 'summary.json').read_text())['error'], str(error))
+                self.assertIn('version.stdout.log', result['artifact_sha256'])
+
+    def test_missing_or_malformed_provenance_is_recorded_without_overwriting(self):
+        source = Path(__file__).resolve().parents[1] / 'fixtures/public/sfifo/sfifo.v'
+        for contents in (None, '{'):
+            with self.subTest(contents=contents), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                fixture = root / 'fixtures/public/sfifo'
+                fixture.mkdir(parents=True)
+                (fixture / 'sfifo.v').write_bytes(source.read_bytes())
+                if contents is not None:
+                    (fixture / 'provenance.json').write_text(contents)
+                out = root / 'run'
+                with patch('scripts.assess_fifo.ROOT', root), patch('scripts.assess_fifo.command') as run:
+                    result = assessment(out, '/missing/yosys')
+                    self.assertEqual(result['status'], 'ERROR')
+                    self.assertTrue(result['error'])
+                    saved = (out / 'summary.json').read_bytes()
+                    with self.assertRaises(FileExistsError):
+                        assessment(out, '/missing/yosys')
+                    self.assertEqual((out / 'summary.json').read_bytes(), saved)
+                    run.assert_not_called()
