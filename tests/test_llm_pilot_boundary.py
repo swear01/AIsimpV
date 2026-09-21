@@ -1,4 +1,5 @@
 """Exercise the candidate/trusted boundary without substituting fake LLM results."""
+import errno
 import hashlib
 import importlib.util
 import json
@@ -287,6 +288,24 @@ class PilotBoundaryTests(unittest.TestCase):
                 validate_candidate_rtl(source)
         source.write_text('module abstract_design; endmodule')
         validate_candidate_rtl(source)
+
+    def test_network_probe_accepts_only_explicit_permission_denials(self):
+        for code in (errno.EPERM, errno.EACCES):
+            with self.subTest(errno=code), patch('socket.socket') as socket:
+                socket.return_value.connect.side_effect = PermissionError(code, 'denied')
+                exec(pilot.NETWORK_PROBE, {})
+                socket.return_value.connect.assert_called_once_with(('1.1.1.1', 443))
+        for error in (TimeoutError(errno.ETIMEDOUT, 'timeout'),
+                      ConnectionRefusedError(errno.ECONNREFUSED, 'refused'),
+                      OSError(errno.ENETUNREACH, 'offline'),
+                      PermissionError(errno.EINVAL, 'unexpected errno')):
+            with self.subTest(error=error), patch('socket.socket') as socket:
+                socket.return_value.connect.side_effect = error
+                with self.assertRaises(type(error)):
+                    exec(pilot.NETWORK_PROBE, {})
+        with patch('socket.socket'):
+            with self.assertRaisesRegex(SystemExit, 'network boundary failed'):
+                exec(pilot.NETWORK_PROBE, {})
 
     @unittest.skipUnless(shutil.which('codex') and Path('/usr/bin/python3').exists(), 'live Codex sandbox unavailable')
     def test_live_os_boundary_blocks_gold_contract_write_and_network(self):

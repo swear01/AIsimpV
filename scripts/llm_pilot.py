@@ -15,6 +15,17 @@ import time
 import tomllib
 
 
+NETWORK_PROBE = '''import errno, socket
+try:
+ s = socket.socket()
+ s.settimeout(0.2)
+ s.connect(('1.1.1.1', 443))
+except PermissionError as error:
+ if error.errno not in (errno.EPERM, errno.EACCES): raise
+else: raise SystemExit('network boundary failed')
+'''
+
+
 ALLOWED = {'certificate': ('certificate.json',), 'rewrite': ('abstract.v', 'certificate.json')}
 
 
@@ -113,7 +124,7 @@ def permissions(ledger, candidate):
 
 def probe(run, ledger, candidate):
     # Probe exactly the profile generation will use, before consuming model budget.
-    script = '''import pathlib, socket, sys
+    script = '''import pathlib, sys
 bundle, candidate, forbidden = map(pathlib.Path, sys.argv[1:])
 assert (bundle / 'input.txt').read_text() == 'public input'
 (candidate / 'certificate.json').write_text('{}')
@@ -131,13 +142,7 @@ link.unlink()
 for p in [forbidden, forbidden.parent / 'parent-verdict.json']:
  try: p.write_text('tamper')
  except OSError: pass
-try:
- s = socket.socket()
- s.settimeout(0.2)
- s.connect(('1.1.1.1', 443))
-except OSError: pass
-else: raise SystemExit('network boundary failed')
-print('READ_WRITE_NETWORK_BOUNDARY_OK')
+''' + NETWORK_PROBE + '''print('READ_WRITE_NETWORK_BOUNDARY_OK')
 '''
     # A separate synthetic input avoids overwriting the real read-only bundle.
     public = run / 'boundary-input'
