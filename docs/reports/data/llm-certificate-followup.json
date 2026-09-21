@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "run_id": "skid8-certificate-inline-20260921",
+  "task": "R2-skid8 fixed-pair certificate discovery",
+  "mode": "certificate",
+  "source_commit": "9dd8e24fbc60057f3ca5100f603f0738f655b8d6",
+  "outcome": "SUCCESS",
+  "stop_reason": "first candidate accepted and frozen abstract property proved",
+  "scope": "Fixed manually prepared C/A; this run generates a certificate only and does not generate RTL.",
+  "max_candidates": 4,
+  "budget_seconds": 900,
+  "candidate_count": 1,
+  "repair_count": 0,
+  "charged_seconds": 38.61031971400371,
+  "wall_seconds": 38.632572889328,
+  "generation_seconds": 36.68826046597678,
+  "verification_seconds": 1.922059248026926,
+  "cost_usd": null,
+  "cost_usd_status": "unavailable from CLI",
+  "usage": {
+    "input_tokens": 19860,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1756,
+    "reasoning_output_tokens": 1401
+  },
+  "model": "gpt-5.6-sol",
+  "reasoning_effort": "high",
+  "provider": "openai",
+  "model_identity_source": "existing Codex config and explicit CLI argument; backend routing is unknown",
+  "codex_version": "codex-cli 0.154.0",
+  "config_sha256": "a4f0bd02b45fea960289ee9a5d36196945834c757f87c7a72aa74583567ca309",
+  "canonical_task_sha256": {
+    "concrete": "397147cf737063964958eb252f95bcd850c0e0390377fd6b027f4b787a10da96",
+    "abstract": "66894d5fdffc526f302d9bf8fbc0e610e5ccfc24845b64c9f0934d304f671fd6",
+    "contract": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2"
+  },
+  "candidate_raw_sha256": "c6133e9a6c1d1c43582af6d9d6850481e9b60720cfd06405678830895aa6837d",
+  "candidate_canonical_sha256": "ca77423118448e16431eec438310006144aa6746674e145895e6c9d2bb7ce3c9",
+  "attempts": [
+    {
+      "number": 1,
+      "generation_status": "GENERATED",
+      "returncode": 0,
+      "gate_status": "ACCEPTED",
+      "abstract_property_status": "SAFE",
+      "outcome": "SUCCESS",
+      "generation_seconds": 36.68826046597678,
+      "verification_seconds": 1.922059248026926,
+      "stage_seconds": {
+        "gate": 0.5102835050201975,
+        "property": 1.3926511050085537
+      },
+      "checker_obligations": {
+        "INITIAL_NONEMPTY": {
+          "status": "sat",
+          "seconds": 0.0069761869963258505,
+          "query_sha256": "04c5a33964fee73ff843e7f1ba13c2a0cb21c2e5f9194286f8252c15b30eb763"
+        },
+        "INIT_J": {
+          "status": "unsat",
+          "seconds": 0.009691912971902639,
+          "query_sha256": "0e3e61f1ddc914ce3b27f3284e25c785e6385163de826afa9172d40d66f5bd75"
+        },
+        "STEP_J": {
+          "status": "unsat",
+          "seconds": 0.01040664897300303,
+          "query_sha256": "db94cf93889b6ba308bd9896719fe15b58c03fd93fd30e7d95d60785a4733d36"
+        },
+        "INIT_MAP": {
+          "status": "unsat",
+          "seconds": 0.022486113011837006,
+          "query_sha256": "498a42b55713a921fedb12710ba8b9b6564e33000fb5c31f1f4c92b0c6bebde9"
+        },
+        "STEP_MAP": {
+          "status": "unsat",
+          "seconds": 0.020027218968607485,
+          "query_sha256": "2e5c97cf77d631190cee8e5b02a499e4027972f6dfeebabb71fe1c1676433c05"
+        },
+        "OBS_MAP": {
+          "status": "unsat",
+          "seconds": 0.023735128983389586,
+          "query_sha256": "20d2a3904128ba7b3444f361cb9c993a79f9e2e55a6dc45d7cc3e9ea869de80d"
+        }
+      },
+      "usage": {
+        "input_tokens": 19860,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1756,
+        "reasoning_output_tokens": 1401
+      },
+      "candidate_raw_sha256": "c6133e9a6c1d1c43582af6d9d6850481e9b60720cfd06405678830895aa6837d",
+      "tool_call_count": 0
+    }
+  ],
+  "integrity": {
+    "trusted_hashes_unchanged": true,
+    "bundle_matches_root_audit": true,
+    "final_response_and_candidate_utf8_bytes_match": true,
+    "candidate_matches_ledger_hash": true,
+    "os_boundary_probe": "PASSED",
+    "witness_free_abstract_property": true,
+    "candidate_formula_assistance": false,
+    "candidate_rtl_assistance": false,
+    "research_runtime_infrastructure_changes": [],
+    "generation_tools_disabled": true,
+    "actual_tool_call_count": 0,
+    "runtime_warning_count": 2,
+    "runtime_warning_codes": [
+      "UNSTABLE_SKIP_HOST_SKILL_DISCOVERY",
+      "CODE_MODE_DISABLED_FAIL_CLOSED"
+    ]
+  },
+  "separate_engineering_costs": {
+    "transport_smoke": {
+      "status": "PASSED_WITH_RUNTIME_WARNINGS",
+      "initial_classification": "FAILED",
+      "classification_correction": "Two pre-turn runtime warnings were initially misclassified as tool calls; no model retry occurred.",
+      "model_calls": 1,
+      "charged_seconds": 7.151915048947558,
+      "wall_seconds": 7.652284113981295,
+      "usage": {
+        "input_tokens": 11332,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 18,
+        "reasoning_output_tokens": 0
+      },
+      "cost_usd": null,
+      "qualification_sha256": "fe7e003e964863471acffd2cffef99cff95a3eb2c7d3a002054b88b525dec1f3",
+      "diagnosis_sha256": "4e3a4a412debf089ba77aa6cb3460336c3537e5e64f7b457c2e811dd761cd49e"
+    },
+    "frozen_backend_gold_qualification": {
+      "status": "SUCCESS",
+      "gate": "ACCEPTED",
+      "property": "SAFE",
+      "seconds": 1.5998306160327047,
+      "model_calls": 0
+    },
+    "independent_clean_source_recheck": {
+      "status": "REPRODUCED",
+      "model_calls": 0,
+      "wall_seconds": 1.5698777830111794,
+      "verification_stage_seconds": 1.5427639980334789,
+      "evidence": "llm-certificate-followup-reproduction.json"
+    }
+  },
+  "prior_runs_preserved": {
+    "original_certificate": {
+      "status": "INFRASTRUCTURE_BLOCKED",
+      "attempts": 4,
+      "meaningful_candidates": 0,
+      "charged_seconds": 309.73984032624867,
+      "ledger_sha256": "d2ae2e6c765a3a64bc09c33e1dc4d6c9667524271a09cf563c9df6b112df50dc"
+    },
+    "original_joint_rewrite": {
+      "status": "SUCCESS",
+      "attempts": 2,
+      "charged_seconds": 86.78426637605298,
+      "ledger_sha256": "3a8e2ae37d67799c3aff2863aef0a7d8e6d2fb11903a4d9ceed4455b4356882b"
+    }
+  },
+  "limitations": [
+    "One fixed pair; no estimate of general discovery success.",
+    "No repairs were needed; this run does not test the benefit of formal feedback.",
+    "No verification speedup or new RTL rewrite is established by this certificate-only run."
+  ],
+  "artifact_sha256": {
+    "audit.json": "5dbdd466456590de6f54252ff1109473d16654e5c279d3d70489a1e1c344d505",
+    "audit-before-approval.json": "a187b426ebb864c107f75a30cb8bf6df03c206220f67de6dafaaa7d21dc2dc01",
+    "preregistration.md": "8181c22e29f885c572138a09a101d0fb8521a9e0e458cc8f0373ef4c926927c0",
+    "prompt-certificate.txt": "8fb21f3075e45f8b3bb4941adbdf2cccddf3ce6bdea58a5d4846572e7a67223c",
+    "run-certificate/ledger.json": "daf2335d3b9ef8fa004825635629632c928b6573c43d2214d1e42831009a7709",
+    "run-certificate/attempt-01/prompt.txt": "24a36fbca5766fcab6deb3f0b1a23fd05336ae25170c24d8d5cd737ec673e8d5",
+    "run-certificate/attempt-01/command.json": "48462bbf44e9b89c0738e12c84339853a61bd84c9e89cbec6d4c093896422b16",
+    "run-certificate/attempt-01/events.jsonl": "976a146268ad69799324d916b67f558e13d22dfdc1e63aa57069308d8630cbf8",
+    "run-certificate/attempt-01/stderr.txt": "6e992b39520b5852902b1194a57794c548e2635add8b9592f05d2f2262d3809b",
+    "run-certificate/attempt-01/final.txt": "c858aacd669dc0b13da4694bd0fcbda1dab868e9f959d0a7b9c082f8c6cbef31",
+    "run-certificate/attempt-01/candidate/certificate.json": "c6133e9a6c1d1c43582af6d9d6850481e9b60720cfd06405678830895aa6837d",
+    "run-certificate/evaluation-01/evaluation.json": "8bc6f038ded1c08717c356a88a41602ecf73824e06e09aa7cbc6a530253822fe"
+  },
+  "raw_selected_summary_sha256": "5c8f48577de2220c7a4c7889081f918bd7a9ef0b0288a263d8492c5a95ea332e",
+  "cumulative_research_charged_seconds": 435.13442641630536,
+  "human_readable_relation": {
+    "h.o_data": "C.o_data",
+    "h.n": "C.LOGIC.r_valid ? 2 : (C.LOGIC.REG_OUTPUT.ro_valid ? 1 : 0)",
+    "J": "C.LOGIC.r_valid == 0 OR C.LOGIC.REG_OUTPUT.ro_valid == 1",
+    "w.z": "C.LOGIC.r_data"
+  },
+  "relation_note": "Human explanation of the unchanged model-produced certificate, added only after generation and recheck."
+}

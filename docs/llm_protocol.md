@@ -204,3 +204,20 @@ feedback allowed the model to correct the certificate on attempt two while
 retaining the exact same RTL. The gate then accepted and the free-choice property
 was proved. `protocol-amendment.json` records transport changes and the absence
 of human candidate formula edits, tied to both immutable raw ledger hashes.
+
+## Separately registered fixed-pair follow-up
+
+The complete Wednesday-delivery goal authorized a new fixed-pair experiment after
+the original infrastructure failure. Its [preregistration](llm_certificate_followup.md)
+was also [published on issue #9](https://github.com/swear01/AIsimpV/issues/9#issuecomment-5754280390)
+before candidate generation. It adds at most four submissions and 900 charged
+seconds beyond the original two pilots' allocation. Keep the original ledgers,
+attempt counts and costs; report this run separately and include it in cumulative
+costs. It is not a resume or reset of the infrastructure-blocked run.
+
+The fixed C/A/contract bytes are unchanged. The merged runner uses the inline
+transport already used by the joint pilot. Before research generation, a separate
+trivial structured-output model call qualifies that actual transport; its prompt
+contains no RTL or relationship hints. Save its cost and any diagnosis separately
+from research attempts. A subsequent clean-source verification of saved candidates
+is also a separate verification cost, not another generation attempt.

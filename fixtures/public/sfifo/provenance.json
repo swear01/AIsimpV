@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F1-sfifo4x8-assessment",
+  "repository": "https://github.com/ZipCPU/wb2axip",
+  "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+  "upstream_path": "rtl/sfifo.v",
+  "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+  "license": "Source header explicitly dedicates this design to the public domain; original bytes and header retained.",
+  "parameters": {
+    "BW": 8,
+    "LGFLEN": 2,
+    "OPT_ASYNC_READ": 1,
+    "OPT_WRITE_ON_FULL": 0,
+    "OPT_READ_ON_EMPTY": 0
+  },
+  "clock": {
+    "name": "i_clk",
+    "edge": "positive"
+  },
+  "defines": [],
+  "initial_state": {
+    "wr_addr": 0,
+    "rd_addr": 0,
+    "o_fill": 0,
+    "r_empty": 1,
+    "mem[0..3]": "32 unconstrained initial bits; subsequent state retained until written"
+  },
+  "reset": "Synchronous active-high i_reset resets controls only; w_wr still writes memory on a reset edge.",
+  "observations": [
+    "o_fill",
+    "o_full",
+    "o_empty",
+    "o_data"
+  ],
+  "property_scope": "No property checked by this assessment. Occupancy/flags and data ordering require distinct frozen properties.",
+  "core_matrix_member": false
+}

@@ -19,8 +19,8 @@
 <h1 id="h1">RTL 可以換一種狀態表示，<br>但不能漏掉原始行為</h1>
 <p class="lead">用「抽象 RTL＋對應證書＋獨立 checker」檢查非局部 rewrite，再驗證原先凍結的 safety property。</p>
 <div class="flow"><span>原始 C<br>固定 contract</span><b>→</b><span>候選 A<br>h / J / w</span><b>→</b><span>包含關係<br>獨立 checker</span><b>→</b><span>A property proof<br>自由 nondeterminism</span></div>
-<div class="grid"><div class="card"><h3>本輪要回答</h3><p>能否檢查實際狀態改寫？<br>哪些必要關係不能放掉？</p></div><div class="card"><h3>分開驗證三件事</h3><p>人工 gold 可證性 · LLM discovery<br>完整成本與驗證加速</p></div></div>
-<p class="draft"><strong>人工：</strong>4/4 good gate＋P 通過；4 coarse 假反例；4 錯證書被拒絕。<br><strong>LLM：</strong>joint 兩次內得到 18→10 bits 的安全候選；固定 C/A 因工具錯誤受阻。</p>
+<div class="grid"><div class="card"><h3>改寫與對應</h3><p>1. 人工改寫能否證成包含？<br>2. LLM 能否找到可檢查的對應？</p></div><div class="card"><h3>效用與成本</h3><p>3. 抽象是否仍能證明目標 property？<br>4. 完整成本是否支持驗證加速？</p></div></div>
+<p class="draft"><strong>人工：</strong>4/4 good gate＋P 通過；4 coarse 假反例；4 錯證書被拒絕。<br><strong>LLM：</strong>joint 兩次取得資料抽象；新 fixed-pair 首候選找到 occupancy 對應。原工具失敗仍保留。</p>
 <div class="foot"><span>單 clock · BV safety · 固定 reset / 觀察 / property</span><span>1 / 8</span></div>
 </section>
 <section class="slide" id="s2" aria-labelledby="h2">
@@ -31,8 +31,8 @@
 <tr><td>R3-skid32</td><td>同一家族、加大資料位寬</td><td>66 → 34 design bits</td></tr>
 <tr><td>R4-pipe32</td><td>AVR · 原 history-sum property</td><td>96 → 64 design bits；64 monitor bits 保留</td></tr>
 </tbody></table>
-<div class="grid"><div class="card"><h3>人工矩陣：12 基本 attempts</h3><p>每題：good / coarse / bad certificate。<br>8 個 C/A pairs；反向證書及 replay 另記。</p></div><div class="card"><h3>LLM：另外 2 個 pilots</h3><p>固定 C/A 找證書；joint RTL＋證書。<br>各最多 4 attempts / 15 分鐘。</p></div></div>
-<p class="note">位數已核對實際匯出的模型；COI 規模含 property harness，另列完整報告。P1/P5 回歸、FIFO 與重跑次數不增加主集合分母。skid 使用衍生 port-level property，不是完整上游 formal suite。</p>
+<div class="grid"><div class="card"><h3>人工矩陣：12 基本 attempts</h3><p>每題：good / coarse / bad certificate。<br>8 個 C/A pairs；反向證書及 replay 另記。</p></div><div class="card"><h3>LLM：首輪＋獨立 follow-up</h3><p>首輪 fixed-pair、joint；另預註冊 fixed-pair。<br>每個 run 各最多 4 attempts / 15 分鐘。</p></div></div>
+<p class="note">位數已核對實際匯出的模型；COI 規模含 property harness，另列完整報告。P1/P5、重跑與額外 FIFO 接入不增加分母；FIFO 4×8 為 UNSUPPORTED。skid 使用衍生 port-level property，不是完整上游 formal suite。</p>
 <div class="foot"><span>公共 reset 每拍自由；E=true；原 property 不隨候選修改</span><span>2 / 8</span></div>
 </section>
 <section class="slide" id="s3" aria-labelledby="h3">
@@ -121,11 +121,16 @@
 <div class="foot"><span>NOT_RUN / ERROR / UNKNOWN 保留；不以新案例替換失敗列</span><span>5 / 8</span></div>
 </section>
 <section class="slide" id="s6" aria-labelledby="h6">
-<div class="kicker">真實 Codex discovery</div><h2 id="h6">兩個獨立 pilot，保留不同終態</h2>
-<div class="grid"><div class="card"><h3>Pilot A · Certificate only</h3><p class="tag pending">INFRASTRUCTURE_BLOCKED</p><p>4 次工具失敗，0 可驗證候選。<br>計費 309.740s；wall 408.163s。</p><p class="note">a2 含診斷停頓上界；不能推論模型找不到 mapping。</p></div><div class="card"><h3>Pilot B · Joint rewrite</h3><p class="tag">ACCEPTED ＋ SAFE · 18→10 bits</p><p>a1 stale hash ERROR → a2 修證書。<br>2 次計費 86.784s；RTL 相同。</p><p class="note">刪除 r_data、保留 valid bits；兩個保存候選獨立重驗皆相符。</p></div></div>
-<ul><li>各最多 4 次 / 900 秒；失敗保留，兩個 pilots 不合併成功率。</li><li>Joint 改用 inline bundle＋無工具輸出；父端原樣存檔，未提供 h/J/w。</li><li>修改 hash 後通過是一次真實修正紀錄，不是 feedback 因果對照。</li></ul>
-<p class="note">gpt-5.6-sol / high，Codex 0.154.0。Joint usage：34,968 input / 3,750 output tokens；固定pair usage不完整；費用 unavailable。</p>
-<div class="foot"><span>固定 pair：檔案工作區；joint：無工具 inline transport；改動與失敗均留存</span><span>6 / 8</span></div>
+<div class="kicker">真實 Codex discovery</div><h2 id="h6">原始失敗保留，另驗證新的對應發現</h2>
+<table class="compact"><thead><tr><th>獨立 run</th><th>Attempts／結果</th><th>Charged 秒</th></tr></thead><tbody>
+<tr><td>原 fixed-pair</td><td>4 次工具失敗；0 可驗證候選；INFRASTRUCTURE_BLOCKED</td><td>309.740</td></tr>
+<tr><td>原 joint RTL＋certificate</td><td>2 次；stale hash → ACCEPTED＋SAFE；design state 18→10 bits</td><td>86.784</td></tr>
+<tr><td>新 fixed-pair follow-up</td><td>首候選 ACCEPTED＋SAFE；找到 occupancy h／J／w，無 repair</td><td>38.610</td></tr>
+</tbody></table>
+<p><span class="strong">三個研究 runs 合計 435.134s。</span>新 run＋資格＋首次重驗小計 48.932s；後續工程成本另列。</p>
+<ul><li>新 run 生成前預註冊；首候選經乾淨 source 重驗，六個 query hashes 相符。</li><li>固定人工 A 找到 h/J/w，與自主 RTL 生成分開；沒有自動發現 occupancy RTL。</li><li>單一 fixed pair 首次成功，沒有 repair；不宣稱 feedback 因果收益或一般成功率。</li></ul>
+<p class="note">gpt-5.6-sol / high，Codex 0.154.0。新 run tokens：19,860 input／1,756 output；費用 unavailable。原 infra a2 成本含診斷上界。</p>
+<div class="foot"><span>原 fixed-pair：檔案工具；原 joint／新 follow-up：無工具 inline transport；完整紀錄各自保留</span><span>6 / 8</span></div>
 </section>
 <section class="slide" id="s7" aria-labelledby="h7">
 <div class="kicker">負例提供什麼證據</div><h2 id="h7">錯對應與抽象過粗，要由不同關卡辨認</h2>
@@ -137,10 +142,15 @@
 </section>
 <section class="slide" id="s8" aria-labelledby="h8">
 <div class="kicker">證成範圍與下一步</div><h2 id="h8">先依證據決定下一階段投入</h2>
-<p class="draft"><strong>已證成：</strong>4/4 人工改寫保留 P；LLM 另產生 1 個可驗證資料抽象。<br><strong>限制：</strong>固定 C/A pilot 卡在工具；單次成本沒有加速證據，不能推論一般成功率。</p>
-<div class="grid"><div class="card"><h3>若 gold 通過、LLM 失敗</h3><p>集中 mapping discovery、語法與回饋；保留失敗候選，不擴大生成預算掩蓋問題。</p></div><div class="card"><h3>若 gate 通過、P 失敗</h3><p>恢復 property 所需的時序／資料關係；先不增加平台功能。</p></div></div>
-<p>本輪不涵蓋任意 RTL、multi-clock、latency 改變、liveness、symbolic memory；兩個公開家族不支持通用性推論。</p>
-<p class="note">凍結 run：<code>wednesday-20260921-final01</code>；凍結時 143、最終整合 145 項工程測試 PASS。<br>乾淨 source 重跑 12/12 分類與 hashes 相符；另耗 18.584s，不作 timing median。<br>已執行 runner：<code>python -m rtl_relate.wednesday --out results/&lt;new-run&gt;</code><br>完整來源／數據：同目錄 <code>wednesday_report.md</code>、<code>data/manual-summary.json</code>，公開專案 <a href="https://github.com/swear01/AIsimpV">swear01/AIsimpV</a>。</p>
+<p class="draft"><strong>已證成：</strong>4/4 人工改寫保留 P；LLM 另完成固定 A 的對應發現及資料抽象生成。<br><strong>限制：</strong>原 fixed-pair 工具失敗保留；沒有自主發現 occupancy RTL 或加速證據。</p>
+<table><thead><tr><th>研究問題</th><th>目前證據</th></tr></thead><tbody>
+<tr><td>人工改寫可證？</td><td>四個指定 good rewrites：包含＋P；非任意 RTL 保證。</td></tr>
+<tr><td>LLM 找得到對應？</td><td>新 fixed A：首候選找到 h/J/w；原 joint：另產生資料抽象。</td></tr>
+<tr><td>抽象有用？</td><td>Good A 可證目標 P；coarse A 的關係丟失由 CEX/replay 辨識。</td></tr>
+<tr><td>是否加速？</td><td>沒有加速證據；本次 good workflow 均高於正常 B0。</td></tr>
+</tbody></table>
+<p class="note">額外 <a href="https://github.com/swear01/AIsimpV/blob/main/docs/reports/fifo_followup.md">FIFO 4×8</a> 展開為 42 bits（32 memory 初值任意），仍 UNSUPPORTED，無等義／certificate／property proof。四次工程 run 共 2.731s，另故障驗證 0.013s、整合重驗 0.608s，不增加原四題分母。</p>
+<p class="note">人工乾淨重跑 12/12 分類與 hashes 相符；18.584s，不作 timing median。首輪 143／145 與 PR #15 的 163 tests 為歷史；新整合本地 165 tests PASS（36.381s），PR／CI 紀錄另見 GitHub。<br>完整來源／成本：<a href="https://github.com/swear01/AIsimpV/blob/main/docs/reports/wednesday_report.md">報告</a>、<a href="https://github.com/swear01/AIsimpV/blob/main/docs/reports/data/llm-certificate-followup.json">新 LLM summary</a>、<a href="https://github.com/swear01/AIsimpV/blob/main/docs/reports/data/followup-evidence-index.json">追加證據索引</a>；公開專案 <a href="https://github.com/swear01/AIsimpV">swear01/AIsimpV</a>。</p>
 <div class="foot"><span>所有結論綁定凍結來源、contract、候選與工具版本</span><span>8 / 8</span></div>
 </section>
 </body>

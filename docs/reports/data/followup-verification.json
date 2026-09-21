@@ -1,0 +1,126 @@
+{
+  "source_commit": "308e8192a5e8ba46d85b318eafe62b146b51b158",
+  "checks": [
+    {
+      "name": "unit",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "returncode": 0,
+      "seconds": 36.67769916396355,
+      "log_sha256": "25578d8485e07ff1745264e3680c9f39dc1c59782c0476fe3798d1136e786557"
+    },
+    {
+      "name": "demo",
+      "command": [
+        "python3",
+        "-m",
+        "rtl_relate",
+        "demo",
+        "--out",
+        "results/followup-integration/demo"
+      ],
+      "returncode": 0,
+      "seconds": 5.68346000200836,
+      "log_sha256": "4810fc76a392ebf1a450d0aae6defbbbe64f9cd9a751a0008521d8a1ca5e00ff"
+    },
+    {
+      "name": "matrix",
+      "command": [
+        "python3",
+        "-m",
+        "rtl_relate.wednesday",
+        "--out",
+        "results/followup-integration/matrix",
+        "--task-budget",
+        "120"
+      ],
+      "returncode": 0,
+      "seconds": 17.9129902679706,
+      "log_sha256": "2b11c4b2098b1b6ff357f0bf99fc0a36a002c3376d407efdfa548683964722aa"
+    },
+    {
+      "name": "fifo",
+      "command": [
+        "python3",
+        "scripts/assess_fifo.py",
+        "--out",
+        "results/followup-integration/fifo",
+        "--yosys",
+        "<pinned-yosys>"
+      ],
+      "returncode": 0,
+      "seconds": 0.7184959430014715,
+      "log_sha256": "137eea6f1082c1e7b408d8139e53f93a4171cbd0f079561a21999cbf3bafd119"
+    }
+  ],
+  "code_sha256": {
+    "rtl_relate/__init__.py": "1839c99284423c9c7131ee5713b7a1355a7166b1d77828044a0bb648c9aa816b",
+    "rtl_relate/__main__.py": "6f935c504b3910450a770611f4208dc86d7cb33a1ee67ae8d40b942b928596c4",
+    "rtl_relate/checker.py": "9ab3438bea4e816d91d55728e3ac139f5fa59ebe29b1b0588e209d0481924101",
+    "rtl_relate/fixtures.py": "3d8f7a378469d4fb30c1fc3c34bb5c331106ed595eba47694e54d556850ba0c3",
+    "rtl_relate/formal.py": "0575a5726033a9c7de97fe9e7a26573d190f75472c9235db0ea2d211073f89b2",
+    "rtl_relate/frontend.py": "53bb46a9b5f4de8244b0e4c1263e6f8fd9e2cc3364a1e3cdb41a5eb03c36174a",
+    "rtl_relate/fsm_case.py": "baf654b35964e8a2a59decf1654b53c21085c8c1bec07227c96b20dbc722ec39",
+    "rtl_relate/ir.py": "04a7f211928a0d47304cfca421de62293e40fdc1dccf86115dd100c1988a71e2",
+    "rtl_relate/pipeline_case.py": "699e43fe77e619e4c6f78185dc608c6bcc57abcddf45bb6203184fd67ce616a2",
+    "rtl_relate/properties.py": "35e21b8dabfc0e7eb6cfa15e1e8ba447b3ff53a346bda384cef8bdc8d399f188",
+    "rtl_relate/skid_cases.py": "d66fa30189d3d78d028cfc95c8b6d21c56fcbfebadbb1e771c621a2331ed9345",
+    "rtl_relate/solver.py": "a4b9657d4499fa2bef327bd7b8649725a3b2e15f045374eb726fe482ab93900a",
+    "rtl_relate/wednesday.py": "298de53e89c8a2788bb966d916dcd14177450be364e23a5b0ad01b04fe3bd3fe",
+    "rtl_relate/witness.py": "8bc2282a52eecd0f47577729dee5e9ccb16bf14822c9de27f7be4892a699658b",
+    "scripts/assess_fifo.py": "b8f7ebf257dc0eb099ca32936e55a0985e417647eef2ff6d145e97f5f07352e4",
+    "scripts/llm_pilot.py": "5382d3e19b93290242ddd327fbd8441cc8984f01072c6e0be8c752cf38eb8665",
+    "scripts/run_llm_experiments.py": "866e36b9869d69ab346df6024ffb047d686151cce9df3e2486c6e7345189c04f",
+    "tests/test_checker.py": "58014acf6c73a40af7d0bafab71ac1c4a54093150c1afdc4cc76a579bdd55b36",
+    "tests/test_contracts_v1.py": "2489ec2ba61230c395f3a63926285677211cc6cef030ea569d6b2359364f1299",
+    "tests/test_fifo_frontend.py": "a676171849d8fba4cbaf1ea9ee66dc988976fe5246ad4062e036df3a7827393a",
+    "tests/test_formal.py": "96624c2162feea92fdf5d4649955db0b65e708b502032077ea4e4423ead211a0",
+    "tests/test_frontend.py": "20ccccfa53c65b904b7a29689a563d2db4f79b371851c6ac11f3f94c6086c66e",
+    "tests/test_fsm_rewrite.py": "523e053ca932d093ae004173eac7b4aff1bd917abe741043662e630df824d701",
+    "tests/test_ir.py": "b8b25caedd3e2af0f6273ac7fbf3aeeb486bbfef4ee0cf17e408987380ba0ec8",
+    "tests/test_llm_pilot_boundary.py": "da5875629321c0c7262207294a287d7984c5150cfafa4e9921fe7cdf6ca26fee",
+    "tests/test_oracle.py": "74507260c4f3bd1e982e6285fc6abccb57b0f9e998aaf4b73c30ce5b3f9ab4a5",
+    "tests/test_pipeline_rewrite.py": "a6b8b6233f7f52600429b53c10b063f6dd34d436d506008f559a4a7e36a032a3",
+    "tests/test_properties.py": "120fd6fed28764878f18e529719012eee017584549caf9201c3ef090d98f6ae3",
+    "tests/test_runner.py": "6a1b21b38ac440779285c942dbd5ef594dd3f3b7b9426e43d3277ea9535673f3",
+    "tests/test_skidbuffer_rewrite.py": "d23ef61099dce6dbc6b88abdb23eb27110717646cfd27972a2824f260f0c8eca",
+    "tests/test_wednesday.py": "77ece14550cadc6b0ae3b8d0a145735e798281801cffc26d47c7f8cf960f4591",
+    "tests/test_witness.py": "3f1895f39b368ad7551a8614a4b79f5fc0161920544bc917e724bf9b7f831c62"
+  },
+  "scope": "Engineering integration checks, separate from research attempts and timing comparisons",
+  "raw_verification_sha256": "09e8796a21bb21b5197558f75ddf4b043e09bd02decffd08111441a32d660d34",
+  "unit_tests": 165,
+  "unit_test_reported_seconds": 36.381,
+  "unit_test_skips": 0,
+  "matrix_expected_attempts": 12,
+  "fifo": {
+    "status": "UNSUPPORTED",
+    "assessment_wall_seconds": 0.6080377109465189,
+    "state_bits": 42,
+    "unconstrained_initial_memory_bits": 32,
+    "script_sha256": "b8f7ebf257dc0eb099ca32936e55a0985e417647eef2ff6d145e97f5f07352e4"
+  },
+  "packaged_command": {
+    "status": "PASS",
+    "kind": "packaged README command verification",
+    "model_calls": 0,
+    "wall_seconds": 0.9920748210279271,
+    "gate": "ACCEPTED",
+    "property": "SAFE",
+    "prior_packaging_attempt": {
+      "status": "ERROR",
+      "reason": "Output parent results directory did not exist; evaluate(out.mkdir) raised FileNotFoundError before gate. README corrected to create parent; frozen verifier unchanged.",
+      "model_calls": 0,
+      "formal_stages_run": 0,
+      "tool_reported_command_wall_seconds": 1.3966627,
+      "measurement_scope": "exec_command reported wall time; no finer stage timing was recorded"
+    }
+  }
+}
