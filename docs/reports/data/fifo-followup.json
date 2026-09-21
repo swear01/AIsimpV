@@ -1,0 +1,138 @@
+{
+  "task_id": "F1-sfifo4x8-assessment",
+  "assessment_status": "COMPLETED",
+  "integration_status": "UNSUPPORTED",
+  "core_matrix_member": false,
+  "core_matrix_denominator": 4,
+  "normalization_equivalence": "NOT_RUN",
+  "certificate": "NOT_RUN",
+  "property": "NOT_RUN",
+  "source_revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+  "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+  "implementation_base": "9dd8e24",
+  "parameters": {
+    "BW": 8,
+    "LGFLEN": 2,
+    "OPT_ASYNC_READ": 1,
+    "OPT_WRITE_ON_FULL": 0,
+    "OPT_READ_ON_EMPTY": 0
+  },
+  "yosys_version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)",
+  "state_bits": 42,
+  "unconstrained_initial_memory_bits": 32,
+  "defined_control_initial_bits": 10,
+  "control_init": {
+    "wr_addr": "000",
+    "rd_addr": "000",
+    "o_fill": "000",
+    "o_empty": "1"
+  },
+  "clock": {
+    "name": "i_clk",
+    "edge": "positive"
+  },
+  "final_boundaries": {
+    "original_frontend": {
+      "status": "UNSUPPORTED",
+      "reason": "unsupported cell $memwr_v2 (no arrays/latches/async clocks)",
+      "seconds": 0.25748221098911017
+    },
+    "expanded_netlist": {
+      "status": "UNSUPPORTED",
+      "reason": "undefined/high-impedance RTL bit"
+    },
+    "expanded_parser": {
+      "status": "UNSUPPORTED",
+      "reason": "BTOR2 line 40 input 3: state/input requires an unambiguous name"
+    }
+  },
+  "engineering_runs": [
+    {
+      "run_id": "20260921-01",
+      "status": "ERROR",
+      "wall_seconds": 0.5039262300124392,
+      "script_sha256": "4b0461fccea110adb418b918efca3beda0b840fc7e31f4787d89b290a13844e4",
+      "summary_sha256": "586f98186f4414b24a9f5e657bdb75342cb08ee82e5c8f1f28154425ac4542bc",
+      "summary_path": "results/fifo-followup/20260921-01/summary.json",
+      "reason": "'r_empty'",
+      "stages": {
+        "version": "OK",
+        "original_frontend": "UNSUPPORTED",
+        "expand": "OK"
+      }
+    },
+    {
+      "run_id": "20260921-02",
+      "status": "UNSUPPORTED",
+      "wall_seconds": 0.5992466349853203,
+      "script_sha256": "5ab6a8bd10eb112d12b4ba0d6b292632df3f44594ebf803aaf5ea9443ccaa05f",
+      "summary_sha256": "91cf303510b6210a3632bb6a676a18d914908851904a682688c24b7afd419cdc",
+      "summary_path": "results/fifo-followup/20260921-02/summary.json",
+      "reason": null,
+      "stages": {
+        "version": "OK",
+        "original_frontend": "UNSUPPORTED",
+        "expand": "OK",
+        "expanded_netlist": "UNSUPPORTED",
+        "btor": "OK",
+        "expanded_parser": "UNSUPPORTED"
+      }
+    },
+    {
+      "run_id": "20260921-03",
+      "status": "UNSUPPORTED",
+      "wall_seconds": 1.0243133909534663,
+      "script_sha256": "6bb69ea1c72c9eb52acec4220f32697c3cd6b96864276c57b6ab07a60005849e",
+      "summary_sha256": "017b589254c6ed0408cc04befac570fc1d3d6d6aa73e284a336cde24fcca20e3",
+      "summary_path": "results/fifo-followup/20260921-03/summary.json",
+      "reason": null,
+      "stages": {
+        "version": "OK",
+        "original_frontend": "UNSUPPORTED",
+        "expand": "OK",
+        "expanded_netlist": "UNSUPPORTED",
+        "btor": "OK",
+        "expanded_parser": "UNSUPPORTED"
+      }
+    },
+    {
+      "run_id": "20260921-final",
+      "status": "UNSUPPORTED",
+      "wall_seconds": 0.6030215139617212,
+      "script_sha256": "b8f7ebf257dc0eb099ca32936e55a0985e417647eef2ff6d145e97f5f07352e4",
+      "summary_sha256": "2de7d8a6bdb9168039dac41920d8c5435d67e1e97c7aaf582f8fb27004bd8f59",
+      "summary_path": "results/fifo-followup/20260921-final/summary.json",
+      "reason": null,
+      "stages": {
+        "version": "OK",
+        "original_frontend": "UNSUPPORTED",
+        "expand": "OK",
+        "expanded_netlist": "UNSUPPORTED",
+        "btor": "OK",
+        "expanded_parser": "UNSUPPORTED"
+      }
+    }
+  ],
+  "engineering_wall_seconds_total": 2.730507769912947,
+  "fault_verification": {
+    "kind": "missing executable",
+    "status": "ERROR",
+    "exit_code": 1,
+    "wall_seconds": 0.012550337007269263,
+    "summary_path": "results/fifo-followup/fault-missing-yosys/summary.json",
+    "excluded_from_engineering_runs": true
+  },
+  "verification": [
+    "2 stdlib unittest checks passed",
+    "live final assessment returned UNSUPPORTED with exit 0",
+    "missing executable returned ERROR with exit 1",
+    "existing output directory refused without overwriting",
+    "all raw artifact hashes and archived driver hashes verified"
+  ],
+  "limitations": [
+    "No solver or formal equivalence checks run.",
+    "No certificate or property proof run.",
+    "Finite expansion retains X-valued disabled-write branches; no initial memory bit is fixed.",
+    "Control/flags observations do not establish data ordering."
+  ]
+}
