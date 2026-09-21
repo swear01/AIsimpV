@@ -33,8 +33,10 @@ is handled by Codex itself, outside the model's shell sandbox.
 Before the first generation, an actual `codex sandbox` probe checks the underlying
 local-command profile: bundle read,
 bundle overwrite rejection, candidate writes, hidden-file and symlink read
-rejection, preservation of parent files, and blocked tool networking. Some
-non-mounted parent paths may be writable inside an ephemeral namespace; the probe
+rejection, preservation of parent files, and blocked tool networking.
+Network denial requires `PermissionError` with `EPERM` or `EACCES`; timeout,
+connection refusal, and an unreachable network fail the probe.
+Some non-mounted parent paths may be writable inside an ephemeral namespace; the probe
 also checks that these writes do not affect the host. Codex 0.154.0 cannot reliably
 mount individual writable files, so the candidate directory is writable and the
 parent rejects extra paths, symlinks and non-regular files afterwards. This is an

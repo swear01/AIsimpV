@@ -28,3 +28,6 @@ The matrix CLI defaults to a 1,800-second wall budget per task; `--task-budget`
 accepts a positive finite number. CI uses `--task-budget 120` for all four tasks
 inside its 15-minute job limit. This CI limit does not replace the frozen research
 budget or measurements. Duplicate `--task` selections fail before creating output.
+
+Formal subprocess logs retain raw stdout/stderr bytes before UTF-8 decoding.
+Malformed stdout still fails closed; its original bytes remain available for diagnosis.
