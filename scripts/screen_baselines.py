@@ -113,8 +113,8 @@ def main():
         parser.error('positive repeats/timeout and depth >= 2 required')
     catalog = json.loads(args.catalog.read_text())
     selected = args.tasks or list(catalog['tasks'])
-    if not set(selected) <= set(catalog['tasks']) or len(selected) != len(set(selected)):
-        parser.error('unknown or duplicate task')
+    if not selected or not set(selected) <= set(catalog['tasks']) or len(selected) != len(set(selected)):
+        parser.error('empty, unknown or duplicate task selection')
     yosys = os.environ.get('RTL_RELATE_YOSYS', str(ROOT / '.tools/yosys-venv/bin/yowasp-yosys'))
     smtbmc = str(Path(yosys).with_name('yowasp-yosys-smtbmc'))
     if not Path(yosys).is_file() or not Path(smtbmc).is_file() or not shutil.which('z3'):

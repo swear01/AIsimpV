@@ -2,17 +2,31 @@
 import os
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 from tempfile import TemporaryDirectory
 import unittest
 from scripts.screen_baselines import ROOT, prove
 
 
 class BaselineScreenTests(unittest.TestCase):
+    def test_empty_catalog_is_rejected_before_creating_output(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            catalog = root / 'empty.json'
+            catalog.write_text('{"tasks": {}}')
+            result = subprocess.run([sys.executable, str(ROOT / 'scripts/screen_baselines.py'),
+                                     '--catalog', str(catalog), '--out', str(root / 'out')],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn('empty, unknown or duplicate task selection', result.stderr)
+            self.assertFalse((root / 'out').exists())
+
     def test_native_assertions_are_preserved_and_required(self):
         yosys = os.environ.get('RTL_RELATE_YOSYS', str(ROOT / '.tools/yosys-venv/bin/yowasp-yosys'))
-        if not Path(yosys).is_file() or not shutil.which('z3'):
-            self.skipTest('pinned frontend and Z3 not installed')
         smtbmc = str(Path(yosys).with_name('yowasp-yosys-smtbmc'))
+        if not Path(yosys).is_file() or not Path(smtbmc).is_file() or not shutil.which('z3'):
+            self.skipTest('pinned frontend, SMTBMC and Z3 not installed')
         with TemporaryDirectory() as temporary:
             root = Path(temporary)
             for name, update, assertion, expected in (
