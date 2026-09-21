@@ -26,12 +26,12 @@ def save(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n')
 
 
-def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=None, defines=()):
+def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=None, defines=(), ric3=None):
     out.mkdir(parents=True, exist_ok=False)
     start = time.monotonic()
     row = dict(status='ERROR', depth=depth, timeout=timeout, stages={},
                source_sha256=sha(source), load_start=os.getloadavg(), top=top,
-               parameters=parameters or {}, defines=list(defines))
+               parameters=parameters or {}, defines=list(defines), engine='ric3-ic3' if ric3 else 'smtbmc-z3')
     try:
         if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', top):
             raise ValueError('invalid top identifier')
@@ -45,7 +45,9 @@ def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=N
         params = ''.join(f' -chparam {name} {value}' for name, value in row['parameters'].items())
         script = (f'read_verilog -formal -sv{flags} source.v\nhierarchy -check -top {top}{params}\n'
                   f'prep -top {top} -flatten\nasync2sync\nchformal -lower\ndffunmap\nopt_clean\n'
-                  'check -assert\nwrite_json model.json\nwrite_smt2 -wires model.smt2\n')
+                  'check -assert\nwrite_json model.json\n'
+                  + ('chformal -cover -remove\nwrite_btor -s model.btor2\n' if ric3
+                     else 'write_smt2 -wires model.smt2\n'))
         (out / 'prepare.ys').write_text(script)
         deadline = start + timeout
         prep, _ = _run([yosys, '-Q', '-T', '-s', 'prepare.ys'], out, 'prepare', deadline)
@@ -65,9 +67,21 @@ def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=N
         row['constant_assertions'] = sum(all(isinstance(b, str) for b in c['connections']['A'])
                                          for c in assertions)
         row['memory_cells'] = sum(c['type'].startswith('$mem') for c in cells.values())
-        row['model_sha256'] = sha(out / 'model.smt2')
-        row['model_bytes'] = (out / 'model.smt2').stat().st_size
-        for stage in ('base', 'induction'):
+        model = out / ('model.btor2' if ric3 else 'model.smt2')
+        row['model_sha256'] = sha(model)
+        row['model_bytes'] = model.stat().st_size
+        stages = ('ic3',) if ric3 else ('base', 'induction')
+        for stage in stages:
+            if ric3:
+                process, stdout = _run([ric3, '-e', 'ic3', 'model.btor2'], out, stage, deadline)
+                row['stages'][stage] = process
+                if process['timeout']:
+                    raise TimeoutError('ic3 exceeded shared budget')
+                status = classify_ric3(process['returncode'], stdout)
+                if status != 'SAFE':
+                    row.update(status=status, reason='ic3 returned ' + status)
+                    break
+                continue
             command = [smtbmc, '-s', 'z3', '-t', str(depth), '--presat', '--noprogress',
                        '--dump-vcd', stage + '.vcd', '--dump-yw', stage + '.yw',
                        '--dump-smt2', stage + '.smt2']
@@ -93,11 +107,20 @@ def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=N
     except Exception as error:
         row.update(status='ERROR', reason=f'{type(error).__name__}: {error}')
     row.update(seconds=time.monotonic() - start, load_end=os.getloadavg())
-    row['solver_seconds'] = sum(row['stages'][s]['seconds'] for s in ('base', 'induction')
+    row['solver_seconds'] = sum(row['stages'][s]['seconds'] for s in ('base', 'induction', 'ic3')
                                 if s in row['stages'])
     row['hashes'] = {p.name: sha(p) for p in sorted(out.iterdir()) if p.is_file()}
     save(out / 'result.json', row)
     return row
+
+
+def classify_ric3(returncode, stdout):
+    """rIC3 1.5.2 uses SAT-solver exit codes; require a matching final verdict."""
+    verdicts = re.findall(r'^(UNSAT|SAT|UNKNOWN)$', stdout, re.MULTILINE)
+    if len(verdicts) != 1:
+        return 'ERROR'
+    return {(20, 'UNSAT'): 'SAFE', (10, 'SAT'): 'CEX',
+            (30, 'UNKNOWN'): 'UNKNOWN'}.get((returncode, verdicts[0]), 'ERROR')
 
 
 def main():
@@ -108,6 +131,7 @@ def main():
     parser.add_argument('--repeats', type=int, default=1)
     parser.add_argument('--depth', type=int, help='override the catalog depth (AVR 20; FIFO 4)')
     parser.add_argument('--timeout', type=int, default=45)
+    parser.add_argument('--ric3', type=Path, help='use pinned rIC3 1.5.2 single-thread IC3 instead of SMTBMC')
     args = parser.parse_args()
     if args.repeats < 1 or (args.depth is not None and args.depth < 2) or args.timeout < 1:
         parser.error('positive repeats/timeout and depth >= 2 required')
@@ -119,6 +143,9 @@ def main():
     smtbmc = str(Path(yosys).with_name('yowasp-yosys-smtbmc'))
     if not Path(yosys).is_file() or not Path(smtbmc).is_file() or not shutil.which('z3'):
         parser.error('pinned YoWASP and Z3 must already be installed')
+    ric3 = str(args.ric3.resolve()) if args.ric3 else None
+    if ric3 and not Path(ric3).is_file():
+        parser.error('rIC3 executable does not exist')
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     start = time.monotonic()
@@ -141,6 +168,11 @@ def main():
             raise ValueError(label + ' identity failed')
         metadata['tools'][label] = dict(path=executable, sha256=sha(executable), version=stdout.strip())
     metadata['tools']['smtbmc'] = dict(path=smtbmc, sha256=sha(smtbmc))
+    if ric3:
+        process, stdout = _run([ric3, '--version'], out, 'version_ric3', time.monotonic() + 15)
+        if process['returncode'] != 0 or process['timeout'] or stdout.strip() != 'rIC3 1.5.2':
+            raise ValueError('rIC3 1.5.2 identity required')
+        metadata['tools']['ric3'] = dict(path=ric3, sha256=sha(ric3), version=stdout.strip())
     package = Path(yosys).parent.parent
     metadata['tools']['distribution_files'] = {str(p.relative_to(package)): sha(p)
         for pattern in ('lib/python*/site-packages/yowasp_yosys/yosys.wasm',
@@ -156,7 +188,7 @@ def main():
                         out / f'repeat-{repeat:02d}' / task, yosys, smtbmc,
                         depth=args.depth or catalog['tasks'][task].get('recommended_depth', 20), timeout=args.timeout,
                         parameters=catalog['tasks'][task].get('parameters'),
-                        defines=catalog['tasks'][task].get('defines', ()))
+                        defines=catalog['tasks'][task].get('defines', ()), ric3=ric3)
             row.update(task=task, repeat=repeat)
             rows.append(row)
             save(out / 'rows.json', rows)

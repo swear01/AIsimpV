@@ -1,0 +1,312 @@
+{
+  "description": "Exact raw model outputs, including failed and timed-out attempts; never repaired. Verdicts here are original v1 discovery records, not final corrected-verifier acceptance.",
+  "source": "ZipCPU/wb2axip rtl/sfifo.v, public domain per its header; revision 2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+  "tasks": {
+    "sfifo_sync256_d256": {
+      "neuroabs-inspired": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        }
+      ],
+      "ai": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "5f939c20a37cf10a2879e002925bf5f3c9313ee279ddaa4bb76d0ed65a31f012",
+            "certificate.json": "027bbf7328ef92959a98eff5e79e1905777da13d6f6968af78a0d05fa3344073"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  input wire i_clk,\n  input wire i_reset,\n  input wire i_wr,\n  input wire [255:0] i_data,\n  output wire o_full,\n  output wire [8:0] o_fill,\n  input wire i_rd,\n  output wire [255:0] o_data,\n  output wire o_empty,\n  input wire [8:0] __ar_const_0,\n  output wire [27:0] __ar_a,\n  output wire [27:0] __ar_en,\n  input wire abs_o_full,\n  input wire [8:0] abs_o_fill,\n  input wire [255:0] abs_o_data,\n  input wire abs_o_empty,\n  input wire [27:0] abs_a,\n  input wire [27:0] abs_en\n);\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_en = abs_en;\n  assign __ar_a = abs_a | abs_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_a\": \"__ar_a\",\n    \"abs_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "5f939c20a37cf10a2879e002925bf5f3c9313ee279ddaa4bb76d0ed65a31f012",
+            "certificate.json": "027bbf7328ef92959a98eff5e79e1905777da13d6f6968af78a0d05fa3344073"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  input wire i_clk,\n  input wire i_reset,\n  input wire i_wr,\n  input wire [255:0] i_data,\n  output wire o_full,\n  output wire [8:0] o_fill,\n  input wire i_rd,\n  output wire [255:0] o_data,\n  output wire o_empty,\n  input wire [8:0] __ar_const_0,\n  output wire [27:0] __ar_a,\n  output wire [27:0] __ar_en,\n  input wire abs_o_full,\n  input wire [8:0] abs_o_fill,\n  input wire [255:0] abs_o_data,\n  input wire abs_o_empty,\n  input wire [27:0] abs_a,\n  input wire [27:0] abs_en\n);\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_en = abs_en;\n  assign __ar_a = abs_a | abs_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_a\": \"__ar_a\",\n    \"abs_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "5f939c20a37cf10a2879e002925bf5f3c9313ee279ddaa4bb76d0ed65a31f012",
+            "certificate.json": "027bbf7328ef92959a98eff5e79e1905777da13d6f6968af78a0d05fa3344073"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  input wire i_clk,\n  input wire i_reset,\n  input wire i_wr,\n  input wire [255:0] i_data,\n  output wire o_full,\n  output wire [8:0] o_fill,\n  input wire i_rd,\n  output wire [255:0] o_data,\n  output wire o_empty,\n  input wire [8:0] __ar_const_0,\n  output wire [27:0] __ar_a,\n  output wire [27:0] __ar_en,\n  input wire abs_o_full,\n  input wire [8:0] abs_o_fill,\n  input wire [255:0] abs_o_data,\n  input wire abs_o_empty,\n  input wire [27:0] abs_a,\n  input wire [27:0] abs_en\n);\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_en = abs_en;\n  assign __ar_a = abs_a | abs_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_a\": \"__ar_a\",\n    \"abs_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "5f939c20a37cf10a2879e002925bf5f3c9313ee279ddaa4bb76d0ed65a31f012",
+            "certificate.json": "027bbf7328ef92959a98eff5e79e1905777da13d6f6968af78a0d05fa3344073"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  input wire i_clk,\n  input wire i_reset,\n  input wire i_wr,\n  input wire [255:0] i_data,\n  output wire o_full,\n  output wire [8:0] o_fill,\n  input wire i_rd,\n  output wire [255:0] o_data,\n  output wire o_empty,\n  input wire [8:0] __ar_const_0,\n  output wire [27:0] __ar_a,\n  output wire [27:0] __ar_en,\n  input wire abs_o_full,\n  input wire [8:0] abs_o_fill,\n  input wire [255:0] abs_o_data,\n  input wire abs_o_empty,\n  input wire [27:0] abs_a,\n  input wire [27:0] abs_en\n);\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_en = abs_en;\n  assign __ar_a = abs_a | abs_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_a\": \"__ar_a\",\n    \"abs_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        }
+      ]
+    },
+    "sfifo_sync512_d64": {
+      "neuroabs-inspired": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        }
+      ],
+      "ai": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "bcd9959875b0af8124dbc352845b79d623fd0c2089f8c32f8ded07fa56dad201",
+            "certificate.json": "027bbf7328ef92959a98eff5e79e1905777da13d6f6968af78a0d05fa3344073"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_full,\n  abs_o_fill,\n  abs_o_data,\n  abs_o_empty,\n  abs_a,\n  abs_en\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [6:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [6:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input abs_o_full;\n  input [6:0] abs_o_fill;\n  input [511:0] abs_o_data;\n  input abs_o_empty;\n  input [27:0] abs_a;\n  input [27:0] abs_en;\n\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_a = abs_a | abs_en;\n  assign __ar_en = abs_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_a\": \"__ar_a\",\n    \"abs_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "f1732d9089fa298347a2fb4f0677ed5385248e20d846015a8994726fdbb46dcf",
+            "certificate.json": "043752721b9110ebe1c26cf6a6d7f40ca63c24a32eae82268b2f851c9fb6f639"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_full,\n  abs_o_fill,\n  abs_o_data,\n  abs_o_empty\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [6:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [6:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input abs_o_full;\n  input [6:0] abs_o_fill;\n  input [511:0] abs_o_data;\n  input abs_o_empty;\n\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_a = 28'hfffffff;\n  assign __ar_en = 28'hfffffff;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "CERTIFICATE_BOUNDED",
+          "sha256": {
+            "abstract.v": "135bf337d279a35b266fff882f5a95c6f3450af882b846ab3df28a925ad68119",
+            "certificate.json": "60dca3b44e5bbbbf393efc695339129d1e454646d8a8956a752e786be11d3aa1"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_data\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [6:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [6:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input [511:0] abs_o_data;\n\n  reg [6:0] fill = 7'd0;\n  reg [6:0] wr_addr = 7'd0;\n  reg [6:0] rd_addr = 7'd0;\n  reg empty = 1'b1;\n\n  reg past_valid = 1'b0;\n  reg [6:0] past_fill;\n  reg past_no_read_nonempty;\n\n  reg a6 = 1'b1;\n  reg a7 = 1'b1;\n  reg a8 = 1'b1;\n  reg a9 = 1'b1;\n  reg en6 = 1'b0;\n  reg en7 = 1'b0;\n  reg en8 = 1'b0;\n  reg en9 = 1'b0;\n\n  wire full;\n  wire do_write;\n  wire do_read;\n  wire [6:0] f_fill;\n\n  assign full = fill[6];\n  assign do_write = i_wr && !full;\n  assign do_read = i_rd && !empty;\n  assign f_fill = wr_addr - rd_addr;\n\n  always @(posedge i_clk) begin\n    if (i_reset)\n      fill <= 7'd0;\n    else begin\n      case ({do_write, do_read})\n        2'b01: fill <= fill - 7'd1;\n        2'b10: fill <= fill + 7'd1;\n        default: fill <= fill;\n      endcase\n    end\n  end\n\n  always @(posedge i_clk) begin\n    if (i_reset)\n      wr_addr <= 7'd0;\n    else if (do_write)\n      wr_addr <= wr_addr + 7'd1;\n  end\n\n  always @(posedge i_clk) begin\n    if (i_reset)\n      rd_addr <= 7'd0;\n    else if (do_read)\n      rd_addr <= rd_addr + 7'd1;\n  end\n\n  always @(posedge i_clk) begin\n    if (i_reset)\n      empty <= 1'b1;\n    else begin\n      case ({do_write, do_read})\n        2'b01: empty <= (fill <= 7'd1);\n        2'b10: empty <= 1'b0;\n        default: empty <= empty;\n      endcase\n    end\n  end\n\n  always @(posedge i_clk) begin\n    a6 <= empty;\n    a7 <= empty;\n    a8 <= !empty;\n    a9 <= !empty;\n\n    en6 <= past_valid && (f_fill == 7'd0);\n    en7 <= past_valid && (f_fill == 7'd0);\n    en8 <= past_valid && (f_fill != 7'd0) && (past_fill > 7'd1);\n    en9 <= past_valid && (f_fill != 7'd0) && !(past_fill > 7'd1)\n           && past_no_read_nonempty;\n\n    past_valid <= 1'b1;\n    past_fill <= f_fill;\n    past_no_read_nonempty <= !i_rd && (f_fill > 7'd0);\n  end\n\n  assign o_full = full;\n  assign o_fill = fill;\n  assign o_empty = empty;\n  assign o_data = abs_o_data;\n\n  assign __ar_a[0] = (f_fill <= 7'd64);\n  assign __ar_a[1] = (fill == f_fill);\n  assign __ar_a[2] = (full == (f_fill == 7'd64));\n  assign __ar_a[3] = (empty == (f_fill == 7'd0));\n  assign __ar_a[4] = 1'b1;\n  assign __ar_a[5] = 1'b1;\n  assign __ar_a[6] = a6;\n  assign __ar_a[7] = a7;\n  assign __ar_a[8] = a8;\n  assign __ar_a[9] = a9;\n  assign __ar_a[27:10] = 18'h3ffff;\n\n  assign __ar_en[5:0] = 6'h3f;\n  assign __ar_en[6] = en6;\n  assign __ar_en[7] = en7;\n  assign __ar_en[8] = en8;\n  assign __ar_en[9] = en9;\n  assign __ar_en[27:10] = 18'h3ffff;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_data\": \"o_data\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "8062260d0aab55f44b09505a01360b74a33c4a45340023d71d2ec22d1da0640e",
+            "certificate.json": "414d043c103a90b329117deb6385c77b52b0da241ac04eab593844d1579860d7"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_data\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [6:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [6:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input [511:0] abs_o_data;\n\n  reg [6:0] fill = 7'd0;\n  reg past_valid = 1'b0;\n  reg [6:0] past_fill;\n  reg past_no_read_nonempty;\n\n  reg a6 = 1'b1;\n  reg a7 = 1'b1;\n  reg a8 = 1'b1;\n  reg a9 = 1'b1;\n  reg en6 = 1'b0;\n  reg en7 = 1'b0;\n  reg en8 = 1'b0;\n  reg en9 = 1'b0;\n\n  wire full;\n  wire empty;\n  wire do_write;\n  wire do_read;\n\n  assign full = (fill == 7'd64);\n  assign empty = (fill == 7'd0);\n  assign do_write = i_wr && !full;\n  assign do_read = i_rd && !empty;\n\n  always @(posedge i_clk) begin\n    if (i_reset)\n      fill <= 7'd0;\n    else begin\n      case ({do_write, do_read})\n        2'b01: fill <= fill - 7'd1;\n        2'b10: fill <= fill + 7'd1;\n        default: fill <= fill;\n      endcase\n    end\n  end\n\n  always @(posedge i_clk) begin\n    a6 <= empty;\n    a7 <= empty;\n    a8 <= !empty;\n    a9 <= !empty;\n\n    en6 <= past_valid && (fill == 7'd0);\n    en7 <= past_valid && (fill == 7'd0);\n    en8 <= past_valid && (fill != 7'd0) && (past_fill > 7'd1);\n    en9 <= past_valid && (fill != 7'd0) && !(past_fill > 7'd1)\n           && past_no_read_nonempty;\n\n    past_valid <= 1'b1;\n    past_fill <= fill;\n    past_no_read_nonempty <= !i_rd && (fill > 7'd0);\n  end\n\n  assign o_full = full;\n  assign o_fill = fill;\n  assign o_data = abs_o_data;\n  assign o_empty = empty;\n\n  assign __ar_a[0] = (fill <= 7'd64);\n  assign __ar_a[1] = 1'b1;\n  assign __ar_a[2] = 1'b1;\n  assign __ar_a[3] = 1'b1;\n  assign __ar_a[4] = 1'b1;\n  assign __ar_a[5] = 1'b1;\n  assign __ar_a[6] = a6;\n  assign __ar_a[7] = a7;\n  assign __ar_a[8] = a8;\n  assign __ar_a[9] = a9;\n  assign __ar_a[27:10] = 18'h3ffff;\n\n  assign __ar_en[5:0] = 6'h3f;\n  assign __ar_en[6] = en6;\n  assign __ar_en[7] = en7;\n  assign __ar_en[8] = en8;\n  assign __ar_en[9] = en9;\n  assign __ar_en[27:10] = 18'h3ffff;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_data\": \"o_data\"\n  },\n  \"invariants\": [\n    {\n      \"op\": \"ule\",\n      \"args\": [\n        { \"ref\": \"a.fill\" },\n        { \"bv\": 64, \"width\": 7 }\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        { \"ref\": \"c.f_fill\" },\n        { \"ref\": \"a.fill\" }\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        { \"ref\": \"c.o_fill\" },\n        { \"ref\": \"a.fill\" }\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        { \"ref\": \"c.o_full\" },\n        { \"ref\": \"a.o_full\" }\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        { \"ref\": \"c.o_empty\" },\n        { \"ref\": \"a.o_empty\" }\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        { \"ref\": \"c.f_past_valid\" },\n        { \"ref\": \"a.past_valid\" }\n      ]\n    },\n    {\n      \"op\": \"or\",\n      \"args\": [\n        {\n          \"op\": \"eq\",\n          \"args\": [\n            { \"ref\": \"a.past_valid\" },\n            { \"bv\": 0, \"width\": 1 }\n          ]\n        },\n        {\n          \"op\": \"eq\",\n          \"args\": [\n            { \"ref\": \"c.$past$source.v:303$228$0\" },\n            { \"ref\": \"a.past_fill\" }\n          ]\n        }\n      ]\n    },\n    {\n      \"op\": \"or\",\n      \"args\": [\n        {\n          \"op\": \"eq\",\n          \"args\": [\n            { \"ref\": \"a.past_valid\" },\n            { \"bv\": 0, \"width\": 1 }\n          ]\n        },\n        {\n          \"op\": \"eq\",\n          \"args\": [\n            { \"ref\": \"c.$past$source.v:306$229$0\" },\n            { \"ref\": \"a.past_no_read_nonempty\" }\n          ]\n        }\n      ]\n    }\n  ]\n}\n"
+          }
+        }
+      ]
+    },
+    "sfifo_sync512_d256": {
+      "neuroabs-inspired": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "GENERATED",
+          "original_verification_status": "UNCHANGED",
+          "sha256": {
+            "certificate.json": "03bf50d1d98b5b2863b8849d1552170fcad6c16aa51947dc21de00c732f61fba"
+          },
+          "files": {
+            "certificate.json": "{\"cuts\":[]}"
+          }
+        }
+      ],
+      "ai": [
+        {
+          "attempt": 1,
+          "generation_status": "GENERATED",
+          "original_verification_status": "CERTIFICATE_UNKNOWN",
+          "sha256": {
+            "abstract.v": "3af280ecd37115601c87db38fdb8fa0bb5a0ab63c5e1f88e5606dc9f9987286c",
+            "certificate.json": "559b53f732354e08c9eaaf61eb94b23c6a4ef776cfec197bbdbdd884ecccb6bf"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_full,\n  abs_o_fill,\n  abs_o_data,\n  abs_o_empty,\n  abs_ar_a,\n  abs_ar_en\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [8:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [8:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input abs_o_full;\n  input [8:0] abs_o_fill;\n  input [511:0] abs_o_data;\n  input abs_o_empty;\n  input [27:0] abs_ar_a;\n  input [27:0] abs_ar_en;\n\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_en = abs_ar_en;\n  assign __ar_a = abs_ar_a | abs_ar_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_ar_a\": \"__ar_a\",\n    \"abs_ar_en\": \"__ar_en\"\n  },\n  \"invariants\": []\n}\n"
+          }
+        },
+        {
+          "attempt": 2,
+          "generation_status": "GENERATED",
+          "original_verification_status": "CERTIFICATE_UNKNOWN",
+          "sha256": {
+            "abstract.v": "c0b6fc0cdd5a9e6b7e87c12b2bd6a22ef9013a6116eaef493a02ada72f805db2",
+            "certificate.json": "fbb748121cfd4cc6eeb54eb6e2930e7937ecbb65b9d2e18d1f757f1e6e576486"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_full,\n  abs_o_fill,\n  abs_o_data,\n  abs_o_empty,\n  abs_ar_en\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [8:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [8:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input abs_o_full;\n  input [8:0] abs_o_fill;\n  input [511:0] abs_o_data;\n  input abs_o_empty;\n  input [27:0] abs_ar_en;\n\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_a = 28'hfffffff;\n  assign __ar_en = abs_ar_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_ar_en\": \"__ar_en\"\n  },\n  \"invariants\": [\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_fill\"},\n        {\"ref\": \"c.f_fill\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"sub\", \"args\": [{\"ref\": \"c.wr_addr\"}, {\"ref\": \"c.rd_addr\"}]},\n        {\"ref\": \"c.f_fill\"}\n      ]\n    },\n    {\n      \"op\": \"ule\",\n      \"args\": [\n        {\"ref\": \"c.f_fill\"},\n        {\"bv\": 256, \"width\": 9}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_full\"},\n        {\"ref\": \"c.r_full\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_empty\"},\n        {\"ref\": \"c.r_empty\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.r_full\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 256, \"width\": 9}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.r_empty\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 0, \"width\": 9}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_first_in_fifo\"},\n        {\"ref\": \"c.f_first_addr_in_fifo\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_second_in_fifo\"},\n        {\"ref\": \"c.f_second_addr_in_fifo\"}\n      ]\n    }\n  ]\n}\n"
+          }
+        },
+        {
+          "attempt": 3,
+          "generation_status": "GENERATED",
+          "original_verification_status": "SUCCESS",
+          "sha256": {
+            "abstract.v": "c0b6fc0cdd5a9e6b7e87c12b2bd6a22ef9013a6116eaef493a02ada72f805db2",
+            "certificate.json": "ba69ac8c72568220fe04cb7e82ad721211160d7ca411ea041465d465ab239dcc"
+          },
+          "files": {
+            "abstract.v": "module abstract_design(\n  i_clk,\n  i_reset,\n  i_wr,\n  i_data,\n  o_full,\n  o_fill,\n  i_rd,\n  o_data,\n  o_empty,\n  __ar_const_0,\n  __ar_a,\n  __ar_en,\n  abs_o_full,\n  abs_o_fill,\n  abs_o_data,\n  abs_o_empty,\n  abs_ar_en\n);\n  input i_clk;\n  input i_reset;\n  input i_wr;\n  input [511:0] i_data;\n  output o_full;\n  output [8:0] o_fill;\n  input i_rd;\n  output [511:0] o_data;\n  output o_empty;\n  input [8:0] __ar_const_0;\n  output [27:0] __ar_a;\n  output [27:0] __ar_en;\n\n  input abs_o_full;\n  input [8:0] abs_o_fill;\n  input [511:0] abs_o_data;\n  input abs_o_empty;\n  input [27:0] abs_ar_en;\n\n  assign o_full = abs_o_full;\n  assign o_fill = abs_o_fill;\n  assign o_data = abs_o_data;\n  assign o_empty = abs_o_empty;\n  assign __ar_a = 28'hfffffff;\n  assign __ar_en = abs_ar_en;\nendmodule\n",
+            "certificate.json": "{\n  \"witnesses\": {\n    \"abs_o_full\": \"o_full\",\n    \"abs_o_fill\": \"o_fill\",\n    \"abs_o_data\": \"o_data\",\n    \"abs_o_empty\": \"o_empty\",\n    \"abs_ar_en\": \"__ar_en\"\n  },\n  \"invariants\": [\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_fill\"},\n        {\"ref\": \"c.f_fill\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"sub\", \"args\": [{\"ref\": \"c.wr_addr\"}, {\"ref\": \"c.rd_addr\"}]},\n        {\"ref\": \"c.f_fill\"}\n      ]\n    },\n    {\n      \"op\": \"ule\",\n      \"args\": [\n        {\"ref\": \"c.f_fill\"},\n        {\"bv\": 256, \"width\": 9}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_full\"},\n        {\"ref\": \"c.r_full\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.o_empty\"},\n        {\"ref\": \"c.r_empty\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.r_full\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 256, \"width\": 9}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.r_empty\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 0, \"width\": 9}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_distance_to_first\"},\n        {\"op\": \"sub\", \"args\": [{\"ref\": \"c.__ar_const_0\"}, {\"ref\": \"c.rd_addr\"}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_second_addr\"},\n        {\"op\": \"add\", \"args\": [{\"ref\": \"c.__ar_const_0\"}, {\"bv\": 1, \"width\": 9}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_distance_to_second\"},\n        {\"op\": \"sub\", \"args\": [{\"ref\": \"c.f_second_addr\"}, {\"ref\": \"c.rd_addr\"}]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_first_addr_in_fifo\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"and\", \"args\": [\n          {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 0, \"width\": 9}]}]},\n          {\"op\": \"ult\", \"args\": [{\"ref\": \"c.f_distance_to_first\"}, {\"ref\": \"c.f_fill\"}]}\n        ]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_second_addr_in_fifo\"}, {\"bv\": 1, \"width\": 1}]},\n        {\"op\": \"and\", \"args\": [\n          {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_fill\"}, {\"bv\": 0, \"width\": 9}]}]},\n          {\"op\": \"ult\", \"args\": [{\"ref\": \"c.f_distance_to_second\"}, {\"ref\": \"c.f_fill\"}]}\n        ]}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_first_in_fifo\"},\n        {\"ref\": \"c.f_first_addr_in_fifo\"}\n      ]\n    },\n    {\n      \"op\": \"eq\",\n      \"args\": [\n        {\"ref\": \"c.f_second_in_fifo\"},\n        {\"ref\": \"c.f_second_addr_in_fifo\"}\n      ]\n    },\n    {\n      \"op\": \"or\",\n      \"args\": [\n        {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_first_addr_in_fifo\"}, {\"bv\": 1, \"width\": 1}]}]},\n        {\"op\": \"or\", \"args\": [\n          {\"op\": \"eq\", \"args\": [{\"ref\": \"c.o_full\"}, {\"bv\": 1, \"width\": 1}]},\n          {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [\n            {\"op\": \"extract\", \"args\": [{\"ref\": \"c.wr_addr\"}], \"high\": 7, \"low\": 0},\n            {\"op\": \"extract\", \"args\": [{\"ref\": \"c.__ar_const_0\"}], \"high\": 7, \"low\": 0}\n          ]}]}\n        ]}\n      ]\n    },\n    {\n      \"op\": \"or\",\n      \"args\": [\n        {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [{\"ref\": \"c.f_second_addr_in_fifo\"}, {\"bv\": 1, \"width\": 1}]}]},\n        {\"op\": \"or\", \"args\": [\n          {\"op\": \"eq\", \"args\": [{\"ref\": \"c.o_full\"}, {\"bv\": 1, \"width\": 1}]},\n          {\"op\": \"not\", \"args\": [{\"op\": \"eq\", \"args\": [\n            {\"op\": \"extract\", \"args\": [{\"ref\": \"c.wr_addr\"}], \"high\": 7, \"low\": 0},\n            {\"op\": \"extract\", \"args\": [{\"ref\": \"c.f_second_addr\"}], \"high\": 7, \"low\": 0}\n          ]}]}\n        ]}\n      ]\n    }\n  ]\n}\n"
+          }
+        },
+        {
+          "attempt": 4,
+          "generation_status": "TIMEOUT",
+          "original_verification_status": "TIMEOUT",
+          "sha256": {
+            "abstract.v": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "certificate.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "files": {
+            "abstract.v": "",
+            "certificate.json": ""
+          }
+        }
+      ]
+    }
+  }
+}
