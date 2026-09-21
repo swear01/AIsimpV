@@ -2,11 +2,15 @@
 
 import copy
 import json
+import os
 from pathlib import Path
+import signal
+import subprocess
 import tempfile
 import sys
 import time
 import unittest
+from unittest.mock import patch
 
 from rtl_relate.formal import _run, prove_rtl
 from rtl_relate.ir import bv, digest, load_json, op, ref
@@ -132,6 +136,51 @@ class FormalTests(unittest.TestCase):
             _run(command, out, "tool", time.monotonic() + 10)
         self.assertEqual((out / "tool.stdout.log").read_bytes(), b"Status: PASSED\n\xff")
         self.assertEqual((out / "tool.stderr.log").read_bytes(), b"error\xfe")
+
+
+class ProcessTests(unittest.TestCase):
+    def test_timeout_bounds_drain_when_escaped_descendant_holds_pipes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            pid_file = out / "escaped.pid"
+            child = ("import os,time; os.write(1,b'partial stdout\\n'); "
+                     "os.write(2,b'partial stderr\\xfe'); time.sleep(15)")
+            parent = ("import pathlib,subprocess,sys,time; "
+                      f"child=subprocess.Popen([sys.executable,'-c',{child!r}], start_new_session=True); "
+                      "pathlib.Path('escaped.pid').write_text(str(child.pid)); time.sleep(15)")
+            started = time.monotonic()
+            try:
+                row, stdout = _run([sys.executable, "-c", parent], out, "escaped", started + 2)
+                self.assertLess(time.monotonic() - started, 6)
+                self.assertTrue(row["timeout"])
+                self.assertEqual(row["returncode"], -signal.SIGKILL)
+                self.assertEqual(stdout, "partial stdout\n")
+                self.assertEqual((out / "escaped.stdout.log").read_bytes(), b"partial stdout\n")
+                self.assertEqual((out / "escaped.stderr.log").read_bytes(), b"partial stderr\xfe")
+            finally:
+                if pid_file.exists():
+                    try:
+                        os.kill(int(pid_file.read_text()), signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+
+    def test_kill_permission_error_is_retained_without_unbounded_drain(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch("rtl_relate.formal.subprocess.Popen") as launch, \
+                patch("rtl_relate.formal.os.killpg", side_effect=PermissionError("kill denied")):
+            process = launch.return_value
+            process.communicate.side_effect = subprocess.TimeoutExpired(
+                "tool", 1, output=b"partial out", stderr=b"partial err")
+            row, stdout = _run(["tool"], Path(directory), "denied", time.monotonic() + 1)
+            self.assertTrue(row["timeout"])
+            self.assertEqual(stdout, "partial out")
+            self.assertEqual(process.communicate.call_count, 1)
+            process.stdout.close.assert_called_once()
+            process.stderr.close.assert_called_once()
+            process.poll.assert_called_once()
+            stderr = (Path(directory) / "denied.stderr.log").read_bytes()
+            self.assertIn(b"partial err", stderr)
+            self.assertIn(b"kill denied", stderr)
 
 
 if __name__ == "__main__":

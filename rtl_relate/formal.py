@@ -49,16 +49,25 @@ def _run(command, out, name, deadline):
                                        stderr=subprocess.PIPE, start_new_session=True)
             try:
                 stdout, stderr = process.communicate(timeout=remaining)
-            except subprocess.TimeoutExpired:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                stdout, stderr = process.communicate()
+            except subprocess.TimeoutExpired as error:
                 row["timeout"] = True
+                stdout, stderr = error.output or b"", error.stderr or b""
+                try:
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    try:
+                        stdout, stderr = process.communicate(timeout=1)
+                    except subprocess.TimeoutExpired as error:
+                        stdout, stderr = error.output or stdout, error.stderr or stderr
+                finally:
+                    process.stdout.close()
+                    process.stderr.close()
+                    process.poll()
             row["returncode"] = process.returncode
     except OSError as error:
-        stderr = str(error).encode("utf-8")
+        stderr += (b"\n" if stderr else b"") + str(error).encode("utf-8")
     (out / f"{name}.stdout.log").write_bytes(stdout)
     (out / f"{name}.stderr.log").write_bytes(stderr)
     row.update(seconds=time.monotonic() - started, stdout=f"{name}.stdout.log",
