@@ -79,6 +79,11 @@ Pipeline 的完整 property 中位數增加約 **73%**；求解程序中位數�
 
 ## 重跑
 
+量測 source 固定於 `de5898204580b40b3237f2f7f9d1077f7f7d6f91`。
+量測完成後的 review 另補強 runner：未預期的 Python Exception 也記錄為 ERROR，
+保留逐輪資料並產生 INCOMPLETE 摘要；回歸注入 RuntimeError 驗證此路徑。
+這項失敗處理修正沒有重跑或覆寫上述 50 組原始資料。
+
 獨立資料審核另核對全部 50 pairs、300 個 certificate queries、100 份 proof
 與 900 個 proof artifact hashes，並重算所有統計；結果
 [PASS，0 差異](data/verification-timing-audit.json)。自動審核 2.746 秒另計。

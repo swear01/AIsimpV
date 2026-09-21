@@ -140,8 +140,8 @@ def measure(task, index, root, deadline, bindings):
             raise ValueError('proof tools differ within or between pairs')
         row['validation_stage_subtotal'] = row['frontend'] + row['certificate'] + row['abstract_property']
         row['status'] = 'PASS'
-    except (ValueError, OSError, KeyError, TypeError, TimeoutError) as error:
-        row['error'] = str(error)
+    except Exception as error:
+        row['error'] = f'{type(error).__name__}: {error}'
     finally:
         row.update(wall_seconds=time.monotonic() - started, load_end=os.getloadavg())
         if row['status'] == 'PASS':
