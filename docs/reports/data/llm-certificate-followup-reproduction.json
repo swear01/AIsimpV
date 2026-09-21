@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "run_id": "skid8-certificate-inline-20260921",
+  "kind": "independent saved-candidate recheck from clean git archive",
+  "status": "REPRODUCED",
+  "source_commit": "9dd8e24fbc60057f3ca5100f603f0738f655b8d6",
+  "source_archive_sha256": "650f09edb7692bc5cf6fe285d931e482f45b05586056f1c911233fec1c1f4683",
+  "source_and_prompt_audit": {
+    "status": "PASS",
+    "all_archived_source_files_unchanged": true,
+    "archived_regular_files_checked": 80,
+    "actual_first_attempt_prompt_matches_merged_runner_bundle_and_generic_prompt": true,
+    "actual_prompt_sha256": "24a36fbca5766fcab6deb3f0b1a23fd05336ae25170c24d8d5cd737ec673e8d5",
+    "fresh_ephemeral_context": true,
+    "model_tools_disabled": true,
+    "no_previous_candidate_or_feedback": true,
+    "snapshot_and_bundle_still_match_root_audit": true,
+    "original_ledger_sha256": "daf2335d3b9ef8fa004825635629632c928b6573c43d2214d1e42831009a7709",
+    "root_audit_sha256": "5dbdd466456590de6f54252ff1109473d16654e5c279d3d70489a1e1c344d505",
+    "snapshot_core_and_scripts_match_merged_commit": true,
+    "certificate_bundle_files": [
+      "abstract.json",
+      "abstract.v",
+      "concrete.json",
+      "concrete.v",
+      "contract.json",
+      "syntax.md"
+    ],
+    "bundle_content": "Only fixed C/A RTL, typed transition models, frozen contract and generic expression syntax; no gold certificate or relation recipe."
+  },
+  "canonical_hashes": {
+    "concrete": "397147cf737063964958eb252f95bcd850c0e0390377fd6b027f4b787a10da96",
+    "abstract": "66894d5fdffc526f302d9bf8fbc0e610e5ccfc24845b64c9f0934d304f671fd6",
+    "contract": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2"
+  },
+  "candidate_count": 1,
+  "candidate_raw_sha256": "c6133e9a6c1d1c43582af6d9d6850481e9b60720cfd06405678830895aa6837d",
+  "candidate_canonical_sha256": "ca77423118448e16431eec438310006144aa6746674e145895e6c9d2bb7ce3c9",
+  "parent_materialization_verbatim": true,
+  "candidate_unchanged": true,
+  "gate": {
+    "status": "ACCEPTED",
+    "seconds": 0.22461583401309326,
+    "report": "verification/gate/report.json",
+    "obligations": {
+      "INITIAL_NONEMPTY": {
+        "status": "sat",
+        "query_sha256": "04c5a33964fee73ff843e7f1ba13c2a0cb21c2e5f9194286f8252c15b30eb763"
+      },
+      "INIT_J": {
+        "status": "unsat",
+        "query_sha256": "0e3e61f1ddc914ce3b27f3284e25c785e6385163de826afa9172d40d66f5bd75"
+      },
+      "STEP_J": {
+        "status": "unsat",
+        "query_sha256": "db94cf93889b6ba308bd9896719fe15b58c03fd93fd30e7d95d60785a4733d36"
+      },
+      "INIT_MAP": {
+        "status": "unsat",
+        "query_sha256": "498a42b55713a921fedb12710ba8b9b6564e33000fb5c31f1f4c92b0c6bebde9"
+      },
+      "STEP_MAP": {
+        "status": "unsat",
+        "query_sha256": "2e5c97cf77d631190cee8e5b02a499e4027972f6dfeebabb71fe1c1676433c05"
+      },
+      "OBS_MAP": {
+        "status": "unsat",
+        "query_sha256": "20d2a3904128ba7b3444f361cb9c993a79f9e2e55a6dc45d7cc3e9ea869de80d"
+      }
+    },
+    "all_query_hashes_match_original": true
+  },
+  "property": {
+    "status": "SAFE",
+    "seconds": 1.3181481640203856,
+    "report": "verification/property/formal.json",
+    "source_sha256": "f28ef4d51c08cdb02e230b0bfe126ba244f1f51e0e8ba60c76c206fa7dfe16a9",
+    "contract_sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+    "driver_sha256": "0575a5726033a9c7de97fe9e7a26573d190f75472c9235db0ea2d211073f89b2",
+    "free_nondeterminism_verified": true,
+    "z_harness_input": "in_5",
+    "base": "PASSED",
+    "induction": "PASSED",
+    "no_assumptions": true,
+    "all_artifact_hashes_match_original": true,
+    "tool_hashes_match_original": true
+  },
+  "classification_matches_original": true,
+  "human_readable_relation": {
+    "h.o_data": "C.o_data",
+    "h.n": "C.LOGIC.r_valid ? 2 : (C.LOGIC.REG_OUTPUT.ro_valid ? 1 : 0)",
+    "J": "C.LOGIC.r_valid == 0 OR C.LOGIC.REG_OUTPUT.ro_valid == 1",
+    "w.z": "C.LOGIC.r_data"
+  },
+  "relation_note": "Human explanation of the unchanged model-produced certificate, added only after generation and recheck.",
+  "original_cost_seconds": {
+    "generation": 36.68826046597678,
+    "verification": 1.922059248026926,
+    "charged_total": 38.61031971400371
+  },
+  "recheck_cost_seconds": {
+    "gate": 0.22461583401309326,
+    "property": 1.3181481640203856,
+    "verification_stages": 1.5427639980334789,
+    "wall": 1.5698777830111794
+  },
+  "recheck_model_calls": 0,
+  "cost_note": "Recheck cost is separate from original candidate generation/verification. Read-only preflight and post-check file audit are not timed solver work.",
+  "artifact_paths_relative_to": "archived independent recheck evidence root",
+  "limits": [
+    "One fixed C/A pair and one generated candidate; no general success-rate claim.",
+    "No repair was needed, so this run does not demonstrate a causal feedback benefit.",
+    "Original infrastructure-blocked pilot and joint rewrite pilot remain separate.",
+    "This is reproducibility evidence, not a verification speedup measurement."
+  ]
+}
