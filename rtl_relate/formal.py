@@ -40,12 +40,12 @@ def _run(command, out, name, deadline):
     started = time.monotonic()
     row = {"command": command, "returncode": None, "timeout": False}
     remaining = deadline - started
-    stdout = stderr = ""
+    stdout = stderr = b""
     try:
         if remaining <= 0:
             row["timeout"] = True
         else:
-            process = subprocess.Popen(command, cwd=out, text=True, stdout=subprocess.PIPE,
+            process = subprocess.Popen(command, cwd=out, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, start_new_session=True)
             try:
                 stdout, stderr = process.communicate(timeout=remaining)
@@ -58,12 +58,13 @@ def _run(command, out, name, deadline):
                 row["timeout"] = True
             row["returncode"] = process.returncode
     except OSError as error:
-        stderr = str(error)
-    (out / f"{name}.stdout.log").write_text(stdout)
-    (out / f"{name}.stderr.log").write_text(stderr)
+        stderr = str(error).encode("utf-8")
+    (out / f"{name}.stdout.log").write_bytes(stdout)
+    (out / f"{name}.stderr.log").write_bytes(stderr)
     row.update(seconds=time.monotonic() - started, stdout=f"{name}.stdout.log",
                stderr=f"{name}.stderr.log")
-    return row, stdout
+    # Retain both raw streams before decoding; malformed proof output fails closed.
+    return row, stdout.decode("utf-8")
 
 
 def render_harness(top, contract, ports, nondet=()):

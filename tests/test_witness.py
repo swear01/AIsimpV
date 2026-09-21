@@ -19,6 +19,7 @@ class WitnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.temp.cleanup)
         cls.out = Path(cls.temp.name)
         cls.cases = {}
         definitions = [
@@ -36,10 +37,6 @@ class WitnessTests(unittest.TestCase):
             formal = prove_rtl(ROOT / asrc, atop, contract, path / "formal", parameters=ap, nondet=nd)
             result = extract_counterexample(a, contract, path / "formal", path / "witness")
             cls.cases[name] = (c, a, contract, formal, result, path)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.temp.cleanup()
 
     def test_real_coarse_traces_validate_and_are_spurious_on_safe_concrete(self):
         for name, (c, a, contract, formal, result, path) in self.cases.items():

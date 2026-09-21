@@ -131,7 +131,7 @@ def validate_case(task, case, frontend):
         raw_hash, normalized_hash = sha(directory / "source.v"), sha(directory / "normalized.v")
         parameters = meta["parameters"] if source_hash == raw_hash else {}
         if (source_hash not in {raw_hash, normalized_hash} or raw_hash != meta["source_sha256"]
-                or sha(directory / "normalized.v") != meta["normalized_sha256"]):
+                or normalized_hash != meta["normalized_sha256"]):
             raise ValueError(f"{role} proof source differs from certified frontend")
         if case.get(role + "_parameters", {}) != parameters:
             raise ValueError(f"{role} proof parameters differ from certified frontend")

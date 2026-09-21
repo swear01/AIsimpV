@@ -4,9 +4,11 @@ import copy
 import json
 from pathlib import Path
 import tempfile
+import sys
+import time
 import unittest
 
-from rtl_relate.formal import prove_rtl
+from rtl_relate.formal import _run, prove_rtl
 from rtl_relate.ir import bv, digest, load_json, op, ref
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,6 +108,16 @@ class FormalTests(unittest.TestCase):
         result = prove_rtl(ROOT / "fixtures/rtl/p5_concrete.v", "p5_concrete", self.contract, self.out / "p5_concrete")
         self.assertEqual(result["status"], "ERROR")
         self.assertEqual((self.out / "p5_concrete/formal.json").read_bytes(), previous)
+
+    def test_malformed_tool_output_preserves_both_raw_logs(self):
+        out = self.out / "invalid-utf8"
+        out.mkdir()
+        command = [sys.executable, "-c",
+                   "import os; os.write(1, b'Status: PASSED\\n\\xff'); os.write(2, b'error\\xfe')"]
+        with self.assertRaises(UnicodeDecodeError):
+            _run(command, out, "tool", time.monotonic() + 10)
+        self.assertEqual((out / "tool.stdout.log").read_bytes(), b"Status: PASSED\n\xff")
+        self.assertEqual((out / "tool.stderr.log").read_bytes(), b"error\xfe")
 
 
 if __name__ == "__main__":
