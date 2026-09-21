@@ -163,6 +163,7 @@ skid8 的一條人工構造 trace：初始 valid=0/data=0；第一拍接受 `0x1
 - 凍結前 unit suite：**143 tests PASS，27.155 秒**，此 log 已封存於 ZIP。後續整合 LLM driver／基礎設施修復後，另驗證 **145 tests PASS，27.104 秒**；該最新整合 log 由發布端保留，不在前述已凍結 ZIP。工程回歸數不是研究 task 的分母。
 - 發布 review 後的 runner 保護先通過 **155 tests，27.154 秒**，補上程序恰在 timeout 時退出的回歸後為 **156 tests，35.243 秒**：涵蓋 ledger 原子寫入、setup 失敗記帳／停止、候選完整性與 CI 時間上限。這些修正晚於凍結實驗；release tag 與原始 snapshots 保留當時版本，不用新程式冒充原始量測。
 - 後續整合修正另通過 **160 tests，28.536 秒**：保留非 UTF-8 原始工具 logs、共用前端驗證的 state 集合、拒絕部分未初始化 RTL，並要求 sandbox network probe 取得明確權限拒絕。包含真實 OS probe；未新增模型呼叫或改寫凍結實驗。
+- 整合收尾回歸為 **163 tests，43.026 秒**：新增「可信檔案篡改後還原仍不得記成功」與 escaped-descendant timeout 測試；修正後逾時的輸出收集最多額外 1 秒。這是工程修正的驗證，沒有新增研究 attempts。
 - [封存索引](data/evidence-index.json)：2,927 個原檔；ZIP SHA-256 `eb8b11c4e3b112629fbe7e06c8570267d78da006378f53e9e48a61b1051b796e`，可核對下載位元組。
 - [完整 raw evidence ZIP](https://github.com/swear01/AIsimpV/releases/download/wednesday-pilot-2026-09-21/AIsimpV-wednesday-evidence.zip) 保留人工 queries、solver outputs、frontend metadata、strictness/cover/replay traces，及 LLM snapshots、input bundles、prompts、ledger、全部 candidates。附件由主發布流程核驗並上傳；LLM 重新生成具有非決定性，固定候選的驗證可獨立重跑。
 

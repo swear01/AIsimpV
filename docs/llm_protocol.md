@@ -117,6 +117,8 @@ python -m unittest discover -s tests -p test_llm_pilot_boundary.py -v
 
 The live OS probe requires Linux, `/usr/bin/python3`, and a current Codex CLI. CI
 without Codex skips that one check; it does not claim isolation was tested there.
+Pilot paths and their ancestors must be physical directories without symlinks;
+symlinked roots are deliberately rejected rather than normalized across the boundary.
 The other checks cover symlink and path escape, contract tampering, unauthorized
 candidate files, mutation after capture, shared budget and attempt enforcement.
 No mock result from these tests counts as an LLM experiment.
