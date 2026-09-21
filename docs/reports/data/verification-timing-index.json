@@ -1,0 +1,19 @@
+{
+  "run_id": "timing-20260921-fixedpairs-v1",
+  "source_commit": "de5898204580b40b3237f2f7f9d1077f7f7d6f91",
+  "issue": 17,
+  "archive_name": "AIsimpV-verification-timing-evidence.zip",
+  "archive_sha256": "f9f88c39b2ba7b30c770f30fc6e587bd741807fcc654e66b16aa80cbd1779432",
+  "archive_bytes": 4992120,
+  "archive_files": 5356,
+  "source_archive_sha256": "da6b6eac7499b099ad0eedc0222f8c90df77afb324094dee763305663e74c757",
+  "run_summary_sha256": "51e44019a4ce113caa68288db12a53fbae83adcb575836044bb479a445ddaf31",
+  "independent_audit_sha256": "89aad090356ed40787f2e95684550a09434e8e662f6916c15e3ed6e6428b947a",
+  "measured_pairs": 40,
+  "warmup_pairs": 10,
+  "all_passed": true,
+  "new_model_calls": 0,
+  "suite_wall_seconds": 103.21618636895437,
+  "independent_data_audit_seconds": 2.745915,
+  "finding": "No reliable property-proof speedup; pipeline slower 8/8; validation path slower 40/40."
+}

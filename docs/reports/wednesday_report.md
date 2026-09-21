@@ -1,5 +1,7 @@
 # AIsimpV：中小型 RTL 狀態改寫的可驗證性
 
+追加量測：[八輪配對驗證時間與證書說明](verification_timing.md)。原始數據保持不變；新實驗沒有觀察到穩定的 proof 加速，pipeline 的 property 中位數為 C 0.618 秒／A 1.070 秒。
+
 報告與離線簡報依凍結 evidence 人工整理，沒有自動重新產生數據區塊。
 
 報告日：2026-09-23。人工矩陣 `wednesday-20260921-final01` 已凍結；原 fixed-pair pilot 保持 INFRASTRUCTURE_BLOCKED，原 joint pilot 在兩次內取得 ACCEPTED＋SAFE。另經生成前預註冊的 fixed-pair follow-up，第一個候選即取得 ACCEPTED＋SAFE。

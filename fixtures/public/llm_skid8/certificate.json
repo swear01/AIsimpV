@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "concrete_sha256": "397147cf737063964958eb252f95bcd850c0e0390377fd6b027f4b787a10da96",
+  "abstract_sha256": "d63477f66a1c6a8c05e6e104650f6366d8b669521953d1f18cbab33b13f79062",
+  "contract_sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+  "h": {
+    "btor_10": {"ref": "c.btor_9"},
+    "btor_14": {"ref": "c.btor_13"},
+    "btor_18": {"ref": "c.btor_17"}
+  },
+  "J": {"bool": true},
+  "w": {
+    "btor_8": {"ref": "c.btor_20"}
+  }
+}

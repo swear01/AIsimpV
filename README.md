@@ -8,6 +8,8 @@ The [September 23 pilot plan](docs/wednesday_plan.md) covers four new tasks: FSM
 
 The additional [finite FIFO 4×8 assessment](docs/reports/fifo_followup.md) remains `UNSUPPORTED` at undefined-value branches and anonymous BTOR inputs. It preserves arbitrary initial memory values, adds no FIFO property proof, and is outside the four-task matrix.
 
+An [eight-repeat paired timing study](docs/reports/verification_timing.md) now separates property proof, SMTBMC/Z3 process time, and certificate/translation costs for the four manual rewrites and saved LLM candidate. It finds no reliable speedup: pipeline property time rises from a median 0.618 s to 1.070 s, and every known-candidate validation path costs more than direct concrete proof. State reduction alone is not the performance objective.
+
 See the [benchmark source survey](docs/benchmark_shortlist.md), [measured manual results](docs/reports/data/manual-results.csv), and [GitHub issues](https://github.com/swear01/AIsimpV/issues) for dependencies, file ownership, and acceptance evidence. The two skidbuffer widths count as one design family. The skidbuffer task uses a documented derived contract; it is not a reproduction of the full upstream formal suite.
 
 ## Reproduce

@@ -1,0 +1,10 @@
+{
+  "origin": "Unmodified model-generated joint pilot, attempt 2, skid8-llm-final-20260921",
+  "parent_report": "docs/reports/data/llm-reproduction.json",
+  "source_hashes": {
+    "abstract.v": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+    "certificate.json": "752f1d6cf29a7f22c64dacb900302bbc7981bf411ea20926217d6649f1f1fbec"
+  },
+  "generation_charged_run_seconds": 86.78426637605298,
+  "new_model_calls": 0
+}
