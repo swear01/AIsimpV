@@ -84,8 +84,9 @@ The development runner writes ledgers atomically and reserves the attempt before
 candidate setup or the isolation probe. Setup failures retain their elapsed cost
 and terminate as `ISOLATION_OR_RUNNER_ERROR`; resuming that terminal run returns
 the same ledger without another attempt. Existing candidate directories are never
-cleared. A missing candidate hash permits only infrastructure-error feedback,
-never a formal success. These post-pilot guards do not modify the archived runner
+cleared. Every infrastructure-failed attempt permits only infrastructure-error
+feedback, even if a candidate hash exists and modified trusted files are later
+restored. Candidate hashes still must match. These post-pilot guards do not modify the archived runner
 snapshots or retroactively change the original measurements.
 
 A repair prompt includes the prior candidate, its real checker feedback and any

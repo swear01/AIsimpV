@@ -41,18 +41,21 @@ class ContractV1Tests(unittest.TestCase):
 
     def test_invalid_reset_profiles_fail_closed(self):
         original = self.contract("r2_skid8")
-        variants = [None, True, {}, {**original["reset"], "extra": True}]
+        contract = deepcopy(original)
+        contract["reset"] = None
+        validate_contract(contract)
+        contract = deepcopy(original)
+        contract["semantics"] = "single-clock-bv-v0"
+        with self.assertRaisesRegex(Unsupported, "v0 has no reset profile"):
+            validate_contract(contract)
+        variants = [True, {}, {**original["reset"], "extra": True}]
         for key, values in {"kind": ("asynchronous", None), "port": ("missing", "i_data", "i_clk", [], ""),
                             "active": (0, True, "1"), "assumption": ("initially_asserted", True)}.items():
             variants.extend({**original["reset"], key: value} for value in values)
         for reset in variants:
             with self.subTest(reset=reset):
                 contract = deepcopy(original)
-                # A missing reset declaration is supported in v1, but not a malformed object.
-                if reset is None:
-                    contract["semantics"] = "single-clock-bv-v0"
-                else:
-                    contract["reset"] = reset
+                contract["reset"] = reset
                 with self.assertRaises((Invalid, Unsupported)):
                     validate_contract(contract)
         for typ in (True, "bool", 2):

@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant">
+<!-- Hand-authored presentation for the frozen evidence; no generated data blocks. -->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,9 +20,7 @@
 <p class="lead">用「抽象 RTL＋對應證書＋獨立 checker」檢查非局部 rewrite，再驗證原先凍結的 safety property。</p>
 <div class="flow"><span>原始 C<br>固定 contract</span><b>→</b><span>候選 A<br>h / J / w</span><b>→</b><span>包含關係<br>獨立 checker</span><b>→</b><span>A property proof<br>自由 nondeterminism</span></div>
 <div class="grid"><div class="card"><h3>本輪要回答</h3><p>能否檢查實際狀態改寫？<br>哪些必要關係不能放掉？</p></div><div class="card"><h3>分開驗證三件事</h3><p>人工 gold 可證性 · LLM discovery<br>完整成本與驗證加速</p></div></div>
-<!-- OVERVIEW_START -->
 <p class="draft"><strong>人工：</strong>4/4 good gate＋P 通過；4 coarse 假反例；4 錯證書被拒絕。<br><strong>LLM：</strong>joint 兩次內得到 18→10 bits 的安全候選；固定 C/A 因工具錯誤受阻。</p>
-<!-- OVERVIEW_END -->
 <div class="foot"><span>單 clock · BV safety · 固定 reset / 觀察 / property</span><span>1 / 8</span></div>
 </section>
 <section class="slide" id="s2" aria-labelledby="h2">
@@ -116,18 +115,14 @@
 </section>
 <section class="slide" id="s5" aria-labelledby="h5">
 <div class="kicker">正式人工矩陣</div><h2 id="h5">包含成立、性質可證、執行成本分開報告</h2>
-<!-- MANUAL_RESULTS_START -->
 <table class="compact"><thead><tr><th>Task</th><th>Good gate / P</th><th>Coarse gate / replay</th><th>錯證書</th><th>B0 / good workflow 秒</th></tr></thead><tbody><tr><td>R1-fsm</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.545 / 1.433</td></tr><tr><td>R2-skid8</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.559 / 1.477</td></tr><tr><td>R3-skid32</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.543 / 1.520</td></tr><tr><td>R4-pipe32</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.604 / 1.923</td></tr></tbody></table><p><span class="strong">人工 12 筆分類均符合預期。</span>FSM 反向 ACCEPTED；三個公開 good A 的嚴格抽象 trace 皆通過檢查。</p><p class="note">全部候選 workflow 15.175s ＋ B0 2.251s；suite 17.439s。COI 後 state C→A：7→6、30→22、102→70、257→225；cells：25→25、35→33、35→33、20→20。</p>
-<!-- MANUAL_RESULTS_END -->
 <p class="note">完整成本含前端、證書、property、失敗與 replay；FSM 反向證書另記且計入。B0 每個固定 C/contract 只算一次。人工準備時間未量測。</p>
 <p class="note">規模分成 design、原 monitor 與 property harness。COI 後 state/cells 含仍存活的取樣 state；共用 harness 也套用 FSM/pipeline。單次時間不支持加速結論。</p>
 <div class="foot"><span>NOT_RUN / ERROR / UNKNOWN 保留；不以新案例替換失敗列</span><span>5 / 8</span></div>
 </section>
 <section class="slide" id="s6" aria-labelledby="h6">
 <div class="kicker">真實 Codex discovery</div><h2 id="h6">兩個獨立 pilot，保留不同終態</h2>
-<!-- LLM_RESULTS_START -->
 <div class="grid"><div class="card"><h3>Pilot A · Certificate only</h3><p class="tag pending">INFRASTRUCTURE_BLOCKED</p><p>4 次工具失敗，0 可驗證候選。<br>計費 309.740s；wall 408.163s。</p><p class="note">a2 含診斷停頓上界；不能推論模型找不到 mapping。</p></div><div class="card"><h3>Pilot B · Joint rewrite</h3><p class="tag">ACCEPTED ＋ SAFE · 18→10 bits</p><p>a1 stale hash ERROR → a2 修證書。<br>2 次計費 86.784s；RTL 相同。</p><p class="note">刪除 r_data、保留 valid bits；兩個保存候選獨立重驗皆相符。</p></div></div>
-<!-- LLM_RESULTS_END -->
 <ul><li>各最多 4 次 / 900 秒；失敗保留，兩個 pilots 不合併成功率。</li><li>Joint 改用 inline bundle＋無工具輸出；父端原樣存檔，未提供 h/J/w。</li><li>修改 hash 後通過是一次真實修正紀錄，不是 feedback 因果對照。</li></ul>
 <p class="note">gpt-5.6-sol / high，Codex 0.154.0。Joint usage：34,968 input / 3,750 output tokens；固定pair usage不完整；費用 unavailable。</p>
 <div class="foot"><span>固定 pair：檔案工作區；joint：無工具 inline transport；改動與失敗均留存</span><span>6 / 8</span></div>
@@ -135,23 +130,17 @@
 <section class="slide" id="s7" aria-labelledby="h7">
 <div class="kicker">負例提供什麼證據</div><h2 id="h7">錯對應與抽象過粗，要由不同關卡辨認</h2>
 <div class="grid"><div class="card"><h3>同一個 good A，換錯證書</h3><p>skid：<code>w.z=0</code>。<br>pipeline：<code>h.s=a</code>。</p><p>檢查一步匹配；拒絕的是這份 certificate，不能直接報 design BUG。</p></div><div class="card"><h3>正確包含，但丟掉必要關係</h3><p>skid：輸出 data 每拍自由。<br>pipeline：兩個 monitor views 獨立。</p><p>gate 可過仍可能有 abstract CEX；需 exact replay 判斷 C 是否能執行。</p></div></div>
-<!-- NEGATIVE_RESULTS_START -->
 <p class="draft"><strong>實測 skid8：</strong>valid=1 且 ready=0/reset=0 時，coarse data 從 0x12 變成 0x34。A-prefix SAT、P 違反、C replay INFEASIBLE。錯 witness=0 則在 STEP_MAP 被拒絕。</p>
-<!-- NEGATIVE_RESULTS_END -->
 <div class="flow"><span>A trace 可達<br>且違反 P</span><b>→</b><span>固定公共 inputs / observations<br>回 C exact replay</span><b>→</b><span>FEASIBLE：BUG<br>INFEASIBLE：spurious</span></div>
 <p class="note">人工構造 trace 也須 SMT 查驗初值可達、P 違反與 replay；來源如實標記。trace strictness 與 property failure 不是同一件事。</p>
 <div class="foot"><span>不得把 certificate failure、abstract CEX 或 timeout 寫成 concrete bug</span><span>7 / 8</span></div>
 </section>
 <section class="slide" id="s8" aria-labelledby="h8">
 <div class="kicker">證成範圍與下一步</div><h2 id="h8">先依證據決定下一階段投入</h2>
-<!-- CONCLUSION_START -->
 <p class="draft"><strong>已證成：</strong>4/4 人工改寫保留 P；LLM 另產生 1 個可驗證資料抽象。<br><strong>限制：</strong>固定 C/A pilot 卡在工具；單次成本沒有加速證據，不能推論一般成功率。</p>
-<!-- CONCLUSION_END -->
 <div class="grid"><div class="card"><h3>若 gold 通過、LLM 失敗</h3><p>集中 mapping discovery、語法與回饋；保留失敗候選，不擴大生成預算掩蓋問題。</p></div><div class="card"><h3>若 gate 通過、P 失敗</h3><p>恢復 property 所需的時序／資料關係；先不增加平台功能。</p></div></div>
 <p>本輪不涵蓋任意 RTL、multi-clock、latency 改變、liveness、symbolic memory；兩個公開家族不支持通用性推論。</p>
-<!-- EVIDENCE_START -->
 <p class="note">凍結 run：<code>wednesday-20260921-final01</code>；凍結時 143、最終整合 145 項工程測試 PASS。<br>乾淨 source 重跑 12/12 分類與 hashes 相符；另耗 18.584s，不作 timing median。<br>已執行 runner：<code>python -m rtl_relate.wednesday --out results/&lt;new-run&gt;</code><br>完整來源／數據：同目錄 <code>wednesday_report.md</code>、<code>data/manual-summary.json</code>，公開專案 <a href="https://github.com/swear01/AIsimpV">swear01/AIsimpV</a>。</p>
-<!-- EVIDENCE_END -->
 <div class="foot"><span>所有結論綁定凍結來源、contract、候選與工具版本</span><span>8 / 8</span></div>
 </section>
 </body>

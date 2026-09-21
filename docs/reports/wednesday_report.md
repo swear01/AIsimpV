@@ -1,5 +1,7 @@
 # AIsimpV：中小型 RTL 狀態改寫的可驗證性
 
+報告與離線簡報依凍結 evidence 人工整理，沒有自動重新產生數據區塊。
+
 報告日：2026-09-23。人工矩陣 `wednesday-20260921-final01` 已凍結；固定 C/A pilot 為 INFRASTRUCTURE_BLOCKED；joint pilot 在兩次內取得 ACCEPTED＋SAFE 候選。
 
 **人工矩陣的四個指定 rewrite 均通過包含檢查且保留目標 property；四個過粗抽象產生假反例，四份錯證書被拒絕。LLM joint pilot 另自動產生一個 18→10 bits 的安全候選；固定 C/A pilot 則因工具錯誤受阻。**本輪要驗證的是：改變 RTL 內部狀態表示後，能否以 `h / J / w` 證書，讓獨立 checker 確認指定觀察行為包含原設計，再由不讀取證書的 property backend 證明凍結的 safety property。
@@ -53,7 +55,6 @@ coarse A 把第二個 view 改成獨立 z2。w=(a,b) 仍能匹配 C，但 `z+z2=
 
 本節只使用凍結的 `wednesday-20260921-final01`。實際方法為 **Yosys SMTBMC＋Z3，base check＋k-induction**，C/A 同用 requested depth 20 與每次 property proof 120 秒上限；不是把 depth 20 的 BMC 無反例直接標 SAFE，也不是宣稱執行過 SBY prove。四個 B0 都為 SAFE。
 
-<!-- MANUAL_RESULTS_START -->
 | Task | Good：gate / P | Coarse：gate / P / replay | 同一 good A＋錯證書 | 反向／strictness |
 | --- | --- | --- | --- | --- |
 | R1-fsm | ACCEPTED / SAFE | ACCEPTED / CEX / SPURIOUS_TRACE | REJECTED：STEP_J | 反向 ACCEPTED，指定觀察等價 |
@@ -64,11 +65,9 @@ coarse A 把第二個 view 改成獨立 z2。w=(a,b) 仍能匹配 C，但 `z+z2=
 四個 good 改寫均包含 C 且保留 P；其中兩個公開家族的三個實例全部通過。四個 coarse 改寫仍有正確 certificate，但 property backend 各找到 CEX；另外保存的人工 trace 也通過 A-prefix SAT、P 違反與 C exact replay INFEASIBLE，故分類為 SPURIOUS_TRACE。四份錯證書全部被拒絕；bad-certificate 列不再執行 property proof，並非 property failure。
 
 FSM 正反向 certificate 皆通過；skid8/skid32/pipeline 的 good A 各有一條不違反 P、但在 C 無法重播的可行觀察 trace，支持指定觀察下的嚴格 over-approximation。四題 good/coarse 的 concrete cover traces 都為 FEASIBLE。完整 12 列見 [manual-results.csv](data/manual-results.csv)，原始精度與額外 checks 見 [manual-summary.json](data/manual-summary.json)。
-<!-- MANUAL_RESULTS_END -->
 
 原始 RTL design bits、原 property monitor bits、新增 nondet bits，與 formal backend 正常 COI/前處理後的 state bits/cells 分開列。共用 property harness 引入 `past_valid` 與取樣用 observation/input registers，再由前處理移除不需要的 captures；因此表中的後端規模包含 DUT、原 monitor 與仍存活的 harness state。skid 會記住 hold antecedent 與資料；FSM/pipeline 的 current-state predicate 也經同一取樣 harness，不能把額外 captures 算成原 RTL monitor 或直接忽略。
 
-<!-- COST_RESULTS_START -->
 | Task | Design bits C→A | 原 monitor bits C→A | A nondet bits good/coarse | COI 後 state bits C→A | COI 後 cells C→A |
 | --- | --- | --- | --- | --- | --- |
 | R1-fsm | 3→2 | 0→0 | 0/2 | 7→6 | 25→25 |
@@ -90,7 +89,6 @@ FSM 正反向 certificate 皆通過；skid8/skid32/pipeline 的 good A 各有一
 全部人工候選 workflow **15.175 秒**，四個 B0 合計 **2.251 秒**，suite wall time **17.439 秒**。正向 certificate stages 合計 2.238 秒；FSM 反向另 0.180 秒。workflow 另含協調與資料處理耗時，因此不只等於四個 solver 欄位相加。這次單次 pilot 的 good workflow 都高於各自 B0；結果支持可驗證性，沒有提供端到端加速證據。
 
 另以 `git archive 6901b49` 解出的乾淨 source 重跑 12 筆：分類與 C/A/contract/certificate hashes 逐列一致（[reproduction record](data/manual-reproduction.json)）。這次額外驗證耗時 suite **18.584 秒**，其中 candidate workflow 16.160 秒、B0 2.406 秒；兩次 suite 共 **36.023 秒**。它不是三次 timing median，沒有被選來替換較慢的量測；完整重跑 summary/log 在 raw evidence ZIP。
-<!-- COST_RESULTS_END -->
 
 `T_workflow = Σ生成 + Σ前端 + Σ證書 + Σabstract property + Σreplay/strictness/refinement`。所有嘗試和失敗計入；FSM 反向證書單列但納入成本。B0 使用同一 engine、depth 與正常 preprocessing，每個固定 C/contract 僅執行一次，不能因它出現在三個 variant 列中重複相加。suite wall time 另列。以上成本的範圍是這次凍結的正式 run；開發 qualification 與工程回歸不是這 12 筆正式 attempts，也沒有納入本表，不能把本表當作整個研究的投入。人工發現／準備時間未量測，不能把 machine time 當作完整人力成本。
 
@@ -100,7 +98,6 @@ FSM 正反向 certificate 皆通過；skid8/skid32/pipeline 的 good A 各有一
 
 生成端只讀取經審核的 input bundle，其中包含 contract 的唯讀副本，並僅能在限定候選目錄寫入。父端的可信 contract 原件、checker 與檢查紀錄不可由生成端修改；gold certificate、計畫公式、無關對話與 Git metadata 不提供給生成端。固定 C/A 檔案工作區先做 OS probe 與 trusted hash checks；qualification probe 通過不代表真正 Codex 工具啟動路徑也成功。完整 protocol 見 [llm_protocol.md](../llm_protocol.md)。
 
-<!-- LLM_RESULTS_START -->
 | Pilot | 實際候選數 | 結果與 feedback 鏈 | 計費生成／驗證成本 | 人工介入 |
 | --- | --- | --- | --- | --- |
 | 固定 C/A certificate | 4 infrastructure attempts；0 可驗證候選 | INFRASTRUCTURE_BLOCKED；工具啟動錯誤 | 309.551＋0.189＝309.740 秒；wall 408.163 秒 | 工具診斷／中止／隔離修復；沒有提供 mapping |
@@ -122,7 +119,6 @@ Joint 的實際 rewrite 保留 `r_valid/o_valid` 兩個 valid bits，刪除 8-bi
 第一次因證書的 abstract hash 不符，checker 在綁定檢查回 ERROR，尚未檢查證明義務。模型收到真正匯出的 manifest/hash 後修正 certificate，第二次 gate ACCEPTED 且自由 z 下 P 為 SAFE。兩次 `abstract.v` 位元組完全相同，來源 SHA-256 為 `ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560`。這展示了 hash feedback 後的修正紀錄，沒有證明 feedback 相對無回饋的因果收益。
 
 生成 RTL 的內容與人工 gold 不同，不能直接沿用人工 strictness trace 的結果；本 pilot 的 strictness 尚未另證。主流程以原始候選位元組、frozen snapshot-v3 及新輸出目錄[獨立重驗](data/llm-reproduction.json)：a1 仍是 stale-hash ERROR，a2 仍是 10 bits／ACCEPTED／SAFE。額外兩筆 verification 合計 1.547 秒，沒有新增模型呼叫或改候選，不能當成第三次生成 attempt。另一次先前重驗因相對輸出路徑的操作錯誤，無法進入 gate；該 export phase 耗時 0.724 秒並保留 log，未量測完整協調 wall time。這是重驗操作錯誤，不改寫 LLM 的兩筆結果。
-<!-- LLM_RESULTS_END -->
 
 固定 C/A pilot 的輸出並未到達證書語意檢查：attempt 1/3/4 留下空 certificate，格式檢查為 ERROR；attempt 2 因反覆 sandbox 啟動失敗由父端中止，保留 INTERRUPTED_INFRASTRUCTURE。已查證的工具錯誤為 `bwrap` 的 loopback `RTM_NEWADDR EPERM`。第二次的 114.014 秒是含協調診斷停頓的保守上界，未宣稱純模型推論時間。四次都計入原 attempt cap，沒有重開 pilot 洗去失敗。
 
@@ -150,17 +146,14 @@ skid8 的一條人工構造 trace：初始 valid=0/data=0；第一拍接受 `0x1
 
 ## 8. 報告結論與後續決策
 
-<!-- CONCLUSION_START -->
 本輪在 **4/4 個預先指定 tasks** 上驗證了指定人工 rewrite 的包含關係與目標 P，其中公開部分為 **2 個家族、3/3 個實例**。FSM 有雙向證據；兩種公開 rewrite 有嚴格抽象 trace。這證成的是本組合約下的非局部改寫可驗證性，以及 checker/property/replay 能分開辨認錯證書與關係丟失。
 
 全部基本 12 attempts 均得到預期分類，沒有移除失敗列。單次 good workflow 皆高於正常 B0，不能把 state reduction 寫成驗證加速。固定 C/A pilot 的四次工具基礎設施失敗耗盡 attempt cap，0 個可驗證 certificate；其結果是 INFRASTRUCTURE_BLOCKED，無法判斷 LLM 的對應發現能力。Joint pilot 在修訂的 inline transport 下，兩次內取得一個由模型提出的資料狀態刪除候選，gate 與 P 均通過；沒有自動發現 occupancy 重編碼的證據。這支持一次具體候選的自主生成與可驗證性，不能推廣為任意 RTL rewrite 成功率。人工 gold 成果仍與 LLM 結果分開。
-<!-- CONCLUSION_END -->
 
 若 gold 可證但 LLM 找不到關係，下一步應分析 mapping discovery 與 certificate 格式；若 gate 可過但 P 失敗，下一步是找回 property 所需關係。只有完整時間資料顯示重複求證的成本，才投入 summary reuse 或分解；多 clock、latency 改變、symbolic memory 仍在本輪範圍外。
 
 ### 證據與重跑索引
 
-<!-- EVIDENCE_START -->
 - [凍結人工 summary](data/manual-summary.json) 與 [12 筆 CSV](data/manual-results.csv)；run ID：`wednesday-20260921-final01`。
 - [LLM summary](data/llm-summary.json) 與 [saved-candidate 重驗](data/llm-reproduction.json)：公開選錄含每次真實結果、成本、usage availability、來源 hashes 與 protocol amendment；raw ledgers/events 保留於 evidence ZIP。
 - [乾淨 source reproduction](data/manual-reproduction.json)：12/12 分類與所有 C/A/contract/certificate hashes 相符；source archive SHA-256 `ceac36cfe610b496bff9d1bfe9458205168b55f4896daefb10de9e3d18f96666`。
@@ -180,6 +173,5 @@ python -m rtl_relate.wednesday --out results/wednesday-reproduction
 ```
 
 兩個 LLM pilots 另依 [生成 protocol](../llm_protocol.md) 的完整 input bundle、prompt 與 ledger 重跑，不能把人工 matrix 命令當成 LLM reproduction。
-<!-- EVIDENCE_END -->
 
 此報告的簡報版為 [8 頁 HTML](wednesday_slides.html)。完整預登記與 budget 見 [執行計畫](../wednesday_plan.md)；研究結果以本報告連結的凍結 run 為準，不以 source manifest 的初始 `NOT_RUN` 欄位冒充即時狀態。

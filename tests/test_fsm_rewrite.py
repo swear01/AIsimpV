@@ -27,7 +27,7 @@ class FSMRewriteTests(unittest.TestCase):
 
     def gate(self, case, name, certificate=None):
         return check(case["concrete"], case["abstract"], case["contract"],
-                     certificate or case["certificate"], self.out / name)
+                     case["certificate"] if certificate is None else certificate, self.out / name)
 
     def test_actual_exports_preserve_every_state_and_transition(self):
         models = {"concrete": self.cases["good"]["concrete"],
@@ -56,6 +56,7 @@ class FSMRewriteTests(unittest.TestCase):
     def test_good_mapping_proves_both_trace_inclusions(self):
         case = self.cases["good"]
         self.assertEqual(self.gate(case, "good-gate")["status"], "ACCEPTED")
+        self.assertEqual(self.gate(case, "empty-certificate", {})["status"], "ERROR")
         reverse = check(case["abstract"], case["concrete"], case["contract"],
                         case["reverse_certificate"], self.out / "reverse-gate")
         self.assertEqual(reverse["status"], "ACCEPTED")
