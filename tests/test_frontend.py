@@ -6,11 +6,31 @@ import random
 import tempfile
 import unittest
 
-from rtl_relate.frontend import Unsupported, export_rtl, parse_btor2
+from rtl_relate.frontend import Unsupported, _check_netlist, export_rtl, parse_btor2
 from rtl_relate.ir import digest, emit, evaluate, sort, validate_model
 from rtl_relate.solver import query, run
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class NetlistTests(unittest.TestCase):
+    def test_only_supported_flops_contribute_validated_state_bits(self):
+        module = {
+            'ports': {'clk': {'direction': 'input', 'bits': [2]}},
+            'cells': {'good': {'type': '$dff', 'parameters': {'CLK_POLARITY': '1'},
+                               'connections': {'CLK': [2], 'D': [3, 4], 'Q': [3, 4]}}},
+            'netnames': {'q': {'bits': [3, 4], 'attributes': {'init': '00'}}},
+        }
+        self.assertEqual(_check_netlist(module, 'clk'), {3, 4})
+        for kind in ('$dffe', '$sdff', '$sdffe', '$sdffce', '$ff'):
+            module['cells']['uninitialized'] = {
+                'type': kind, 'parameters': {'CLK_POLARITY': '1'},
+                'connections': {'CLK': [2], 'D': [5], 'Q': [5]},
+            }
+            with self.subTest(kind=kind):
+                with self.assertRaises(Unsupported) as failure:
+                    _check_netlist(module, 'clk')
+                self.assertIn(f'unsupported cell {kind} ', str(failure.exception))
 
 
 class FrontendTests(unittest.TestCase):

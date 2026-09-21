@@ -228,8 +228,7 @@ def prove_rtl(source, top, contract, out_dir, *, nondet=(), parameters=None,
         if set(modules) != {top}:
             raise Unsupported("formal proof requires one flattened design")
         module = modules[top]
-        _check_netlist(module, contract["clock"]["name"])
-        states = {bit for c in module["cells"].values() if c["type"] == "$dff" for bit in c["connections"]["Q"]}
+        states = _check_netlist(module, contract["clock"]["name"])
         initial = {bit for net in module["netnames"].values() if "init" in net.get("attributes", {}) for bit in net["bits"]}
         if not states <= initial:
             raise Unsupported("every design state requires explicit initialization")

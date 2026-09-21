@@ -103,6 +103,20 @@ class FormalTests(unittest.TestCase):
         result = prove_rtl(ROOT / "fixtures/rtl/p5_concrete.v", "p5_concrete", wrong, self.out / "clock")
         self.assertEqual(result["status"], "UNSUPPORTED", result)
 
+    def test_missing_initial_state_is_rejected_before_property_preparation(self):
+        source = self.out / "partial_init.v"
+        source.write_text("module partial_init(input clk, output reg q=0); reg r; "
+                          "always @(posedge clk) begin q<=r; r<=~r; end endmodule")
+        contract = copy.deepcopy(self.contract)
+        contract["inputs"] = {}
+        contract["observations"] = {"q": 1}
+        contract["property"] = {"id": "initialization-boundary", "step": {"bool": True}}
+        result = prove_rtl(source, "partial_init", contract, self.out / "partial-init")
+        self.assertEqual(result["status"], "UNSUPPORTED", result)
+        self.assertEqual(result["reason"], "every design state requires explicit initialization")
+        self.assertNotIn("prepare", result["stages"])
+        self.assertNotIn("base", result["stages"])
+
     def test_attempt_reuse_preserves_evidence(self):
         previous = (self.out / "p5_concrete/formal.json").read_bytes()
         result = prove_rtl(ROOT / "fixtures/rtl/p5_concrete.v", "p5_concrete", self.contract, self.out / "p5_concrete")

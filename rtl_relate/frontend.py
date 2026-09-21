@@ -193,6 +193,7 @@ def parse_btor2(text, *, name, source_sha256, nondet=(), clock="clk", signed=Non
 
 
 def _check_netlist(module, clock):
+    """Validate the supported RTL subset and return every accepted state bit."""
     ports, cells = module["ports"], module.get("cells", {})
     if clock not in ports or ports[clock]["direction"] != "input" or len(ports[clock]["bits"]) != 1:
         raise Unsupported("clock must be a single input port")
@@ -224,6 +225,7 @@ def _check_netlist(module, clock):
         init = net.get("attributes", {}).get("init")
         if init is not None and set(init) - {"0", "1"}:
             raise Unsupported("partially/uninitialized RTL state")
+    return set(state_bits)
 
 
 def export_rtl(source, top, out_dir, *, nondet=(), clock="clk", executable=None, timeout=60,
