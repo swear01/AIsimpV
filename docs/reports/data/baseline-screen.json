@@ -1,0 +1,2247 @@
+{
+  "question": "Find approximately ten-second direct proofs before designing abstractions",
+  "unique_tasks": 17,
+  "attempts": 26,
+  "confirmation": {
+    "sfifo_sync32_d64": {
+      "seconds": [
+        5.709573973086663,
+        5.7939750800142065,
+        5.772426821989939
+      ],
+      "median_seconds": 5.772426821989939,
+      "range_seconds": [
+        5.709573973086663,
+        5.7939750800142065
+      ],
+      "solver_median_seconds": 5.6209416158962995,
+      "base_median_seconds": 0.17220711696427315,
+      "induction_median_seconds": 5.439471469027922,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "assertions": 28,
+      "assumptions": 0,
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 223,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 64,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 2016
+        }
+      ]
+    },
+    "sfifo_sync32_d256": {
+      "seconds": [
+        7.241132292896509,
+        7.3125836360268295,
+        7.360066793044098
+      ],
+      "median_seconds": 7.3125836360268295,
+      "range_seconds": [
+        7.241132292896509,
+        7.360066793044098
+      ],
+      "solver_median_seconds": 7.15137680596672,
+      "base_median_seconds": 0.22594726202078164,
+      "induction_median_seconds": 6.925429543945938,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "assertions": 28,
+      "assumptions": 0,
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 231,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 256,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 8160
+        }
+      ]
+    }
+  },
+  "records": [
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d64",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 5.709573973086663,
+      "solver_seconds": 5.565665315953083,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 223,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.13932015898171812,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.1609311590436846,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 5.404734156909399,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 64,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 2016
+        }
+      ]
+    },
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d256",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 7.241132292896509,
+      "solver_seconds": 7.092678731074557,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 231,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.1444576559588313,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.23032871796749532,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 6.862350013107061,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 256,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 8160
+        }
+      ]
+    },
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d256",
+      "repeat": 1,
+      "status": "SAFE",
+      "seconds": 7.3125836360268295,
+      "solver_seconds": 7.15137680596672,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 231,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.15393920603673905,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.22594726202078164,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 6.925429543945938,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 256,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 8160
+        }
+      ]
+    },
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d64",
+      "repeat": 1,
+      "status": "SAFE",
+      "seconds": 5.7939750800142065,
+      "solver_seconds": 5.631103259976953,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 223,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.15726081700995564,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.1916317909490317,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 5.439471469027922,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 64,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 2016
+        }
+      ]
+    },
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d64",
+      "repeat": 2,
+      "status": "SAFE",
+      "seconds": 5.772426821989939,
+      "solver_seconds": 5.6209416158962995,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 223,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.1473315330222249,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.17220711696427315,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 5.448734498932026,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 64,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 2016
+        }
+      ]
+    },
+    {
+      "run": "native-confirm-06",
+      "task": "sfifo_sync32_d256",
+      "repeat": 2,
+      "status": "SAFE",
+      "seconds": 7.360066793044098,
+      "solver_seconds": 7.20915523392614,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 231,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.14688725001178682,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.21557597001083195,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 6.993579263915308,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 256,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 8160
+        }
+      ]
+    },
+    {
+      "run": "native-screen-01",
+      "task": "s1269b",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 0.9448634230066091,
+      "solver_seconds": 0.8157049750443548,
+      "depth": 20,
+      "reason": null,
+      "source_sha256": "225d80f185128ed8d85977e5c72fd568d9411ab002d28541e290ff5437a095d2",
+      "model_sha256": "eef1f7ac4a561b31897c4cc88d2d25ba052e2891733996730ac5bdf3a6a1945e",
+      "preprocessed": {
+        "cells": 185,
+        "state_bits": 37,
+        "cell_types": {
+          "$and": 54,
+          "$assert": 1,
+          "$dff": 14,
+          "$logic_not": 1,
+          "$logic_or": 6,
+          "$mux": 22,
+          "$not": 37,
+          "$or": 48,
+          "$xor": 2
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.12531287304591388,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.736770706018433,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.07893426902592182,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-01",
+      "task": "rcu",
+      "repeat": 0,
+      "status": "UNKNOWN",
+      "seconds": 45.0182785600191,
+      "solver_seconds": 44.824792693019845,
+      "depth": 20,
+      "reason": "base exceeded shared budget",
+      "source_sha256": "deb92d2da82990d6789265300522aea39d841df4179c88c282488847d7e3491f",
+      "model_sha256": "17a3feba27aa88ac616d2da2ce26ababd109d4c67b960be1527804dbe4c5521e",
+      "preprocessed": {
+        "cells": 351,
+        "state_bits": 40,
+        "cell_types": {
+          "$add": 2,
+          "$assert": 1,
+          "$dff": 21,
+          "$eq": 58,
+          "$ge": 1,
+          "$logic_and": 1,
+          "$logic_not": 10,
+          "$logic_or": 1,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 114,
+          "$not": 7,
+          "$pmux": 80,
+          "$reduce_or": 52
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.18879099003970623,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 44.824792693019845,
+          "returncode": -9,
+          "timeout": true
+        }
+      },
+      "memories": [
+        {
+          "width": 3,
+          "entries": 4,
+          "initial_known_bits": 12,
+          "initial_unknown_bits": 0
+        }
+      ]
+    },
+    {
+      "run": "native-screen-01",
+      "task": "buffer_alloc",
+      "repeat": 0,
+      "status": "UNKNOWN",
+      "seconds": 45.01445047010202,
+      "solver_seconds": 44.86435413605068,
+      "depth": 20,
+      "reason": "base exceeded shared budget",
+      "source_sha256": "9afb87996fceecfa77c237160414bb751126ec2788d3c92df6283c5f06ab8ffc",
+      "model_sha256": "ea2dcff94ddbfa1a27f83926dfe39a4b0acd03600be061c97cf656da772c0c68",
+      "preprocessed": {
+        "cells": 36,
+        "state_bits": 11,
+        "cell_types": {
+          "$add": 1,
+          "$and": 4,
+          "$assert": 1,
+          "$dff": 4,
+          "$eq": 1,
+          "$le": 1,
+          "$mem_v2": 1,
+          "$mux": 20,
+          "$not": 2,
+          "$sub": 1
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.14625328604597598,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 44.86435413605068,
+          "returncode": -9,
+          "timeout": true
+        }
+      },
+      "memories": [
+        {
+          "width": 1,
+          "entries": 16,
+          "initial_known_bits": 16,
+          "initial_unknown_bits": 0
+        }
+      ]
+    },
+    {
+      "run": "native-screen-01",
+      "task": "branch_predictor",
+      "repeat": 0,
+      "status": "CEX",
+      "seconds": 0.3062631479697302,
+      "solver_seconds": 0.09205551201011986,
+      "depth": 20,
+      "reason": "base failed",
+      "source_sha256": "46097d146dbd24a65b8892ed28d4953ac560d84ce7104acd72f9fa9986e30229",
+      "model_sha256": "cff83523f263d4180a3b658fec7e93d9cf56bbba275328a84ac370e41af6730a",
+      "preprocessed": {
+        "cells": 309,
+        "state_bits": 37,
+        "cell_types": {
+          "$add": 4,
+          "$assert": 1,
+          "$dff": 18,
+          "$eq": 2,
+          "$ge": 16,
+          "$gt": 4,
+          "$logic_and": 31,
+          "$logic_not": 1,
+          "$logic_or": 33,
+          "$lt": 32,
+          "$mem_v2": 4,
+          "$mux": 134,
+          "$ne": 4,
+          "$not": 1,
+          "$reduce_bool": 20,
+          "$sub": 4
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 4,
+      "stages": {
+        "prepare": {
+          "seconds": 0.2100934840273112,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.09205551201011986,
+          "returncode": 1,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 2,
+          "entries": 4,
+          "initial_known_bits": 0,
+          "initial_unknown_bits": 8
+        },
+        {
+          "width": 2,
+          "entries": 4,
+          "initial_known_bits": 0,
+          "initial_unknown_bits": 8
+        },
+        {
+          "width": 2,
+          "entries": 4,
+          "initial_known_bits": 0,
+          "initial_unknown_bits": 8
+        },
+        {
+          "width": 2,
+          "entries": 4,
+          "initial_known_bits": 0,
+          "initial_unknown_bits": 8
+        }
+      ]
+    },
+    {
+      "run": "native-screen-01",
+      "task": "usb_phy",
+      "repeat": 0,
+      "status": "BOUNDED",
+      "seconds": 0.8582212979672477,
+      "solver_seconds": 0.6798994289711118,
+      "depth": 20,
+      "reason": "induction failed",
+      "source_sha256": "2d45dafa027818eaa69ebd9714bd1b3cd79732b322c5a75daf8c0882558956a5",
+      "model_sha256": "c124cf6c271b634436b955adf828c39ffcf75bec686aabdf08983c8345ffa8f2",
+      "preprocessed": {
+        "cells": 267,
+        "state_bits": 88,
+        "cell_types": {
+          "$add": 5,
+          "$and": 29,
+          "$assert": 1,
+          "$dff": 57,
+          "$eq": 26,
+          "$logic_not": 19,
+          "$mux": 105,
+          "$ne": 2,
+          "$not": 3,
+          "$or": 7,
+          "$pmux": 7,
+          "$reduce_bool": 1,
+          "$reduce_or": 2,
+          "$scopeinfo": 2,
+          "$xor": 1
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.17395243607461452,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.29231525096111,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.3875841780100018,
+          "returncode": 1,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-01",
+      "task": "sdlx",
+      "repeat": 0,
+      "status": "BOUNDED",
+      "seconds": 1.2501231530914083,
+      "solver_seconds": 1.0872059368994087,
+      "depth": 20,
+      "reason": "induction failed",
+      "source_sha256": "5637d8d9e2fb56e7d5e711d60a563d0dea8fc849982c48006f5b76291d754722",
+      "model_sha256": "73cd4e8821865e960d12d17a587f6e3cb62e2ea31b35fb0a7631cdd1a1b1c873",
+      "preprocessed": {
+        "cells": 196,
+        "state_bits": 31,
+        "cell_types": {
+          "$and": 12,
+          "$assert": 1,
+          "$dff": 23,
+          "$eq": 12,
+          "$logic_not": 4,
+          "$mux": 76,
+          "$not": 10,
+          "$or": 1,
+          "$pmux": 36,
+          "$reduce_or": 21
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.15735567000228912,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.9246383199933916,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.16256761690601707,
+          "returncode": 1,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-02",
+      "task": "vsa16",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 0.4408816749928519,
+      "solver_seconds": 0.298168838955462,
+      "depth": 20,
+      "reason": null,
+      "source_sha256": "a03f8c6f4d2cf1b54956c019ec916ee8138f3239a103017e365a6f2e81eacdb2",
+      "model_sha256": "76f391adbe92030a6db43932941110bdc3e142749c5ebd91075613bbe8e261a2",
+      "preprocessed": {
+        "cells": 119,
+        "state_bits": 108,
+        "cell_types": {
+          "$add": 5,
+          "$and": 2,
+          "$assert": 4,
+          "$dff": 9,
+          "$eq": 14,
+          "$logic_and": 3,
+          "$logic_not": 6,
+          "$logic_or": 3,
+          "$mem_v2": 1,
+          "$mux": 63,
+          "$not": 3,
+          "$or": 1,
+          "$reduce_bool": 2,
+          "$sub": 2,
+          "$xor": 1
+        }
+      },
+      "assertions": 4,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.1398597980150953,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.20890103501733392,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.08926780393812805,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 16,
+          "entries": 4,
+          "initial_known_bits": 64,
+          "initial_unknown_bits": 0
+        }
+      ]
+    },
+    {
+      "run": "native-screen-02",
+      "task": "huffman_decoder",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 0.43421512795612216,
+      "solver_seconds": 0.2963986770482734,
+      "depth": 20,
+      "reason": null,
+      "source_sha256": "754b7ada0a17bbc083e7bb142ecc3cff0db8abf79e15e6102c726de6ea3b18bd",
+      "model_sha256": "a90cd4db739762f281054dbd0a41a081383b916d120d8d5ae28efd9d995dbd81",
+      "preprocessed": {
+        "cells": 124,
+        "state_bits": 20,
+        "cell_types": {
+          "$add": 2,
+          "$assert": 1,
+          "$dff": 2,
+          "$eq": 56,
+          "$logic_not": 1,
+          "$lt": 1,
+          "$mux": 58,
+          "$reduce_bool": 1,
+          "$scopeinfo": 2
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.1342296110233292,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.19876531197223812,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.09763336507603526,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-02",
+      "task": "heap",
+      "repeat": 0,
+      "status": "BOUNDED",
+      "seconds": 5.4792934079887345,
+      "solver_seconds": 5.3240168780321255,
+      "depth": 20,
+      "reason": "induction failed",
+      "source_sha256": "dfb71f8c107f92cfe908868405c8371f50bd17b80a372f2cd3bdafd79e8a5bc8",
+      "model_sha256": "7d08e36e0c384789730b496446f444464c4a57ad6fabc2244c182c5876800e80",
+      "preprocessed": {
+        "cells": 149,
+        "state_bits": 24,
+        "cell_types": {
+          "$add": 3,
+          "$assert": 1,
+          "$dff": 11,
+          "$eq": 23,
+          "$ge": 2,
+          "$le": 2,
+          "$logic_and": 4,
+          "$logic_not": 10,
+          "$logic_or": 3,
+          "$lt": 5,
+          "$mux": 33,
+          "$not": 2,
+          "$pmux": 34,
+          "$reduce_or": 14,
+          "$sub": 2
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.15219068701844662,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 5.016161496983841,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.30785538104828447,
+          "returncode": 1,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-02",
+      "task": "am2910",
+      "repeat": 0,
+      "status": "BOUNDED",
+      "seconds": 2.4290058510378003,
+      "solver_seconds": 2.298442085040733,
+      "depth": 20,
+      "reason": "induction failed",
+      "source_sha256": "fffee1129b7cb27854350ac01d7b80bad63e2fc9b69f14e2c9608ae21cfca83a",
+      "model_sha256": "add9ebfe86bc2be2a202d12dc7e0cf1f7a39ab9c5e308e7f9989e4f37d01c684",
+      "preprocessed": {
+        "cells": 107,
+        "state_bits": 27,
+        "cell_types": {
+          "$add": 2,
+          "$and": 21,
+          "$assert": 1,
+          "$dff": 3,
+          "$eq": 16,
+          "$logic_and": 2,
+          "$logic_not": 2,
+          "$logic_or": 1,
+          "$mem_v2": 1,
+          "$mux": 14,
+          "$ne": 3,
+          "$not": 4,
+          "$or": 33,
+          "$reduce_bool": 1,
+          "$reduce_or": 1,
+          "$sub": 2
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.12736622104421258,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 1.9464987399987876,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.3519433450419456,
+          "returncode": 1,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 12,
+          "entries": 6,
+          "initial_known_bits": 72,
+          "initial_unknown_bits": 0
+        }
+      ]
+    },
+    {
+      "run": "native-screen-02",
+      "task": "instruction_buffer",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 0.3229331410257146,
+      "solver_seconds": 0.18136859696824104,
+      "depth": 20,
+      "reason": null,
+      "source_sha256": "e27e760fdc1c5d050f6160f7918528993c3d37b8b12f3fbf5372f2ae19359094",
+      "model_sha256": "01ce77d6e14208e3dafc5a47bdd07b1c70a59b14da261565348709816ecc98dc",
+      "preprocessed": {
+        "cells": 107,
+        "state_bits": 6,
+        "cell_types": {
+          "$and": 48,
+          "$assert": 1,
+          "$dff": 2,
+          "$logic_and": 2,
+          "$logic_not": 3,
+          "$logic_or": 2,
+          "$not": 22,
+          "$or": 27
+        }
+      },
+      "assertions": 1,
+      "assumptions": 0,
+      "constant_assertions": 0,
+      "memory_cells": 0,
+      "stages": {
+        "prepare": {
+          "seconds": 0.13831888895947486,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.09284285292960703,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 0.088525744038634,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": []
+    },
+    {
+      "run": "native-screen-03-fifo",
+      "task": "sfifo_sync8",
+      "repeat": 0,
+      "status": "ERROR",
+      "seconds": 0.13734991394449025,
+      "solver_seconds": 0,
+      "depth": 4,
+      "reason": "ValueError: native RTL preparation failed; see logs",
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": null,
+      "preprocessed": null,
+      "assertions": null,
+      "assumptions": null,
+      "constant_assertions": null,
+      "memory_cells": null,
+      "stages": {
+        "prepare": {
+          "seconds": 0.13548542198259383,
+          "returncode": 1,
+          "timeout": false
+        }
+      }
+    },
+    {
+      "run": "native-screen-03-fifo",
+      "task": "sfifo_async8",
+      "repeat": 0,
+      "status": "ERROR",
+      "seconds": 0.13624890090432018,
+      "solver_seconds": 0,
+      "depth": 4,
+      "reason": "ValueError: native RTL preparation failed; see logs",
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": null,
+      "preprocessed": null,
+      "assertions": null,
+      "assumptions": null,
+      "constant_assertions": null,
+      "memory_cells": null,
+      "stages": {
+        "prepare": {
+          "seconds": 0.13452712004072964,
+          "returncode": 1,
+          "timeout": false
+        }
+      }
+    },
+    {
+      "run": "native-screen-03-fifo",
+      "task": "sfifo_sync32",
+      "repeat": 0,
+      "status": "ERROR",
+      "seconds": 0.22830985696054995,
+      "solver_seconds": 0,
+      "depth": 4,
+      "reason": "ValueError: native RTL preparation failed; see logs",
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": null,
+      "preprocessed": null,
+      "assertions": null,
+      "assumptions": null,
+      "constant_assertions": null,
+      "memory_cells": null,
+      "stages": {
+        "prepare": {
+          "seconds": 0.21364282898139209,
+          "returncode": 1,
+          "timeout": false
+        }
+      }
+    },
+    {
+      "run": "native-screen-04-fifo",
+      "task": "sfifo_sync8",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 1.8885903300251812,
+      "solver_seconds": 1.7467526519903913,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "e79039304239c7c6cd9d45612406b233ffd5188ec7b6e471cd2c394b8ab391e2",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 119,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.13787739793770015,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.1420946940779686,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 1.6046579579124227,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 8,
+          "entries": 16,
+          "initial_known_bits": 8,
+          "initial_unknown_bits": 120
+        }
+      ]
+    },
+    {
+      "run": "native-screen-04-fifo",
+      "task": "sfifo_async8",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 1.820683086058125,
+      "solver_seconds": 1.675324465148151,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "03709c9453db79ee38f654914cceaff47c32bc62d5c5fca175fa434350b8ea09",
+      "preprocessed": {
+        "cells": 235,
+        "state_bits": 96,
+        "cell_types": {
+          "$add": 4,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 70,
+          "$eq": 19,
+          "$le": 2,
+          "$logic_and": 22,
+          "$logic_not": 14,
+          "$logic_or": 4,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 55,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 3,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.1412778670201078,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.11891798605211079,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 1.5564064790960401,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 8,
+          "entries": 16,
+          "initial_known_bits": 0,
+          "initial_unknown_bits": 128
+        }
+      ]
+    },
+    {
+      "run": "native-screen-04-fifo",
+      "task": "sfifo_sync32",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 1.8544446050655097,
+      "solver_seconds": 1.6954706959659234,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "91c293710d1c16bb958bf5cf6045f31bfd8926bbc651d5dbefd3935363670164",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 215,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.15443559095729142,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.17420683696400374,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 1.5212638590019196,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 16,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 480
+        }
+      ]
+    },
+    {
+      "run": "native-screen-05-capacity",
+      "task": "sfifo_sync32_d32",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 4.098009510082193,
+      "solver_seconds": 3.848358744988218,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "5919f4a386525bc1612342dc66dc8ca0221f7b80537e53c15ad233bb6411f149",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 219,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.22285072808153927,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.24998119298834354,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 3.5983775519998744,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 32,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 992
+        }
+      ]
+    },
+    {
+      "run": "native-screen-05-capacity",
+      "task": "sfifo_sync32_d64",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 6.240466561052017,
+      "solver_seconds": 5.962162290001288,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 223,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.2567821249831468,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.22627056296914816,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 5.73589172703214,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 64,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 2016
+        }
+      ]
+    },
+    {
+      "run": "native-screen-05-capacity",
+      "task": "sfifo_sync32_d256",
+      "repeat": 0,
+      "status": "SAFE",
+      "seconds": 7.806494852062315,
+      "solver_seconds": 7.548402715008706,
+      "depth": 4,
+      "reason": null,
+      "source_sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "preprocessed": {
+        "cells": 266,
+        "state_bits": 231,
+        "cell_types": {
+          "$add": 5,
+          "$anyconst": 1,
+          "$assert": 28,
+          "$cover": 5,
+          "$dff": 75,
+          "$eq": 20,
+          "$gt": 2,
+          "$le": 2,
+          "$logic_and": 24,
+          "$logic_not": 15,
+          "$logic_or": 7,
+          "$lt": 2,
+          "$mem_v2": 1,
+          "$mux": 71,
+          "$ne": 1,
+          "$pmux": 2,
+          "$reduce_bool": 1,
+          "$sub": 4
+        }
+      },
+      "assertions": 28,
+      "assumptions": 0,
+      "constant_assertions": 2,
+      "memory_cells": 1,
+      "stages": {
+        "prepare": {
+          "seconds": 0.23952175804879516,
+          "returncode": 0,
+          "timeout": false
+        },
+        "base": {
+          "seconds": 0.28870214498601854,
+          "returncode": 0,
+          "timeout": false
+        },
+        "induction": {
+          "seconds": 7.259700570022687,
+          "returncode": 0,
+          "timeout": false
+        }
+      },
+      "memories": [
+        {
+          "width": 32,
+          "entries": 256,
+          "initial_known_bits": 32,
+          "initial_unknown_bits": 8160
+        }
+      ]
+    }
+  ],
+  "runs": {
+    "native-confirm-06": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+        "catalog_sha256": "210f7ae214c59bde616b7fddc8c1e2e8fc4585627e49442bab84a910f4a5bd9a",
+        "tasks": [
+          "sfifo_sync32_d64",
+          "sfifo_sync32_d256"
+        ],
+        "depth": 4,
+        "timeout": 45,
+        "repeats": 3,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "sfifo_sync32_d64": {
+            "statuses": [
+              "SAFE",
+              "SAFE",
+              "SAFE"
+            ],
+            "seconds": [
+              5.709573973086663,
+              5.7939750800142065,
+              5.772426821989939
+            ],
+            "safe_median_seconds": 5.772426821989939
+          },
+          "sfifo_sync32_d256": {
+            "statuses": [
+              "SAFE",
+              "SAFE",
+              "SAFE"
+            ],
+            "seconds": [
+              7.241132292896509,
+              7.3125836360268295,
+              7.360066793044098
+            ],
+            "safe_median_seconds": 7.3125836360268295
+          }
+        },
+        "suite_seconds": 39.671800847980194
+      }
+    },
+    "native-screen-01": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "ac1eff176da93d113fe1315f23e53a83dbcfd6aacf88a9e52e643064de0e9d3d",
+        "catalog_sha256": "dfd418c8c4f10313d82174a3fa8a6e6f5fc4a01257da7e9be846a12cb0e41e39",
+        "tasks": [
+          "s1269b",
+          "rcu",
+          "buffer_alloc",
+          "branch_predictor",
+          "usb_phy",
+          "sdlx"
+        ],
+        "depth": 20,
+        "timeout": 45,
+        "repeats": 1,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "s1269b": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              0.9448634230066091
+            ],
+            "safe_median_seconds": 0.9448634230066091
+          },
+          "rcu": {
+            "statuses": [
+              "UNKNOWN"
+            ],
+            "seconds": [
+              45.0182785600191
+            ]
+          },
+          "buffer_alloc": {
+            "statuses": [
+              "UNKNOWN"
+            ],
+            "seconds": [
+              45.01445047010202
+            ]
+          },
+          "branch_predictor": {
+            "statuses": [
+              "CEX"
+            ],
+            "seconds": [
+              0.3062631479697302
+            ]
+          },
+          "usb_phy": {
+            "statuses": [
+              "BOUNDED"
+            ],
+            "seconds": [
+              0.8582212979672477
+            ]
+          },
+          "sdlx": {
+            "statuses": [
+              "BOUNDED"
+            ],
+            "seconds": [
+              1.2501231530914083
+            ]
+          }
+        },
+        "suite_seconds": 94.683292369009
+      }
+    },
+    "native-screen-02": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "ac1eff176da93d113fe1315f23e53a83dbcfd6aacf88a9e52e643064de0e9d3d",
+        "catalog_sha256": "000f9f0f5486aebcba94716f56b49252524539f3ba12770d71193dc1d39f43b1",
+        "tasks": [
+          "vsa16",
+          "huffman_decoder",
+          "heap",
+          "am2910",
+          "instruction_buffer"
+        ],
+        "depth": 20,
+        "timeout": 45,
+        "repeats": 1,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "vsa16": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              0.4408816749928519
+            ],
+            "safe_median_seconds": 0.4408816749928519
+          },
+          "huffman_decoder": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              0.43421512795612216
+            ],
+            "safe_median_seconds": 0.43421512795612216
+          },
+          "heap": {
+            "statuses": [
+              "BOUNDED"
+            ],
+            "seconds": [
+              5.4792934079887345
+            ]
+          },
+          "am2910": {
+            "statuses": [
+              "BOUNDED"
+            ],
+            "seconds": [
+              2.4290058510378003
+            ]
+          },
+          "instruction_buffer": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              0.3229331410257146
+            ],
+            "safe_median_seconds": 0.3229331410257146
+          }
+        },
+        "suite_seconds": 10.285022755037062
+      }
+    },
+    "native-screen-03-fifo": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "354de6413decbf8e7d45b2bee90f1e39fbb100ca3e64ef8f1db28362ff220c61",
+        "catalog_sha256": "db2ba05a78e48ae042ae038fb88571a382e945b81c0ad067cce722c5779be882",
+        "tasks": [
+          "sfifo_sync8",
+          "sfifo_async8",
+          "sfifo_sync32"
+        ],
+        "depth": 4,
+        "timeout": 45,
+        "repeats": 1,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "sfifo_sync8": {
+            "statuses": [
+              "ERROR"
+            ],
+            "seconds": [
+              0.13734991394449025
+            ]
+          },
+          "sfifo_async8": {
+            "statuses": [
+              "ERROR"
+            ],
+            "seconds": [
+              0.13624890090432018
+            ]
+          },
+          "sfifo_sync32": {
+            "statuses": [
+              "ERROR"
+            ],
+            "seconds": [
+              0.22830985696054995
+            ]
+          }
+        },
+        "suite_seconds": 1.3905029209563509
+      }
+    },
+    "native-screen-04-fifo": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+        "catalog_sha256": "db2ba05a78e48ae042ae038fb88571a382e945b81c0ad067cce722c5779be882",
+        "tasks": [
+          "sfifo_sync8",
+          "sfifo_async8",
+          "sfifo_sync32"
+        ],
+        "depth": 4,
+        "timeout": 45,
+        "repeats": 1,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "sfifo_sync8": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              1.8885903300251812
+            ],
+            "safe_median_seconds": 1.8885903300251812
+          },
+          "sfifo_async8": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              1.820683086058125
+            ],
+            "safe_median_seconds": 1.820683086058125
+          },
+          "sfifo_sync32": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              1.8544446050655097
+            ],
+            "safe_median_seconds": 1.8544446050655097
+          }
+        },
+        "suite_seconds": 6.122099364059977
+      }
+    },
+    "native-screen-05-capacity": {
+      "metadata": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+        "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+        "cpu_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "script_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+        "catalog_sha256": "210f7ae214c59bde616b7fddc8c1e2e8fc4585627e49442bab84a910f4a5bd9a",
+        "tasks": [
+          "sfifo_sync32_d32",
+          "sfifo_sync32_d64",
+          "sfifo_sync32_d256"
+        ],
+        "depth": 4,
+        "timeout": 45,
+        "repeats": 1,
+        "tools": {
+          "yosys": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys",
+            "sha256": "8e1c2cad9c4d68179583db01df5ef3c86a915eef0122f57c8515256142ddd406",
+            "version": "Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)"
+          },
+          "z3": {
+            "path": "/home/swear01/.local/bin/z3",
+            "sha256": "b6ae8336dd1be42b8c2a1641cb263f92fbe48aa8367524a227a8b29f3091eb9e",
+            "version": "Z3 version 4.15.4 - 64 bit"
+          },
+          "smtbmc": {
+            "path": "/home/swear01/AIsimpV/rtl-relate/.tools/yosys-venv/bin/yowasp-yosys-smtbmc",
+            "sha256": "29ca8780cbc8658e4ed03434d550ace668efda5ccf257ca028b1fdfac8f2adc4"
+          },
+          "distribution_files": {
+            "lib/python3.14/site-packages/yowasp_yosys/yosys.wasm": "77fe957bef892d75f74a0ce2165d7b328b6cda462a0e0051509df0c5a55ece49",
+            "lib/python3.14/site-packages/yowasp_yosys/smtbmc.py": "5509a929b1cee195e0fe3eb1c740632b3e734c0628565e7968e4df69cdff199f",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+            "lib/python3.14/site-packages/yowasp_yosys/share/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+          }
+        }
+      },
+      "summary": {
+        "results": {
+          "sfifo_sync32_d32": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              4.098009510082193
+            ],
+            "safe_median_seconds": 4.098009510082193
+          },
+          "sfifo_sync32_d64": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              6.240466561052017
+            ],
+            "safe_median_seconds": 6.240466561052017
+          },
+          "sfifo_sync32_d256": {
+            "statuses": [
+              "SAFE"
+            ],
+            "seconds": [
+              7.806494852062315
+            ],
+            "safe_median_seconds": 7.806494852062315
+          }
+        },
+        "suite_seconds": 19.19131337897852
+      }
+    }
+  },
+  "total_case_seconds": 165.89888546837028,
+  "total_solver_seconds": 161.50980028393678,
+  "total_suite_seconds": 171.3440316360211,
+  "new_candidate_model_calls": 0,
+  "certificate_checks": "NOT_RUN",
+  "abstract_proofs": "NOT_RUN"
+}

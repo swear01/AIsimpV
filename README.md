@@ -62,3 +62,5 @@ The trusted computing base includes Yosys, the adapter, typed IR, checker, finit
 Start with an unblocked issue and state which issue you are handling before changing shared files. Each issue lists dependencies, owned paths, and completion evidence. Changes to the common checker/schema/runner need coordination with dependent case work. Keep original RTL, contracts, gold certificates, and checker code outside a generation agent's writable candidate workspace.
 
 An issue is complete only when its acceptance checks have actually run and its evidence links are recorded. Preserve failed attempts and distinguish `NOT_RUN`, `UNSUPPORTED`, `UNKNOWN`, certificate rejection, abstract counterexamples, and replay-confirmed concrete bugs. Timing comparisons use the same frozen contract and normal preprocessing on both sides.
+
+Baseline qualification follow-up: [two public FIFO instances with repeated 5.77 / 7.31 second direct proofs](docs/reports/baseline_screen.md). Certificate integration and abstraction speedup for these instances remain untested.

@@ -1,0 +1,208 @@
+{
+  "repository": "https://github.com/aman-goel/avr",
+  "revision": "9a76dc632066c4416cebccda3a4974a4f8adede8",
+  "tasks": {
+    "s1269b": {
+      "top": "s1269",
+      "path": "tests/opensource/vis_QF_BV_s1269b_p1/s1269b_p1_mod.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/vis_QF_BV_s1269b_p1/s1269b_p1_mod.v",
+      "git_blob": "2b4d90b72ea0f01f43b27e3207883c1a5ff0bf0b",
+      "sha256": "225d80f185128ed8d85977e5c72fd568d9411ab002d28541e290ff5437a095d2",
+      "bytes": 6311
+    },
+    "rcu": {
+      "top": "main",
+      "path": "tests/opensource/h_RCU/main.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/h_RCU/main.v",
+      "git_blob": "03e54d879b04d2c3729369c1bcfd836ec459d059",
+      "sha256": "deb92d2da82990d6789265300522aea39d841df4179c88c282488847d7e3491f",
+      "bytes": 3903
+    },
+    "buffer_alloc": {
+      "top": "main",
+      "path": "tests/opensource/vis_arrays_bufferAlloc/bufferAlloc.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/vis_arrays_bufferAlloc/bufferAlloc.v",
+      "git_blob": "bd00e11c8068ad22d7decbc98a9e882541550c9e",
+      "sha256": "9afb87996fceecfa77c237160414bb751126ec2788d3c92df6283c5f06ab8ffc",
+      "bytes": 2486
+    },
+    "branch_predictor": {
+      "top": "main",
+      "path": "tests/opensource/vis_arrays_bpbs_p1/bpbs_p1.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/vis_arrays_bpbs_p1/bpbs_p1.v",
+      "git_blob": "7bcee85089d8eb115441a4e1388d68cf1fdf9b8d",
+      "sha256": "46097d146dbd24a65b8892ed28d4953ac560d84ce7104acd72f9fa9986e30229",
+      "bytes": 14206
+    },
+    "usb_phy": {
+      "top": "main",
+      "path": "tests/opensource/usb_phy/usb_phy_1.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/usb_phy/usb_phy_1.v",
+      "git_blob": "7d51cab9796b1ea0d845c8329058068f8a825a3d",
+      "sha256": "2d45dafa027818eaa69ebd9714bd1b3cd79732b322c5a75daf8c0882558956a5",
+      "bytes": 28007
+    },
+    "sdlx": {
+      "top": "main",
+      "path": "tests/opensource/sdlx/control1.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/sdlx/control1.v",
+      "git_blob": "87d24cfb23bd2f8cfebf2498a50f1cc3bb96b547",
+      "sha256": "5637d8d9e2fb56e7d5e711d60a563d0dea8fc849982c48006f5b76291d754722",
+      "bytes": 17476
+    },
+    "vsa16": {
+      "top": "main",
+      "path": "tests/opensource/h_Vsa16/main.sv",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/h_Vsa16/main.sv",
+      "git_blob": "d8027b9b4625edce50f7297f866dcfed0f1001a4",
+      "sha256": "a03f8c6f4d2cf1b54956c019ec916ee8138f3239a103017e365a6f2e81eacdb2",
+      "bytes": 6156
+    },
+    "huffman_decoder": {
+      "top": "main",
+      "path": "tests/opensource/Huffman_dec/main.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/Huffman_dec/main.v",
+      "git_blob": "032cf934c48b42665031cdb89cb0a3e26f445dc8",
+      "sha256": "754b7ada0a17bbc083e7bb142ecc3cff0db8abf79e15e6102c726de6ea3b18bd",
+      "bytes": 8130
+    },
+    "heap": {
+      "top": "main",
+      "path": "tests/opensource/Heap/main.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/Heap/main.v",
+      "git_blob": "5a1e9240a6fb32344cd9c8d0b5068363908df2b9",
+      "sha256": "dfb71f8c107f92cfe908868405c8371f50bd17b80a372f2cd3bdafd79e8a5bc8",
+      "bytes": 4028
+    },
+    "am2910": {
+      "top": "main",
+      "path": "tests/opensource/vis_arrays_am2910_p1/am2910_p1.v",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/vis_arrays_am2910_p1/am2910_p1.v",
+      "git_blob": "2918d33e70647683ec05c12302c877a368790cf5",
+      "sha256": "fffee1129b7cb27854350ac01d7b80bad63e2fc9b69f14e2c9608ae21cfca83a",
+      "bytes": 4383
+    },
+    "instruction_buffer": {
+      "top": "main",
+      "path": "tests/opensource/h_Ibuf/main.sv",
+      "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/h_Ibuf/main.sv",
+      "git_blob": "815dbb928e78d6c39f8e50ad48359ea37e877607",
+      "sha256": "e27e760fdc1c5d050f6160f7918528993c3d37b8b12f3fbf5372f2ae19359094",
+      "bytes": 4663
+    },
+    "sfifo_sync8": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 8,
+        "LGFLEN": 4,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_async8": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 8,
+        "LGFLEN": 4,
+        "OPT_ASYNC_READ": 1,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync32": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 32,
+        "LGFLEN": 4,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync32_d32": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 32,
+        "LGFLEN": 5,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync32_d64": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 32,
+        "LGFLEN": 6,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync32_d256": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 32,
+        "LGFLEN": 8,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    }
+  }
+}

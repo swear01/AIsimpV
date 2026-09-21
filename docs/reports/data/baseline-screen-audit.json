@@ -1,0 +1,639 @@
+{
+  "status": "PASS",
+  "checks": {
+    "installed_tool_hash": 3,
+    "installed_distribution_hash": 4,
+    "driver_snapshot_binding": 6,
+    "catalog_hash": 6,
+    "tool_identity_stability": 6,
+    "record_count": 6,
+    "source_binding": 26,
+    "retained_artifact_hash": 289,
+    "saved_record_binding": 26,
+    "configuration": 26,
+    "solver_time_sum": 26,
+    "proof_time_scope": 26,
+    "solver_command": 43,
+    "safe_requires_two_proofs": 19,
+    "model_binding": 23,
+    "assertion_assumption_counts": 23,
+    "smt_assertions": 23,
+    "one_positive_clock": 23,
+    "timeout_not_safe": 2,
+    "concrete_cex": 1,
+    "bounded_not_safe": 4,
+    "summary_recomputed": 22,
+    "parameter_binding": 15,
+    "failed_prepare_no_solver": 3,
+    "fifo_original_memory": 12,
+    "fifo_configuration_memory": 12,
+    "fifo_init_not_filled": 12,
+    "fifo_assertions_and_covers": 12,
+    "confirmation_three_safe": 2,
+    "confirmation_stable_model": 2,
+    "capacity_safe": 3,
+    "stage_success_exit": 9,
+    "screen_confirmation_model_stable": 2,
+    "previous_audited_input_unchanged": 24,
+    "public_run_metadata": 6,
+    "public_run_summary": 6,
+    "public_attempt_count": 1,
+    "public_task_count": 1,
+    "public_all_records_once": 1,
+    "public_record_field": 364,
+    "public_stage_projection": 26,
+    "public_memory_projection": 23,
+    "public_failed_prepare_without_model": 3,
+    "public_confirmation_statistic": 12,
+    "public_confirmation_binding": 10,
+    "public_confirmation_memory": 2,
+    "public_total_cost": 3,
+    "public_scope_no_abstraction": 1
+  },
+  "check_count": 1200,
+  "failures": [],
+  "runs": {
+    "native-screen-01": {
+      "records": 6,
+      "outcomes": {
+        "SAFE": 1,
+        "UNKNOWN": 2,
+        "CEX": 1,
+        "BOUNDED": 2
+      },
+      "source_bindings": {
+        "s1269b": "225d80f185128ed8d85977e5c72fd568d9411ab002d28541e290ff5437a095d2",
+        "rcu": "deb92d2da82990d6789265300522aea39d841df4179c88c282488847d7e3491f",
+        "buffer_alloc": "9afb87996fceecfa77c237160414bb751126ec2788d3c92df6283c5f06ab8ffc",
+        "branch_predictor": "46097d146dbd24a65b8892ed28d4953ac560d84ce7104acd72f9fa9986e30229",
+        "usb_phy": "2d45dafa027818eaa69ebd9714bd1b3cd79732b322c5a75daf8c0882558956a5",
+        "sdlx": "5637d8d9e2fb56e7d5e711d60a563d0dea8fc849982c48006f5b76291d754722"
+      },
+      "input_sha256": {
+        "metadata.json": "7d31d36c5e4f85c69a6b85252ae5f9e4f2329ad020a7f540b16ee7177b110cd1",
+        "rows.json": "782b6b9c205d73a313407d260c2706a646cfc1bcab73aca5d33c67edef323d71",
+        "summary.json": "30cdd9ccd9c93ab2aa2522ee67b387e7f756a3043f5def5a4f373f5e04daa4f5",
+        "catalog.json": "dfd418c8c4f10313d82174a3fa8a6e6f5fc4a01257da7e9be846a12cb0e41e39"
+      },
+      "driver_sha256": "ac1eff176da93d113fe1315f23e53a83dbcfd6aacf88a9e52e643064de0e9d3d",
+      "driver_bytes_verified_at": "results/native-screen-02/screen_baselines.py",
+      "suite_seconds": 94.683292369009,
+      "sum_proof_seconds": 93.39220005215611,
+      "sum_solver_process_seconds": 92.36401268199552,
+      "clock_groups": {
+        "s1269b": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "rcu": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "buffer_alloc": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "branch_predictor": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "usb_phy": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sdlx": [
+          {
+            "signal_bits": [
+              56
+            ],
+            "positive": 1
+          }
+        ]
+      },
+      "memories": {}
+    },
+    "native-screen-02": {
+      "records": 5,
+      "outcomes": {
+        "SAFE": 3,
+        "BOUNDED": 2
+      },
+      "source_bindings": {
+        "vsa16": "a03f8c6f4d2cf1b54956c019ec916ee8138f3239a103017e365a6f2e81eacdb2",
+        "huffman_decoder": "754b7ada0a17bbc083e7bb142ecc3cff0db8abf79e15e6102c726de6ea3b18bd",
+        "heap": "dfb71f8c107f92cfe908868405c8371f50bd17b80a372f2cd3bdafd79e8a5bc8",
+        "am2910": "fffee1129b7cb27854350ac01d7b80bad63e2fc9b69f14e2c9608ae21cfca83a",
+        "instruction_buffer": "e27e760fdc1c5d050f6160f7918528993c3d37b8b12f3fbf5372f2ae19359094"
+      },
+      "input_sha256": {
+        "metadata.json": "b1486270e583e42f6a56f4e363dfc32ab17e22ae446f6580e13009e542f5f529",
+        "rows.json": "276a4642576824ec86dbad7f7d27cd69b0ad838154332cf9bdecabfcab934197",
+        "summary.json": "56aca113baf8a17a8defea7f90db22d36a09823f0aca17552fca6c50e2724b2d",
+        "catalog.json": "000f9f0f5486aebcba94716f56b49252524539f3ba12770d71193dc1d39f43b1"
+      },
+      "driver_sha256": "ac1eff176da93d113fe1315f23e53a83dbcfd6aacf88a9e52e643064de0e9d3d",
+      "driver_bytes_verified_at": "results/native-screen-02/screen_baselines.py",
+      "suite_seconds": 10.285022755037062,
+      "sum_proof_seconds": 9.106329203001224,
+      "sum_solver_process_seconds": 8.398395076044835,
+      "clock_groups": {
+        "vsa16": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "huffman_decoder": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "heap": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "am2910": [
+          {
+            "signal_bits": [
+              11
+            ],
+            "positive": 1
+          }
+        ],
+        "instruction_buffer": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ]
+      },
+      "memories": {}
+    },
+    "native-screen-03-fifo": {
+      "records": 3,
+      "outcomes": {
+        "ERROR": 3
+      },
+      "source_bindings": {
+        "sfifo_sync8": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_async8": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_sync32": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1"
+      },
+      "input_sha256": {
+        "metadata.json": "a20506e90d832baa2df4f66f9806edb5a9c0101a41b5822657dbd0c060445179",
+        "rows.json": "16082176665db212992c64ccfb92e35138b6b1f03564310de0c4b2c356ca1337",
+        "summary.json": "966f1685a68227c969f9198787ba77e42cd9c68a756227a3dbe1c788382512e2",
+        "catalog.json": "db2ba05a78e48ae042ae038fb88571a382e945b81c0ad067cce722c5779be882"
+      },
+      "driver_sha256": "354de6413decbf8e7d45b2bee90f1e39fbb100ca3e64ef8f1db28362ff220c61",
+      "driver_bytes_verified_at": "results/native-screen-03-fifo/screen_baselines.py",
+      "suite_seconds": 1.3905029209563509,
+      "sum_proof_seconds": 0.5019086718093604,
+      "sum_solver_process_seconds": 0,
+      "clock_groups": {},
+      "memories": {}
+    },
+    "native-screen-04-fifo": {
+      "records": 3,
+      "outcomes": {
+        "SAFE": 3
+      },
+      "source_bindings": {
+        "sfifo_sync8": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_async8": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_sync32": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1"
+      },
+      "input_sha256": {
+        "metadata.json": "c8d6c0d6924b9cad7deacb3da6fa51da447a42f83a3892ff3cdf69b332031fb7",
+        "rows.json": "1c902955d305c84e20212e81a7b2ba2437157758cd48fbdb9c16937beac5c044",
+        "summary.json": "3b1f415d9888b0eb769635a121f54a4d5776a29542d42ab4ff7e4ecd8e3d5159",
+        "catalog.json": "db2ba05a78e48ae042ae038fb88571a382e945b81c0ad067cce722c5779be882"
+      },
+      "driver_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+      "driver_bytes_verified_at": "scripts/screen_baselines.py",
+      "suite_seconds": 6.122099364059977,
+      "sum_proof_seconds": 5.563718021148816,
+      "sum_solver_process_seconds": 5.117547813104466,
+      "clock_groups": {
+        "sfifo_sync8": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sfifo_async8": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sfifo_sync32": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ]
+      },
+      "memories": {
+        "sfifo_sync8": {
+          "width": 8,
+          "entries": 16,
+          "bits": 128,
+          "initialized_bits": 8,
+          "unconstrained_initial_bits": 120,
+          "postprep_ff_bits": 119,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        },
+        "sfifo_async8": {
+          "width": 8,
+          "entries": 16,
+          "bits": 128,
+          "initialized_bits": 0,
+          "unconstrained_initial_bits": 128,
+          "postprep_ff_bits": 96,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 3,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        },
+        "sfifo_sync32": {
+          "width": 32,
+          "entries": 16,
+          "bits": 512,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 480,
+          "postprep_ff_bits": 215,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        }
+      }
+    },
+    "native-confirm-06": {
+      "records": 6,
+      "outcomes": {
+        "SAFE": 6
+      },
+      "source_bindings": {
+        "sfifo_sync32_d64": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_sync32_d256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1"
+      },
+      "input_sha256": {
+        "metadata.json": "01392b2a287400f1a448e6799ebd9bdf2e18b8189a85ae5690405306ce1f8e62",
+        "rows.json": "ed02597cf0069b99159c3189d8a48a2b9a62fb05297b9aa6fa5f02d0f143a012",
+        "summary.json": "145152768bc8e8919525b40f6342a0c77021d0fc190e88df0833c4cf81f7c5f7",
+        "catalog.json": "210f7ae214c59bde616b7fddc8c1e2e8fc4585627e49442bab84a910f4a5bd9a"
+      },
+      "driver_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+      "driver_bytes_verified_at": "scripts/screen_baselines.py",
+      "suite_seconds": 39.671800847980194,
+      "sum_proof_seconds": 39.189758597058244,
+      "sum_solver_process_seconds": 38.27092096279375,
+      "clock_groups": {
+        "sfifo_sync32_d64": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sfifo_sync32_d256": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ]
+      },
+      "memories": {
+        "sfifo_sync32_d64": {
+          "width": 32,
+          "entries": 64,
+          "bits": 2048,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 2016,
+          "postprep_ff_bits": 223,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        },
+        "sfifo_sync32_d256": {
+          "width": 32,
+          "entries": 256,
+          "bits": 8192,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 8160,
+          "postprep_ff_bits": 231,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        }
+      }
+    },
+    "native-screen-05-capacity": {
+      "records": 3,
+      "outcomes": {
+        "SAFE": 3
+      },
+      "source_bindings": {
+        "sfifo_sync32_d32": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_sync32_d64": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+        "sfifo_sync32_d256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1"
+      },
+      "input_sha256": {
+        "metadata.json": "66f0d6bf992e8d17dfc80014e24c8feaea8927f441a91ead2a9c2c7303dd255f",
+        "rows.json": "6c9bed647f7177ca7b8b340cd3df5a00983b002256a09709ed6faf5aa1b5d0fe",
+        "summary.json": "482b8a205ab328af31f3526719e58ba8215f4b93204f69655db0425977e5627a",
+        "catalog.json": "210f7ae214c59bde616b7fddc8c1e2e8fc4585627e49442bab84a910f4a5bd9a"
+      },
+      "driver_sha256": "b5d1de580b2f28bdbb461090b02308965babfaad4a0e27637c83b72d1f9b6411",
+      "driver_bytes_verified_at": "results/native-screen-05-capacity/screen_baselines.py",
+      "suite_seconds": 19.19131337897852,
+      "sum_proof_seconds": 18.144970923196524,
+      "sum_solver_process_seconds": 17.358923749998212,
+      "clock_groups": {
+        "sfifo_sync32_d32": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sfifo_sync32_d64": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ],
+        "sfifo_sync32_d256": [
+          {
+            "signal_bits": [
+              2
+            ],
+            "positive": 1
+          }
+        ]
+      },
+      "memories": {
+        "sfifo_sync32_d32": {
+          "width": 32,
+          "entries": 32,
+          "bits": 1024,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 992,
+          "postprep_ff_bits": 219,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        },
+        "sfifo_sync32_d64": {
+          "width": 32,
+          "entries": 64,
+          "bits": 2048,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 2016,
+          "postprep_ff_bits": 223,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        },
+        "sfifo_sync32_d256": {
+          "width": 32,
+          "entries": 256,
+          "bits": 8192,
+          "initialized_bits": 32,
+          "unconstrained_initial_bits": 8160,
+          "postprep_ff_bits": 231,
+          "includes_formal_monitors": true,
+          "assertions": 28,
+          "constant_A_assertion_cells": 2,
+          "assumptions": 0,
+          "cover_cells_present_but_not_run": 5
+        }
+      }
+    }
+  },
+  "confirmation": {
+    "sfifo_sync32_d64": {
+      "seconds": [
+        5.709573973086663,
+        5.7939750800142065,
+        5.772426821989939
+      ],
+      "solver_process_seconds": [
+        5.565665315953083,
+        5.631103259976953,
+        5.6209416158962995
+      ],
+      "base_seconds": [
+        0.1609311590436846,
+        0.1916317909490317,
+        0.17220711696427315
+      ],
+      "induction_seconds": [
+        5.404734156909399,
+        5.439471469027922,
+        5.448734498932026
+      ],
+      "statuses": [
+        "SAFE",
+        "SAFE",
+        "SAFE"
+      ],
+      "seconds_statistics": {
+        "median": 5.772426821989939,
+        "minimum": 5.709573973086663,
+        "maximum": 5.7939750800142065
+      },
+      "solver_process_seconds_statistics": {
+        "median": 5.6209416158962995,
+        "minimum": 5.565665315953083,
+        "maximum": 5.631103259976953
+      },
+      "base_seconds_statistics": {
+        "median": 0.17220711696427315,
+        "minimum": 0.1609311590436846,
+        "maximum": 0.1916317909490317
+      },
+      "induction_seconds_statistics": {
+        "median": 5.439471469027922,
+        "minimum": 5.404734156909399,
+        "maximum": 5.448734498932026
+      },
+      "model_sha256": "7e60ddde3a57e10d8dda4ce982d710c953f163f08b43ee8242647c3a3fcb7675",
+      "memory": {
+        "width": 32,
+        "entries": 64,
+        "bits": 2048,
+        "initialized_bits": 32,
+        "unconstrained_initial_bits": 2016,
+        "postprep_ff_bits": 223,
+        "includes_formal_monitors": true,
+        "assertions": 28,
+        "constant_A_assertion_cells": 2,
+        "assumptions": 0,
+        "cover_cells_present_but_not_run": 5
+      }
+    },
+    "sfifo_sync32_d256": {
+      "seconds": [
+        7.241132292896509,
+        7.3125836360268295,
+        7.360066793044098
+      ],
+      "solver_process_seconds": [
+        7.092678731074557,
+        7.15137680596672,
+        7.20915523392614
+      ],
+      "base_seconds": [
+        0.23032871796749532,
+        0.22594726202078164,
+        0.21557597001083195
+      ],
+      "induction_seconds": [
+        6.862350013107061,
+        6.925429543945938,
+        6.993579263915308
+      ],
+      "statuses": [
+        "SAFE",
+        "SAFE",
+        "SAFE"
+      ],
+      "seconds_statistics": {
+        "median": 7.3125836360268295,
+        "minimum": 7.241132292896509,
+        "maximum": 7.360066793044098
+      },
+      "solver_process_seconds_statistics": {
+        "median": 7.15137680596672,
+        "minimum": 7.092678731074557,
+        "maximum": 7.20915523392614
+      },
+      "base_seconds_statistics": {
+        "median": 0.22594726202078164,
+        "minimum": 0.21557597001083195,
+        "maximum": 0.23032871796749532
+      },
+      "induction_seconds_statistics": {
+        "median": 6.925429543945938,
+        "minimum": 6.862350013107061,
+        "maximum": 6.993579263915308
+      },
+      "model_sha256": "88b460dff73d50c6c9cbca3bcf36ac6137f677e4c5fe8bce766a61901b49c5fa",
+      "memory": {
+        "width": 32,
+        "entries": 256,
+        "bits": 8192,
+        "initialized_bits": 32,
+        "unconstrained_initial_bits": 8160,
+        "postprep_ff_bits": 231,
+        "includes_formal_monitors": true,
+        "assertions": 28,
+        "constant_A_assertion_cells": 2,
+        "assumptions": 0,
+        "cover_cells_present_but_not_run": 5
+      }
+    }
+  },
+  "scope_notes": [
+    "No Major correctness finding in all 26 reviewed records, including completed screen 05 and three-repeat confirmation 06.",
+    "Current regression source covers SAFE/CEX/no-assert with clocked assertions; tests were inspected, not executed in this audit. It does not itself test BOUNDED classification or assumption preservation, so those are only supported here by actual logs/code inspection.",
+    "Native FIFO proof covers all assertions enabled by the selected configuration, not the five cover goals or every upstream parameter variant. Constant-A assertion cells remain counted in 28.",
+    "Per-task seconds stop before final artifact hashing and result.json reporting; those costs and source download/tool identity are in suite_seconds. This timer boundary differs from fixed-pair prove_rtl timings.",
+    "This is exploratory B0 screening and three fresh-process confirmations on one host, not an abstraction speedup experiment, production certificate acceptance, or current frozen port-property proof.",
+    "No zero-fill was added: synchronous FIFO initializes only mem[0]; remaining memory initial bits stay unconstrained. Postprep FF bits include formal-monitor state and exclude memory-array bits.",
+    "async2sync is appropriate for these single-positive-clock synchronous FIFO inputs and clocked checks; this review does not qualify it for arbitrary asynchronous/multiclock designs."
+  ],
+  "primary_sources": {
+    "fifo_upstream_depth4": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/bench/formal/sfifo.sby",
+    "yosys_pinned_clocked_check_lowering": "https://raw.githubusercontent.com/YosysHQ/yosys/9f75ca1f9/passes/sat/async2sync.cc"
+  },
+  "audit_calls": {
+    "yosys": 0,
+    "z3": 0,
+    "llm": 0,
+    "tests": 0
+  },
+  "audit_read_compute_seconds": 0.4199698909651488,
+  "totals": {
+    "attempts": 26,
+    "unique_tasks": 17,
+    "total_case_seconds": 165.89888546837028,
+    "total_solver_seconds": 161.50980028393678,
+    "total_suite_seconds": 171.3440316360211,
+    "outcomes": {
+      "SAFE": 16,
+      "UNKNOWN": 2,
+      "CEX": 1,
+      "BOUNDED": 4,
+      "ERROR": 3
+    }
+  },
+  "public_report": {
+    "path": "docs/reports/data/baseline-screen.json",
+    "sha256": "2511fc7259dc98b57ae9030b325fdfce0f2a429703f823dc3093a2bf426169f2",
+    "status": "MATCH"
+  },
+  "prior_audit_sha256": "3796ec93c55d3278a136e8ded3453aa5dd5b92d0d958674f1b4839ceaae15c42",
+  "extension_read_compute_seconds": 0.14663685904815793,
+  "extension_note": "The first in-memory aggregation attempt assumed ERROR records had a memories field; it stopped without writing. The completed audit explicitly checks failed preparations have no model/memory projection. No source, raw results or tool calls changed."
+}
