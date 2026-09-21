@@ -1,0 +1,10 @@
+{
+  "archive": "AIsimpV-wednesday-evidence.zip",
+  "sha256": "eb8b11c4e3b112629fbe7e06c8570267d78da006378f53e9e48a61b1051b796e",
+  "bytes": 2413161,
+  "files": 2927,
+  "manifest": "AIsimpV-evidence/manifest.json",
+  "manual_revision": "6901b49",
+  "llm_snapshot": "snapshot-v3",
+  "published_url": "https://github.com/swear01/AIsimpV/releases/download/wednesday-pilot-2026-09-21/AIsimpV-wednesday-evidence.zip"
+}

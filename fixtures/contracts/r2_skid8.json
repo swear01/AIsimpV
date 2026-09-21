@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "semantics": "single-clock-bv-v1",
+  "clock": {
+    "name": "i_clk",
+    "edge": "positive"
+  },
+  "reset": {
+    "kind": "synchronous",
+    "port": "i_reset",
+    "active": 1,
+    "assumption": "unconstrained"
+  },
+  "environment": true,
+  "sampling": "before_update",
+  "inputs": {
+    "i_reset": 1,
+    "i_valid": 1,
+    "i_data": 8,
+    "i_ready": 1
+  },
+  "observations": {
+    "o_ready": 1,
+    "o_valid": 1,
+    "o_data": 8
+  },
+  "property": {
+    "id": "output-hold-while-stalled-without-reset",
+    "step": {
+      "op": "or",
+      "args": [
+        {
+          "op": "not",
+          "args": [
+            {
+              "op": "and",
+              "args": [
+                {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "o.o_valid"
+                        },
+                        {
+                          "bv": 1,
+                          "width": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "u.i_ready"
+                        },
+                        {
+                          "bv": 0,
+                          "width": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "u.i_reset"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "and",
+          "args": [
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "n.o_valid"
+                },
+                {
+                  "bv": 1,
+                  "width": 1
+                }
+              ]
+            },
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "n.o_data"
+                },
+                {
+                  "ref": "o.o_data"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

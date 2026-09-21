@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hant">
+<!-- Hand-authored presentation for the frozen evidence; no generated data blocks. -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIsimpV — RTL 狀態改寫與可驗證對應</title>
+<style>
+:root{color-scheme:light;--ink:#17324d;--muted:#4a637a;--line:#d2dde7;--blue:#075d8c;--green:#226937;--amber:#855d05}
+*{box-sizing:border-box}body{margin:0;background:#dce5ec;color:var(--ink);font:22px/1.48 system-ui,-apple-system,"Noto Sans TC",sans-serif}a{color:var(--blue)}nav{position:sticky;top:0;z-index:10;padding:8px 24px;background:#17324d;color:white;font-size:15px;display:flex;gap:18px;justify-content:center}nav a{color:white;text-decoration:none}.slide{width:min(1280px,calc(100% - 32px));min-height:720px;margin:26px auto;background:white;padding:42px 54px 28px;display:flex;flex-direction:column;box-shadow:0 8px 24px #17324d20;scroll-margin-top:50px}.kicker{font-size:16px;letter-spacing:.09em;text-transform:uppercase;color:var(--blue);font-weight:700}h1{font-size:48px;line-height:1.25;margin:30px 0 24px;max-width:1000px}h2{font-size:35px;line-height:1.3;margin:6px 0 24px}h3{font-size:24px;margin:0 0 12px}p{margin:0 0 16px}.lead{font-size:27px;max-width:1000px}.muted,.note{color:var(--muted)}.note{font-size:17px}.draft{background:#fff4de;border-left:5px solid #d7ad52;padding:12px 16px;font-size:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:16px 0}.card{background:#f1f6fa;border:1px solid var(--line);border-radius:12px;padding:22px}.flow{display:flex;align-items:center;gap:14px;justify-content:center;margin:22px 0}.flow span{padding:18px;border:1px solid var(--line);border-radius:10px;background:#f1f6fa;font-size:21px;text-align:center}.flow b{font-size:30px}table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:19px}th,td{padding:12px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eaf1f7}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em}pre{background:#f1f6fa;border:1px solid var(--line);padding:15px 18px;white-space:pre-wrap;font-size:18px;line-height:1.45}ul{padding-left:1.25em;margin:6px 0 18px}li{margin-bottom:8px}.foot{margin-top:auto;padding-top:17px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:14px;color:var(--muted)}.figure{margin:0 auto 12px;width:100%;max-width:1090px}.figure svg{width:100%;height:auto;display:block}.compact{font-size:17px}.tag{display:inline-block;padding:2px 8px;border-radius:5px;background:#edf7ee;color:var(--green);font-size:17px}.pending{background:#fff4de;color:var(--amber)}.strong{font-weight:700;color:var(--blue)}
+@media(max-width:800px){body{font-size:18px}.slide{padding:26px 24px;min-height:auto}h1{font-size:35px}h2{font-size:29px}.lead{font-size:22px}.grid{grid-template-columns:1fr}table{font-size:15px}th,td{padding:8px 6px}.flow{flex-wrap:wrap}.foot{margin-top:24px}.figure{overflow-x:auto}.figure svg{min-width:660px}nav{gap:14px;overflow-x:auto;justify-content:flex-start}}
+@page{size:A4 landscape;margin:0}@media print{body{background:white;font-size:17px}nav{display:none}.slide{width:297mm;height:210mm;min-height:0;margin:0;padding:12mm 14mm 8mm;box-shadow:none;break-after:page;overflow:hidden}.slide:last-child{break-after:auto}h1{font-size:39px}h2{font-size:29px;margin-bottom:17px}h3{font-size:21px}.lead{font-size:22px}.grid{gap:18px;margin:12px 0}.card{padding:16px}table{font-size:16px;margin:9px 0 14px}th,td{padding:9px}.note{font-size:14px}.figure{max-width:240mm}.foot{font-size:11px}.draft{font-size:15px}.compact{font-size:14px}pre{font-size:15px}.flow{margin:14px 0}.flow span{padding:12px;font-size:17px}}
+</style>
+</head>
+<body>
+<nav aria-label="簡報頁次"><a href="#s1">1 問題</a><a href="#s2">2 Test set</a><a href="#s3">3 Skid</a><a href="#s4">4 Pipeline</a><a href="#s5">5 結果</a><a href="#s6">6 LLM</a><a href="#s7">7 負例</a><a href="#s8">8 結論</a></nav>
+<section class="slide" id="s1" aria-labelledby="h1">
+<div class="kicker">AIsimpV · 2026-09-23 · Research pilot</div>
+<h1 id="h1">RTL 可以換一種狀態表示，<br>但不能漏掉原始行為</h1>
+<p class="lead">用「抽象 RTL＋對應證書＋獨立 checker」檢查非局部 rewrite，再驗證原先凍結的 safety property。</p>
+<div class="flow"><span>原始 C<br>固定 contract</span><b>→</b><span>候選 A<br>h / J / w</span><b>→</b><span>包含關係<br>獨立 checker</span><b>→</b><span>A property proof<br>自由 nondeterminism</span></div>
+<div class="grid"><div class="card"><h3>本輪要回答</h3><p>能否檢查實際狀態改寫？<br>哪些必要關係不能放掉？</p></div><div class="card"><h3>分開驗證三件事</h3><p>人工 gold 可證性 · LLM discovery<br>完整成本與驗證加速</p></div></div>
+<p class="draft"><strong>人工：</strong>4/4 good gate＋P 通過；4 coarse 假反例；4 錯證書被拒絕。<br><strong>LLM：</strong>joint 兩次內得到 18→10 bits 的安全候選；固定 C/A 因工具錯誤受阻。</p>
+<div class="foot"><span>單 clock · BV safety · 固定 reset / 觀察 / property</span><span>1 / 8</span></div>
+</section>
+<section class="slide" id="s2" aria-labelledby="h2">
+<div class="kicker">固定集合與分母</div><h2 id="h2">4 個 tasks，2 個公開設計家族</h2>
+<table><thead><tr><th>Task</th><th>來源／property</th><th>狀態改寫</th></tr></thead><tbody>
+<tr><td>R1-fsm</td><td>人工控制 · 恰一個狀態觀察成立</td><td>3-bit one-hot → 2-bit binary</td></tr>
+<tr><td>R2-skid8</td><td>ZipCPU · stall 保持 valid/data</td><td>18 → 10 design bits</td></tr>
+<tr><td>R3-skid32</td><td>同一家族、加大資料位寬</td><td>66 → 34 design bits</td></tr>
+<tr><td>R4-pipe32</td><td>AVR · 原 history-sum property</td><td>96 → 64 design bits；64 monitor bits 保留</td></tr>
+</tbody></table>
+<div class="grid"><div class="card"><h3>人工矩陣：12 基本 attempts</h3><p>每題：good / coarse / bad certificate。<br>8 個 C/A pairs；反向證書及 replay 另記。</p></div><div class="card"><h3>LLM：另外 2 個 pilots</h3><p>固定 C/A 找證書；joint RTL＋證書。<br>各最多 4 attempts / 15 分鐘。</p></div></div>
+<p class="note">位數已核對實際匯出的模型；COI 規模含 property harness，另列完整報告。P1/P5 回歸、FIFO 與重跑次數不增加主集合分母。skid 使用衍生 port-level property，不是完整上游 formal suite。</p>
+<div class="foot"><span>公共 reset 每拍自由；E=true；原 property 不隨候選修改</span><span>2 / 8</span></div>
+</section>
+<section class="slide" id="s3" aria-labelledby="h3">
+<div class="kicker">公開案例 1 · ZipCPU skidbuffer</div><h2 id="h3">刪除內部資料，仍保留 stall 時的 hold</h2>
+<div class="figure"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 530" role="img" aria-labelledby="skid-title skid-desc">
+  <title id="skid-title">Skidbuffer: occupancy and data abstraction</title>
+  <desc id="skid-desc">The concrete design stores two valid bits and two data words. The abstraction stores two-bit occupancy and one output word. Mapping n equals r ? 2 : v ? 1 : 0, q is preserved, invariant r implies v. The free data input z is matched to the hidden concrete data b only in the certificate harness. Property checking leaves z unrestricted.</desc>
+  <defs><marker id="skid-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#365779"/></marker></defs>
+  <style>text{font-family:Arial,sans-serif;fill:#17324d}.head{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:17px}.mono{font-family:monospace;font-size:19px}.box{fill:#f0f5fa;stroke:#8ea8bf;stroke-width:2}.flow{stroke:#365779;stroke-width:2.5;fill:none;marker-end:url(#skid-arrow)}</style>
+  <rect width="1160" height="530" fill="white"/>
+  <text x="35" y="34" class="head">Same public inputs / observations; different stored state</text>
+  <rect x="35" y="65" width="370" height="222" rx="12" class="box"/>
+  <text x="58" y="100" class="head">Concrete C</text>
+  <text x="58" y="140" class="mono">r, v   : 1 + 1 bits</text>
+  <text x="58" y="175" class="mono">b, q   : DW + DW bits</text>
+  <text x="58" y="218" class="body">hidden data b + output data q</text>
+  <text x="58" y="258" class="small">DW=8: 18 bits / DW=32: 66 bits</text>
+  <path d="M410 152H745" class="flow"/>
+  <text x="438" y="112" class="mono">h.n = r ? 2 : v ? 1 : 0</text>
+  <text x="471" y="187" class="mono">h.q = q</text>
+  <text x="469" y="224" class="mono">J: r implies v</text>
+  <rect x="755" y="65" width="370" height="222" rx="12" class="box"/>
+  <text x="778" y="100" class="head">Abstract A</text>
+  <text x="778" y="140" class="mono">n      : 2 bits</text>
+  <text x="778" y="175" class="mono">q      : DW bits</text>
+  <text x="778" y="218" class="body">occupancy + output data</text>
+  <text x="778" y="258" class="small">DW=8: 10 bits / DW=32: 34 bits</text>
+  <rect x="35" y="317" width="1090" height="68" rx="10" fill="#f8fafc" stroke="#cad5df"/>
+  <text x="58" y="345" class="mono">q' = (n==0 || i_ready) ? (n==2 ? z : i_data) : q</text>
+  <text x="58" y="371" class="small">z is a fresh DW-bit input; a stalled output keeps q. Reset clears n, not q.</text>
+  <rect x="35" y="415" width="522" height="83" rx="10" fill="#edf7ee" stroke="#68a874"/>
+  <text x="58" y="446" class="head">Certificate harness only</text>
+  <text x="58" y="478" class="mono">w.z = b   (prove C is included in A)</text>
+  <rect x="586" y="415" width="539" height="83" rx="10" fill="#fff4de" stroke="#d7ad52"/>
+  <text x="608" y="446" class="head">Independent property proof</text>
+  <text x="608" y="478" class="mono">z is FREE at every step; no w or J</text>
+</svg>
+</div>
+<p class="note"><code>valid &amp;&amp; !ready &amp;&amp; !reset ⇒ next(valid) &amp;&amp; next(data)==data</code>。coarse 讓 q 每拍自由變動；good 只在原輸出可更新時讀取自由 z。</p>
+<div class="foot"><span>DW=8/32；OUTREG=1 · LOWPOWER=0 · PASSTHROUGH=0 · INITIAL=1</span><span>3 / 8</span></div>
+</section>
+<section class="slide" id="s4" aria-labelledby="h4">
+<div class="kicker">公開案例 2 · AVR pipeline</div><h2 id="h4">自由分解不必丟失兩個 monitor 的關係</h2>
+<div class="figure"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 550" role="img" aria-labelledby="pipe-title pipe-desc">
+  <title id="pipe-title">Pipeline: sum state with correlated free decomposition</title>
+  <desc id="pipe-desc">Concrete state a and b is mapped to one sum state s equals a plus b. Data output d and history monitor p and q remain. A uses views z and s minus z. Matching z to a only in the certificate preserves both monitors, while independent property checking leaves z free. All arithmetic is modulo 2 to the power 32.</desc>
+  <defs><marker id="pipe-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#365779"/></marker></defs>
+  <style>text{font-family:Arial,sans-serif;fill:#17324d}.head{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:17px}.mono{font-family:monospace;font-size:19px}.box{fill:#f0f5fa;stroke:#8ea8bf;stroke-width:2}.flow{stroke:#365779;stroke-width:2.5;fill:none;marker-end:url(#pipe-arrow)}</style>
+  <rect width="1160" height="550" fill="white"/>
+  <text x="35" y="34" class="head">A free decomposition preserves the sum relation</text>
+  <rect x="35" y="65" width="390" height="239" rx="12" class="box"/>
+  <text x="58" y="100" class="head">Concrete C</text>
+  <text x="58" y="140" class="mono">a, b, d : 96 design bits</text>
+  <text x="58" y="178" class="mono">p, q    : 64 monitor bits</text>
+  <text x="58" y="222" class="mono">p' = a;  q' = b</text>
+  <text x="58" y="265" class="small">160 total stored bits before proof COI</text>
+  <path d="M432 145H730" class="flow"/>
+  <text x="470" y="112" class="mono">h.s = a + b</text>
+  <text x="462" y="184" class="mono">h.(d,p,q) = (d,p,q)</text>
+  <text x="519" y="224" class="mono">J = true</text>
+  <rect x="742" y="65" width="383" height="239" rx="12" class="box"/>
+  <text x="765" y="100" class="head">Abstract A</text>
+  <text x="765" y="140" class="mono">s, d : 64 design bits</text>
+  <text x="765" y="178" class="mono">p, q : 64 monitor bits</text>
+  <text x="765" y="222" class="mono">p' = z;  q' = s - z</text>
+  <text x="765" y="265" class="small">128 total stored bits before proof COI</text>
+  <rect x="35" y="326" width="1090" height="80" rx="10" fill="#f8fafc" stroke="#cad5df"/>
+  <text x="58" y="355" class="mono">s' = (dataIn + c1) + (z &amp; c2)    d' = reset ? 0 : s</text>
+  <text x="58" y="388" class="mono">Same P: (d == p + q) || (d == 0)    Arithmetic: BV32 modulo 2^32</text>
+  <rect x="35" y="435" width="522" height="83" rx="10" fill="#edf7ee" stroke="#68a874"/>
+  <text x="58" y="466" class="head">Certificate harness only</text>
+  <text x="58" y="498" class="mono">w.z = a; monitor mapping is checked</text>
+  <rect x="586" y="435" width="539" height="83" rx="10" fill="#fff4de" stroke="#d7ad52"/>
+  <text x="608" y="466" class="head">Independent property proof</text>
+  <text x="608" y="498" class="mono">z is FREE; z + (s - z) = s still holds</text>
+</svg>
+</div>
+<p class="note">同一個 z 決定兩個 views：<code>z + (s − z) = s</code>。coarse 改成獨立 z/z2 即失去關係。reset 只清除 d；原 monitor 的初值與一拍對齊保留。</p>
+<div class="foot"><span>觀察 O=(d,p,q)；不把原 assertion 改成固定 safe bit</span><span>4 / 8</span></div>
+</section>
+<section class="slide" id="s5" aria-labelledby="h5">
+<div class="kicker">正式人工矩陣</div><h2 id="h5">包含成立、性質可證、執行成本分開報告</h2>
+<table class="compact"><thead><tr><th>Task</th><th>Good gate / P</th><th>Coarse gate / replay</th><th>錯證書</th><th>B0 / good workflow 秒</th></tr></thead><tbody><tr><td>R1-fsm</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.545 / 1.433</td></tr><tr><td>R2-skid8</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.559 / 1.477</td></tr><tr><td>R3-skid32</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.543 / 1.520</td></tr><tr><td>R4-pipe32</td><td>ACCEPTED / SAFE</td><td>ACCEPTED / spurious</td><td>REJECTED</td><td>0.604 / 1.923</td></tr></tbody></table><p><span class="strong">人工 12 筆分類均符合預期。</span>FSM 反向 ACCEPTED；三個公開 good A 的嚴格抽象 trace 皆通過檢查。</p><p class="note">全部候選 workflow 15.175s ＋ B0 2.251s；suite 17.439s。COI 後 state C→A：7→6、30→22、102→70、257→225；cells：25→25、35→33、35→33、20→20。</p>
+<p class="note">完整成本含前端、證書、property、失敗與 replay；FSM 反向證書另記且計入。B0 每個固定 C/contract 只算一次。人工準備時間未量測。</p>
+<p class="note">規模分成 design、原 monitor 與 property harness。COI 後 state/cells 含仍存活的取樣 state；共用 harness 也套用 FSM/pipeline。單次時間不支持加速結論。</p>
+<div class="foot"><span>NOT_RUN / ERROR / UNKNOWN 保留；不以新案例替換失敗列</span><span>5 / 8</span></div>
+</section>
+<section class="slide" id="s6" aria-labelledby="h6">
+<div class="kicker">真實 Codex discovery</div><h2 id="h6">兩個獨立 pilot，保留不同終態</h2>
+<div class="grid"><div class="card"><h3>Pilot A · Certificate only</h3><p class="tag pending">INFRASTRUCTURE_BLOCKED</p><p>4 次工具失敗，0 可驗證候選。<br>計費 309.740s；wall 408.163s。</p><p class="note">a2 含診斷停頓上界；不能推論模型找不到 mapping。</p></div><div class="card"><h3>Pilot B · Joint rewrite</h3><p class="tag">ACCEPTED ＋ SAFE · 18→10 bits</p><p>a1 stale hash ERROR → a2 修證書。<br>2 次計費 86.784s；RTL 相同。</p><p class="note">刪除 r_data、保留 valid bits；兩個保存候選獨立重驗皆相符。</p></div></div>
+<ul><li>各最多 4 次 / 900 秒；失敗保留，兩個 pilots 不合併成功率。</li><li>Joint 改用 inline bundle＋無工具輸出；父端原樣存檔，未提供 h/J/w。</li><li>修改 hash 後通過是一次真實修正紀錄，不是 feedback 因果對照。</li></ul>
+<p class="note">gpt-5.6-sol / high，Codex 0.154.0。Joint usage：34,968 input / 3,750 output tokens；固定pair usage不完整；費用 unavailable。</p>
+<div class="foot"><span>固定 pair：檔案工作區；joint：無工具 inline transport；改動與失敗均留存</span><span>6 / 8</span></div>
+</section>
+<section class="slide" id="s7" aria-labelledby="h7">
+<div class="kicker">負例提供什麼證據</div><h2 id="h7">錯對應與抽象過粗，要由不同關卡辨認</h2>
+<div class="grid"><div class="card"><h3>同一個 good A，換錯證書</h3><p>skid：<code>w.z=0</code>。<br>pipeline：<code>h.s=a</code>。</p><p>檢查一步匹配；拒絕的是這份 certificate，不能直接報 design BUG。</p></div><div class="card"><h3>正確包含，但丟掉必要關係</h3><p>skid：輸出 data 每拍自由。<br>pipeline：兩個 monitor views 獨立。</p><p>gate 可過仍可能有 abstract CEX；需 exact replay 判斷 C 是否能執行。</p></div></div>
+<p class="draft"><strong>實測 skid8：</strong>valid=1 且 ready=0/reset=0 時，coarse data 從 0x12 變成 0x34。A-prefix SAT、P 違反、C replay INFEASIBLE。錯 witness=0 則在 STEP_MAP 被拒絕。</p>
+<div class="flow"><span>A trace 可達<br>且違反 P</span><b>→</b><span>固定公共 inputs / observations<br>回 C exact replay</span><b>→</b><span>FEASIBLE：BUG<br>INFEASIBLE：spurious</span></div>
+<p class="note">人工構造 trace 也須 SMT 查驗初值可達、P 違反與 replay；來源如實標記。trace strictness 與 property failure 不是同一件事。</p>
+<div class="foot"><span>不得把 certificate failure、abstract CEX 或 timeout 寫成 concrete bug</span><span>7 / 8</span></div>
+</section>
+<section class="slide" id="s8" aria-labelledby="h8">
+<div class="kicker">證成範圍與下一步</div><h2 id="h8">先依證據決定下一階段投入</h2>
+<p class="draft"><strong>已證成：</strong>4/4 人工改寫保留 P；LLM 另產生 1 個可驗證資料抽象。<br><strong>限制：</strong>固定 C/A pilot 卡在工具；單次成本沒有加速證據，不能推論一般成功率。</p>
+<div class="grid"><div class="card"><h3>若 gold 通過、LLM 失敗</h3><p>集中 mapping discovery、語法與回饋；保留失敗候選，不擴大生成預算掩蓋問題。</p></div><div class="card"><h3>若 gate 通過、P 失敗</h3><p>恢復 property 所需的時序／資料關係；先不增加平台功能。</p></div></div>
+<p>本輪不涵蓋任意 RTL、multi-clock、latency 改變、liveness、symbolic memory；兩個公開家族不支持通用性推論。</p>
+<p class="note">凍結 run：<code>wednesday-20260921-final01</code>；凍結時 143、最終整合 145 項工程測試 PASS。<br>乾淨 source 重跑 12/12 分類與 hashes 相符；另耗 18.584s，不作 timing median。<br>已執行 runner：<code>python -m rtl_relate.wednesday --out results/&lt;new-run&gt;</code><br>完整來源／數據：同目錄 <code>wednesday_report.md</code>、<code>data/manual-summary.json</code>，公開專案 <a href="https://github.com/swear01/AIsimpV">swear01/AIsimpV</a>。</p>
+<div class="foot"><span>所有結論綁定凍結來源、contract、候選與工具版本</span><span>8 / 8</span></div>
+</section>
+</body>
+</html>

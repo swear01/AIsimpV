@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 550" role="img" aria-labelledby="pipe-title pipe-desc">
+  <title id="pipe-title">Pipeline: sum state with correlated free decomposition</title>
+  <desc id="pipe-desc">Concrete state a and b is mapped to one sum state s equals a plus b. Data output d and history monitor p and q remain. A uses views z and s minus z. Matching z to a only in the certificate preserves both monitors, while independent property checking leaves z free. All arithmetic is modulo 2 to the power 32.</desc>
+  <defs><marker id="pipe-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#365779"/></marker></defs>
+  <style>text{font-family:Arial,sans-serif;fill:#17324d}.head{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:17px}.mono{font-family:monospace;font-size:19px}.box{fill:#f0f5fa;stroke:#8ea8bf;stroke-width:2}.flow{stroke:#365779;stroke-width:2.5;fill:none;marker-end:url(#pipe-arrow)}</style>
+  <rect width="1160" height="550" fill="white"/>
+  <text x="35" y="34" class="head">A free decomposition preserves the sum relation</text>
+  <rect x="35" y="65" width="390" height="239" rx="12" class="box"/>
+  <text x="58" y="100" class="head">Concrete C</text>
+  <text x="58" y="140" class="mono">a, b, d : 96 design bits</text>
+  <text x="58" y="178" class="mono">p, q    : 64 monitor bits</text>
+  <text x="58" y="222" class="mono">p' = a;  q' = b</text>
+  <text x="58" y="265" class="small">160 total stored bits before proof COI</text>
+  <path d="M432 145H730" class="flow"/>
+  <text x="470" y="112" class="mono">h.s = a + b</text>
+  <text x="462" y="184" class="mono">h.(d,p,q) = (d,p,q)</text>
+  <text x="519" y="224" class="mono">J = true</text>
+  <rect x="742" y="65" width="383" height="239" rx="12" class="box"/>
+  <text x="765" y="100" class="head">Abstract A</text>
+  <text x="765" y="140" class="mono">s, d : 64 design bits</text>
+  <text x="765" y="178" class="mono">p, q : 64 monitor bits</text>
+  <text x="765" y="222" class="mono">p' = z;  q' = s - z</text>
+  <text x="765" y="265" class="small">128 total stored bits before proof COI</text>
+  <rect x="35" y="326" width="1090" height="80" rx="10" fill="#f8fafc" stroke="#cad5df"/>
+  <text x="58" y="355" class="mono">s' = (dataIn + c1) + (z &amp; c2)    d' = reset ? 0 : s</text>
+  <text x="58" y="388" class="mono">Same P: (d == p + q) || (d == 0)    Arithmetic: BV32 modulo 2^32</text>
+  <rect x="35" y="435" width="522" height="83" rx="10" fill="#edf7ee" stroke="#68a874"/>
+  <text x="58" y="466" class="head">Certificate harness only</text>
+  <text x="58" y="498" class="mono">w.z = a; monitor mapping is checked</text>
+  <rect x="586" y="435" width="539" height="83" rx="10" fill="#fff4de" stroke="#d7ad52"/>
+  <text x="608" y="466" class="head">Independent property proof</text>
+  <text x="608" y="498" class="mono">z is FREE; z + (s - z) = s still holds</text>
+</svg>

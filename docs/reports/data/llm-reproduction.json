@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "source": "saved raw candidates with frozen snapshot-v3 evaluator; no model calls or candidate edits",
+  "checks": [
+    {
+      "attempt": 1,
+      "status": "ERROR",
+      "gate": "ERROR",
+      "property": null,
+      "state_bits": 10,
+      "seconds": 0.34741016797488555,
+      "candidate_sha256": {
+        "abstract.v": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+        "certificate.json": "9d4996298afcdac2bb6a87877ef132b61a194664fe5e5ddc62383d67e0ba656b"
+      }
+    },
+    {
+      "attempt": 2,
+      "status": "SUCCESS",
+      "gate": "ACCEPTED",
+      "property": "SAFE",
+      "state_bits": 10,
+      "seconds": 1.1995741360005923,
+      "candidate_sha256": {
+        "abstract.v": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+        "certificate.json": "752f1d6cf29a7f22c64dacb900302bbc7981bf411ea20926217d6649f1f1fbec"
+      }
+    }
+  ],
+  "earlier_recheck_error": "A prior local invocation passed a relative output path; subprocess path rebasing prevented gate execution. Retained separately under llm-recheck; not a model attempt."
+}

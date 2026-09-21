@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "semantics": "single-clock-bv-v1",
+  "clock": {
+    "name": "clk",
+    "edge": "positive"
+  },
+  "reset": null,
+  "environment": true,
+  "sampling": "before_update",
+  "inputs": {
+    "advance": 1
+  },
+  "observations": {
+    "idle": 1,
+    "busy": 1,
+    "done": 1
+  },
+  "property": {
+    "id": "exactly-one-state-observation",
+    "step": {
+      "op": "or",
+      "args": [
+        {
+          "op": "or",
+          "args": [
+            {
+              "op": "and",
+              "args": [
+                {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "o.idle"
+                        },
+                        {
+                          "bv": 1,
+                          "width": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "o.busy"
+                        },
+                        {
+                          "bv": 0,
+                          "width": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "o.done"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "and",
+              "args": [
+                {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "o.idle"
+                        },
+                        {
+                          "bv": 0,
+                          "width": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "o.busy"
+                        },
+                        {
+                          "bv": 1,
+                          "width": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "o.done"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "and",
+          "args": [
+            {
+              "op": "and",
+              "args": [
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "o.idle"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                },
+                {
+                  "op": "eq",
+                  "args": [
+                    {
+                      "ref": "o.busy"
+                    },
+                    {
+                      "bv": 0,
+                      "width": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "o.done"
+                },
+                {
+                  "bv": 1,
+                  "width": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

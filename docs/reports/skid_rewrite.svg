@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 530" role="img" aria-labelledby="skid-title skid-desc">
+  <title id="skid-title">Skidbuffer: occupancy and data abstraction</title>
+  <desc id="skid-desc">The concrete design stores two valid bits and two data words. The abstraction stores two-bit occupancy and one output word. Mapping n equals r ? 2 : v ? 1 : 0, q is preserved, invariant r implies v. The free data input z is matched to the hidden concrete data b only in the certificate harness. Property checking leaves z unrestricted.</desc>
+  <defs><marker id="skid-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#365779"/></marker></defs>
+  <style>text{font-family:Arial,sans-serif;fill:#17324d}.head{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:17px}.mono{font-family:monospace;font-size:19px}.box{fill:#f0f5fa;stroke:#8ea8bf;stroke-width:2}.flow{stroke:#365779;stroke-width:2.5;fill:none;marker-end:url(#skid-arrow)}</style>
+  <rect width="1160" height="530" fill="white"/>
+  <text x="35" y="34" class="head">Same public inputs / observations; different stored state</text>
+  <rect x="35" y="65" width="370" height="222" rx="12" class="box"/>
+  <text x="58" y="100" class="head">Concrete C</text>
+  <text x="58" y="140" class="mono">r, v   : 1 + 1 bits</text>
+  <text x="58" y="175" class="mono">b, q   : DW + DW bits</text>
+  <text x="58" y="218" class="body">hidden data b + output data q</text>
+  <text x="58" y="258" class="small">DW=8: 18 bits / DW=32: 66 bits</text>
+  <path d="M410 152H745" class="flow"/>
+  <text x="438" y="112" class="mono">h.n = r ? 2 : v ? 1 : 0</text>
+  <text x="471" y="187" class="mono">h.q = q</text>
+  <text x="469" y="224" class="mono">J: r implies v</text>
+  <rect x="755" y="65" width="370" height="222" rx="12" class="box"/>
+  <text x="778" y="100" class="head">Abstract A</text>
+  <text x="778" y="140" class="mono">n      : 2 bits</text>
+  <text x="778" y="175" class="mono">q      : DW bits</text>
+  <text x="778" y="218" class="body">occupancy + output data</text>
+  <text x="778" y="258" class="small">DW=8: 10 bits / DW=32: 34 bits</text>
+  <rect x="35" y="317" width="1090" height="68" rx="10" fill="#f8fafc" stroke="#cad5df"/>
+  <text x="58" y="345" class="mono">q' = (n==0 || i_ready) ? (n==2 ? z : i_data) : q</text>
+  <text x="58" y="371" class="small">z is a fresh DW-bit input; a stalled output keeps q. Reset clears n, not q.</text>
+  <rect x="35" y="415" width="522" height="83" rx="10" fill="#edf7ee" stroke="#68a874"/>
+  <text x="58" y="446" class="head">Certificate harness only</text>
+  <text x="58" y="478" class="mono">w.z = b   (prove C is included in A)</text>
+  <rect x="586" y="415" width="539" height="83" rx="10" fill="#fff4de" stroke="#d7ad52"/>
+  <text x="608" y="446" class="head">Independent property proof</text>
+  <text x="608" y="478" class="mono">z is FREE at every step; no w or J</text>
+</svg>

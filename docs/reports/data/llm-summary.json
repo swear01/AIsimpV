@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "description": "Public selected fields from raw ledgers plus reviewed protocol amendment; no local paths or event stream copied. Raw evidence package remains authoritative.",
+  "protocol_amendment_sha256": "c55410712dbc79f3afdccdf955b39636490f7330101fecca2a0aa3c91a1c3826",
+  "protocol_amendment": {
+    "recorded_at_unix": 1789935245.667882,
+    "scope": "Reviewed experiment metadata; raw ledger and event bytes are unchanged",
+    "certificate_attempt_versions": {
+      "1": "snapshot",
+      "2": "snapshot, parent interrupted after confirmed RTM_NEWADDR error",
+      "3": "snapshot-v2",
+      "4": "snapshot-v2; automatically queued after a3 returned ERROR before coordinator pause; not inline"
+    },
+    "amendment_before_joint": "Root approved providing the same audited bundle bytes plus canonical JSON hash metadata inline and disabling model tools; parent decodes exact schema string fields into fixed candidate filenames only. The joint pilot retained its original four-attempt/900-second budget. Original fixed-pair pilot was not restarted.",
+    "runs": {
+      "certificate": {
+        "ledger_sha256": "d2ae2e6c765a3a64bc09c33e1dc4d6c9667524271a09cf563c9df6b112df50dc",
+        "terminal_status": "INFRASTRUCTURE_BLOCKED",
+        "meaningful_candidate_attempts": 0,
+        "candidate_formula_assistance": false,
+        "transport": "file tools (v1/v2)",
+        "human_intervention": "Runtime infrastructure diagnosis and transport amendment; no edits to generated RTL, certificate expressions, or certificate hashes",
+        "charged_seconds": 309.73984032624867,
+        "wall_seconds": 408.1631507873535
+      },
+      "rewrite": {
+        "ledger_sha256": "3a8e2ae37d67799c3aff2863aef0a7d8e6d2fb11903a4d9ceed4455b4356882b",
+        "terminal_status": "SUCCESS",
+        "meaningful_candidate_attempts": 2,
+        "candidate_formula_assistance": false,
+        "transport": "inline audited bundle + structured string output (v3)",
+        "human_intervention": "Runtime infrastructure diagnosis and transport amendment; no edits to generated RTL, certificate expressions, or certificate hashes",
+        "charged_seconds": 86.78426637605298,
+        "wall_seconds": 87.06061863899231
+      }
+    }
+  },
+  "runs": [
+    {
+      "mode": "certificate",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "high",
+      "provider": "openai",
+      "codex_version": "codex-cli 0.154.0",
+      "config_sha256": "a4f0bd02b45fea960289ee9a5d36196945834c757f87c7a72aa74583567ca309",
+      "max_attempts": 4,
+      "budget_seconds": 900,
+      "charged_seconds": 309.73984032624867,
+      "wall_seconds": 408.1631507873535,
+      "cost_usd": null,
+      "raw_ledger_sha256": "d2ae2e6c765a3a64bc09c33e1dc4d6c9667524271a09cf563c9df6b112df50dc",
+      "terminal_status": "INFRASTRUCTURE_BLOCKED",
+      "reviewed_metadata": {
+        "ledger_sha256": "d2ae2e6c765a3a64bc09c33e1dc4d6c9667524271a09cf563c9df6b112df50dc",
+        "terminal_status": "INFRASTRUCTURE_BLOCKED",
+        "meaningful_candidate_attempts": 0,
+        "candidate_formula_assistance": false,
+        "transport": "file tools (v1/v2)",
+        "human_intervention": "Runtime infrastructure diagnosis and transport amendment; no edits to generated RTL, certificate expressions, or certificate hashes",
+        "charged_seconds": 309.73984032624867,
+        "wall_seconds": 408.1631507873535
+      },
+      "attempts": [
+        {
+          "number": 1,
+          "status": "GENERATED",
+          "usage": {
+            "input_tokens": 190486,
+            "cached_input_tokens": 158592,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 4718,
+            "reasoning_output_tokens": 3407
+          },
+          "candidate_sha256": {
+            "certificate.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "generation_seconds": 120.74838518799515,
+          "verification_seconds": 0.07654028898105025,
+          "verification": {
+            "status": "ERROR",
+            "reason": "Expecting value: line 1 column 1 (char 0)",
+            "stage_seconds": {
+              "gate": 0.05668637400958687
+            },
+            "gate": {
+              "status": "ERROR",
+              "reason": "Expecting value: line 1 column 1 (char 0)"
+            }
+          }
+        },
+        {
+          "number": 2,
+          "status": "INTERRUPTED_INFRASTRUCTURE",
+          "usage": null,
+          "candidate_sha256": {
+            "certificate.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "generation_seconds": 114.01435780525208,
+          "verification_seconds": 0,
+          "generation_seconds_measurement": "upper_bound_includes_coordinator_diagnostic_pause",
+          "termination_signal": "SIGTERM",
+          "verification": {
+            "status": "INFRASTRUCTURE_ERROR",
+            "reason": "Repeated bwrap loopback RTM_NEWADDR failure before any bundle read; coordinator stopped futile retry",
+            "stage_seconds": {}
+          }
+        },
+        {
+          "number": 3,
+          "status": "GENERATED",
+          "usage": {
+            "input_tokens": 37179,
+            "cached_input_tokens": 24192,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1175,
+            "reasoning_output_tokens": 835
+          },
+          "candidate_sha256": {
+            "certificate.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "generation_seconds": 28.787770076014567,
+          "verification_seconds": 0.05726319900713861,
+          "verification": {
+            "status": "ERROR",
+            "reason": "Expecting value: line 1 column 1 (char 0)",
+            "stage_seconds": {
+              "gate": 0.04511243000160903
+            },
+            "gate": {
+              "status": "ERROR",
+              "reason": "Expecting value: line 1 column 1 (char 0)"
+            }
+          }
+        },
+        {
+          "number": 4,
+          "status": "GENERATED",
+          "usage": {
+            "input_tokens": 77449,
+            "cached_input_tokens": 65664,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1202,
+            "reasoning_output_tokens": 660
+          },
+          "candidate_sha256": {
+            "certificate.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "generation_seconds": 46.0004864189541,
+          "verification_seconds": 0.055037350044585764,
+          "verification": {
+            "status": "ERROR",
+            "reason": "Expecting value: line 1 column 1 (char 0)",
+            "stage_seconds": {
+              "gate": 0.05354581802384928
+            },
+            "gate": {
+              "status": "ERROR",
+              "reason": "Expecting value: line 1 column 1 (char 0)"
+            }
+          }
+        }
+      ],
+      "generation_seconds": 309.5509994882159,
+      "verification_seconds": 0.18884083803277463,
+      "token_usage_complete": false,
+      "available_usage_totals": {
+        "input_tokens": 305114,
+        "cached_input_tokens": 248448,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 7095,
+        "reasoning_output_tokens": 4902
+      }
+    },
+    {
+      "mode": "rewrite",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "high",
+      "provider": "openai",
+      "codex_version": "codex-cli 0.154.0",
+      "config_sha256": "a4f0bd02b45fea960289ee9a5d36196945834c757f87c7a72aa74583567ca309",
+      "max_attempts": 4,
+      "budget_seconds": 900,
+      "charged_seconds": 86.78426637605298,
+      "wall_seconds": 87.06061863899231,
+      "cost_usd": null,
+      "raw_ledger_sha256": "3a8e2ae37d67799c3aff2863aef0a7d8e6d2fb11903a4d9ceed4455b4356882b",
+      "terminal_status": "SUCCESS",
+      "reviewed_metadata": {
+        "ledger_sha256": "3a8e2ae37d67799c3aff2863aef0a7d8e6d2fb11903a4d9ceed4455b4356882b",
+        "terminal_status": "SUCCESS",
+        "meaningful_candidate_attempts": 2,
+        "candidate_formula_assistance": false,
+        "transport": "inline audited bundle + structured string output (v3)",
+        "human_intervention": "Runtime infrastructure diagnosis and transport amendment; no edits to generated RTL, certificate expressions, or certificate hashes",
+        "charged_seconds": 86.78426637605298,
+        "wall_seconds": 87.06061863899231
+      },
+      "attempts": [
+        {
+          "number": 1,
+          "status": "GENERATED",
+          "usage": {
+            "input_tokens": 16223,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 3044,
+            "reasoning_output_tokens": 2517
+          },
+          "candidate_sha256": {
+            "abstract.v": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+            "certificate.json": "9d4996298afcdac2bb6a87877ef132b61a194664fe5e5ddc62383d67e0ba656b"
+          },
+          "generation_seconds": 67.90452776598977,
+          "verification_seconds": 0.9797910940251313,
+          "transport": "inline-json",
+          "verification": {
+            "status": "ERROR",
+            "reason": "stale abstract hash",
+            "stage_seconds": {
+              "export": 0.9124762000283226,
+              "gate": 0.0473031239816919
+            },
+            "export": {
+              "status": "EXPORTED",
+              "abstract_sha256": "d63477f66a1c6a8c05e6e104650f6366d8b669521953d1f18cbab33b13f79062",
+              "abstract_state_bits": 10
+            },
+            "gate": {
+              "status": "ERROR",
+              "reason": "stale abstract hash",
+              "concrete_sha256": "397147cf737063964958eb252f95bcd850c0e0390377fd6b027f4b787a10da96",
+              "abstract_sha256": "d63477f66a1c6a8c05e6e104650f6366d8b669521953d1f18cbab33b13f79062",
+              "contract_sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+              "certificate_sha256": "b6a0a2a36755706e778648d5ebc8de99281898fa7bda7bd3126f11943d9c1c82"
+            }
+          }
+        },
+        {
+          "number": 2,
+          "status": "GENERATED",
+          "usage": {
+            "input_tokens": 18745,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 706,
+            "reasoning_output_tokens": 162
+          },
+          "candidate_sha256": {
+            "abstract.v": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+            "certificate.json": "752f1d6cf29a7f22c64dacb900302bbc7981bf411ea20926217d6649f1f1fbec"
+          },
+          "generation_seconds": 16.59571953903651,
+          "verification_seconds": 1.304227977001574,
+          "transport": "inline-json",
+          "verification": {
+            "status": "SUCCESS",
+            "reason": null,
+            "stage_seconds": {
+              "export": 0.31364100298378617,
+              "gate": 0.2652446720167063,
+              "property": 0.7223513739882037
+            },
+            "export": {
+              "status": "EXPORTED",
+              "abstract_sha256": "d63477f66a1c6a8c05e6e104650f6366d8b669521953d1f18cbab33b13f79062",
+              "abstract_state_bits": 10
+            },
+            "gate": {
+              "status": "ACCEPTED",
+              "concrete_sha256": "397147cf737063964958eb252f95bcd850c0e0390377fd6b027f4b787a10da96",
+              "abstract_sha256": "d63477f66a1c6a8c05e6e104650f6366d8b669521953d1f18cbab33b13f79062",
+              "contract_sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+              "certificate_sha256": "3ac7bb3d0d64f4d9865a666e05d60f1800285d201b55bf0c4d5798d683c30642"
+            },
+            "property": {
+              "status": "SAFE",
+              "method": "yosys-smtbmc z3 base + k-induction",
+              "free_nondeterminism": true,
+              "source_sha256": "ea7321e2ba0d3fc46849be5bce8267ddbdff07a3020b70f4d2ebb879a00e8560",
+              "contract_sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+              "nondet": [
+                "z"
+              ],
+              "design_before_property_preprocessing": {
+                "cells": 21,
+                "state_bits": 10,
+                "cell_types": {
+                  "$dff": 3,
+                  "$logic_and": 3,
+                  "$logic_not": 5,
+                  "$logic_or": 3,
+                  "$mux": 7
+                }
+              },
+              "after_property_preprocessing": {
+                "cells": 34,
+                "state_bits": 22,
+                "cell_types": {
+                  "$assert": 1,
+                  "$dff": 8,
+                  "$eq": 1,
+                  "$logic_and": 6,
+                  "$logic_not": 4,
+                  "$logic_or": 3,
+                  "$mux": 8,
+                  "$not": 2,
+                  "$scopeinfo": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "generation_seconds": 84.50024730502628,
+      "verification_seconds": 2.284019071026705,
+      "token_usage_complete": true,
+      "available_usage_totals": {
+        "input_tokens": 34968,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3750,
+        "reasoning_output_tokens": 2679
+      }
+    }
+  ]
+}

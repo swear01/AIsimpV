@@ -1,0 +1,291 @@
+{
+  "version": 1,
+  "hash_algorithm": "SHA-256",
+  "source_bytes": "Verbatim upstream bytes; no normalization applied to vendored files.",
+  "sources": [
+    {
+      "id": "zipcpu-skidbuffer",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "license": {
+        "identifier": "Apache-2.0",
+        "evidence": "Explicit skidbuffer.v file header; verbatim file header and license text retained.",
+        "scope": "Imported upstream file only; does not set this project license."
+      },
+      "files": [
+        {
+          "path": "fixtures/public/upstream/skidbuffer.v",
+          "sha256": "ed1fda9192563fd7fd7033b564e8cf47ad6cb63ba4f578ed2c302037d47a5389",
+          "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/skidbuffer.v"
+        },
+        {
+          "path": "fixtures/public/upstream/wb2axip-LICENSE-2.0.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+      ]
+    },
+    {
+      "id": "avr-pipeline",
+      "repository": "https://github.com/aman-goel/avr",
+      "revision": "9a76dc632066c4416cebccda3a4974a4f8adede8",
+      "license": {
+        "identifier": "GPL-3.0",
+        "evidence": "Repository README directs AVR usage to its GPLv3 LICENSE. pipeline.v has no file-level license header; source-specific README credits Aman Goel and identifies vce11. No separate per-file grant is claimed.",
+        "scope": "Upstream repository license retained alongside verbatim imported material; does not relicense the independent checker."
+      },
+      "files": [
+        {
+          "path": "fixtures/public/upstream/pipeline.v",
+          "sha256": "9a28c1109682583337c71df11383cd451dc941bf0724ca51c820c1e7bf8d2eaa",
+          "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/pipeline/pipeline.v"
+        },
+        {
+          "path": "fixtures/public/upstream/pipeline-README",
+          "sha256": "39b9fe0a5f529f4cde18d432a19fdcf37e1d105adf422b97e1159137b5e5badf",
+          "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/tests/opensource/pipeline/README"
+        },
+        {
+          "path": "fixtures/public/upstream/avr-LICENSE",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+          "url": "https://raw.githubusercontent.com/aman-goel/avr/9a76dc632066c4416cebccda3a4974a4f8adede8/LICENSE"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "R1-fsm",
+      "contract": {
+        "path": "fixtures/contracts/r1_fsm.json",
+        "sha256": "a2928dcf9ecaa9e898c4333e9fe562fccbbd490da6c2b216bef049d682cd2c9c",
+        "hash_encoding": "canonical JSON: rtl_relate.ir.digest"
+      },
+      "clock": {
+        "name": "clk",
+        "edge": "positive"
+      },
+      "reset": null,
+      "sampling": "before_update",
+      "environment": true,
+      "inputs": {
+        "advance": 1
+      },
+      "observations": {
+        "idle": 1,
+        "busy": 1,
+        "done": 1
+      },
+      "property_id": "exactly-one-state-observation",
+      "experiment_status": "NOT_RUN",
+      "source_kind": "authored-control",
+      "source": null,
+      "concrete": {
+        "path": "fixtures/public/fsm/concrete.v",
+        "sha256": "4ef91a887ce80316cc8140a2acb96c27726eb02fdb1fbb25c793fc2641a83cd6"
+      },
+      "top": "fsm_concrete",
+      "parameters": {},
+      "initial_state": {
+        "state": 1
+      },
+      "property_origin": "Authored current-state exactly-one observation predicate",
+      "transition": "advance ? cycle(001,010,100) : hold; illegal encodings are totalized by concrete RTL"
+    },
+    {
+      "id": "R2-skid8",
+      "contract": {
+        "path": "fixtures/contracts/r2_skid8.json",
+        "sha256": "71d949ec52f2b6b8e63c30d52e883ee25f381a2724bfd38f35e5b86db5f75ac2",
+        "hash_encoding": "canonical JSON: rtl_relate.ir.digest"
+      },
+      "clock": {
+        "name": "i_clk",
+        "edge": "positive"
+      },
+      "reset": {
+        "kind": "synchronous",
+        "port": "i_reset",
+        "active": 1,
+        "assumption": "unconstrained"
+      },
+      "sampling": "before_update",
+      "environment": true,
+      "inputs": {
+        "i_reset": 1,
+        "i_valid": 1,
+        "i_data": 8,
+        "i_ready": 1
+      },
+      "observations": {
+        "o_ready": 1,
+        "o_valid": 1,
+        "o_data": 8
+      },
+      "property_id": "output-hold-while-stalled-without-reset",
+      "experiment_status": "NOT_RUN",
+      "source_kind": "public-rtl-derived-property",
+      "source": "zipcpu-skidbuffer",
+      "concrete": {
+        "path": "fixtures/public/upstream/skidbuffer.v",
+        "sha256": "ed1fda9192563fd7fd7033b564e8cf47ad6cb63ba4f578ed2c302037d47a5389"
+      },
+      "top": "skidbuffer",
+      "parameters": {
+        "OPT_OUTREG": 1,
+        "OPT_LOWPOWER": 0,
+        "OPT_PASSTHROUGH": 0,
+        "OPT_INITIAL": 1,
+        "DW": 8
+      },
+      "defines": [],
+      "initial_state": {
+        "LOGIC.r_valid": 0,
+        "LOGIC.r_data": 0,
+        "LOGIC.REG_OUTPUT.ro_valid": 0,
+        "o_data": 0
+      },
+      "reset_effect": "Clears r_valid and ro_valid; LOWPOWER=0 does not directly reset either data register.",
+      "property_origin": "Derived port-level hold property; FORMAL undefined. Not the complete upstream formal harness.",
+      "property_text": "o_valid_t && !i_ready_t && !i_reset_t => o_valid_(t+1) && o_data_(t+1)==o_data_t",
+      "required_covers": [
+        "accepted input",
+        "buffer full",
+        "output stall",
+        "release stall",
+        "reset during stall"
+      ]
+    },
+    {
+      "id": "R3-skid32",
+      "contract": {
+        "path": "fixtures/contracts/r3_skid32.json",
+        "sha256": "f7f70d04945bc7e57e82e88bf864581775a49206987801b4c701ff15d8c2397d",
+        "hash_encoding": "canonical JSON: rtl_relate.ir.digest"
+      },
+      "clock": {
+        "name": "i_clk",
+        "edge": "positive"
+      },
+      "reset": {
+        "kind": "synchronous",
+        "port": "i_reset",
+        "active": 1,
+        "assumption": "unconstrained"
+      },
+      "sampling": "before_update",
+      "environment": true,
+      "inputs": {
+        "i_reset": 1,
+        "i_valid": 1,
+        "i_data": 32,
+        "i_ready": 1
+      },
+      "observations": {
+        "o_ready": 1,
+        "o_valid": 1,
+        "o_data": 32
+      },
+      "property_id": "output-hold-while-stalled-without-reset",
+      "experiment_status": "NOT_RUN",
+      "source_kind": "public-rtl-derived-property",
+      "source": "zipcpu-skidbuffer",
+      "concrete": {
+        "path": "fixtures/public/upstream/skidbuffer.v",
+        "sha256": "ed1fda9192563fd7fd7033b564e8cf47ad6cb63ba4f578ed2c302037d47a5389"
+      },
+      "top": "skidbuffer",
+      "parameters": {
+        "OPT_OUTREG": 1,
+        "OPT_LOWPOWER": 0,
+        "OPT_PASSTHROUGH": 0,
+        "OPT_INITIAL": 1,
+        "DW": 32
+      },
+      "defines": [],
+      "initial_state": {
+        "LOGIC.r_valid": 0,
+        "LOGIC.r_data": 0,
+        "LOGIC.REG_OUTPUT.ro_valid": 0,
+        "o_data": 0
+      },
+      "reset_effect": "Clears r_valid and ro_valid; LOWPOWER=0 does not directly reset either data register.",
+      "property_origin": "Derived port-level hold property; FORMAL undefined. Not the complete upstream formal harness.",
+      "property_text": "o_valid_t && !i_ready_t && !i_reset_t => o_valid_(t+1) && o_data_(t+1)==o_data_t",
+      "required_covers": [
+        "accepted input",
+        "buffer full",
+        "output stall",
+        "release stall",
+        "reset during stall"
+      ]
+    },
+    {
+      "id": "R4-pipe32",
+      "contract": {
+        "path": "fixtures/contracts/r4_pipe32.json",
+        "sha256": "1a2ecdf91605d4cca37334c0b89a846a12013bc71d1fdea64e53fdefb2f4e886",
+        "hash_encoding": "canonical JSON: rtl_relate.ir.digest"
+      },
+      "clock": {
+        "name": "clock",
+        "edge": "positive"
+      },
+      "reset": {
+        "kind": "synchronous",
+        "port": "reset",
+        "active": 1,
+        "assumption": "unconstrained"
+      },
+      "sampling": "before_update",
+      "environment": true,
+      "inputs": {
+        "dataIn": 32,
+        "c1": 32,
+        "c2": 32,
+        "reset": 1
+      },
+      "observations": {
+        "dataOut": 32,
+        "tmp_stageOne": 32,
+        "tmp_stageTwo": 32
+      },
+      "property_id": "pipeline-original-history-sum",
+      "experiment_status": "NOT_RUN",
+      "source_kind": "public-rtl-original-property",
+      "source": "avr-pipeline",
+      "concrete": {
+        "path": "fixtures/public/upstream/pipeline.v",
+        "sha256": "9a28c1109682583337c71df11383cd451dc941bf0724ca51c820c1e7bf8d2eaa"
+      },
+      "top": "main",
+      "parameters": {},
+      "initial_state": {
+        "dataOut": 0,
+        "stageOne": 0,
+        "stageTwo": 0,
+        "tmp_stageOne": 0,
+        "tmp_stageTwo": 0
+      },
+      "reset_effect": "Only dataOut is synchronously reset; stageOne,stageTwo,tmp_stageOne,tmp_stageTwo continue their ordinary updates.",
+      "property_origin": "Original unclocked assert property(prop) at line 40; predicate definition line 38, sampled as a state invariant before updates.",
+      "property_text": "dataOut == tmp_stageTwo + tmp_stageOne || dataOut == 0",
+      "monitor": {
+        "states": {
+          "tmp_stageOne": 32,
+          "tmp_stageTwo": 32
+        },
+        "initial_state": {
+          "tmp_stageOne": 0,
+          "tmp_stageTwo": 0
+        },
+        "next_state": {
+          "tmp_stageOne": "stageOne",
+          "tmp_stageTwo": "stageTwo"
+        },
+        "sampling": "Nonblocking RHS uses current stage values; dataOut and history monitor at t+1 both refer to stages at t.",
+        "extraction": "Expose original monitor states without changing next-state/init. Verify embedded predicate before any design-only assertion removal. Save frontend extraction metadata and hashes."
+      }
+    }
+  ]
+}

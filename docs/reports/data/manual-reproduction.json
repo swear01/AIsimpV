@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "method": "git archive of exact manual-run revision into new source directory; no untracked development files",
+  "revision": "6901b49",
+  "source_archive_sha256": "ceac36cfe610b496bff9d1bfe9458205168b55f4896daefb10de9e3d18f96666",
+  "rows": 12,
+  "same_result_and_model_contract_certificate_hashes": true,
+  "command": "python3 -m rtl_relate.wednesday --out ../manual-recheck",
+  "results": "manual-recheck/summary.json",
+  "timing_use": "verification only; not a repeat for statistical speedup claims"
+}

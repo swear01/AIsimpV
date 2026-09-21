@@ -2,13 +2,35 @@
 import itertools
 import json
 from pathlib import Path
+import random
 import tempfile
 import unittest
 
-from rtl_relate.frontend import Unsupported, export_rtl, parse_btor2
-from rtl_relate.ir import evaluate, validate_model
+from rtl_relate.frontend import Unsupported, _check_netlist, export_rtl, parse_btor2
+from rtl_relate.ir import digest, emit, evaluate, sort, validate_model
+from rtl_relate.solver import query, run
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class NetlistTests(unittest.TestCase):
+    def test_only_supported_flops_contribute_validated_state_bits(self):
+        module = {
+            'ports': {'clk': {'direction': 'input', 'bits': [2]}},
+            'cells': {'good': {'type': '$dff', 'parameters': {'CLK_POLARITY': '1'},
+                               'connections': {'CLK': [2], 'D': [3, 4], 'Q': [3, 4]}}},
+            'netnames': {'q': {'bits': [3, 4], 'attributes': {'init': '00'}}},
+        }
+        self.assertEqual(_check_netlist(module, 'clk'), {3, 4})
+        for kind in ('$dffe', '$sdff', '$sdffe', '$sdffce', '$ff'):
+            module['cells']['uninitialized'] = {
+                'type': kind, 'parameters': {'CLK_POLARITY': '1'},
+                'connections': {'CLK': [2], 'D': [5], 'Q': [5]},
+            }
+            with self.subTest(kind=kind):
+                with self.assertRaises(Unsupported) as failure:
+                    _check_netlist(module, 'clk')
+                self.assertIn(f'unsupported cell {kind} ', str(failure.exception))
 
 
 class FrontendTests(unittest.TestCase):
@@ -61,6 +83,30 @@ class FrontendTests(unittest.TestCase):
                 checked += 1
         self.assertEqual(checked, 520)
 
+    def test_export_version_and_compile_share_one_deadline(self):
+        tool = self.output / 'slow-yosys'
+        tool.write_text('#!/usr/bin/python3\nimport time\ntime.sleep(0.3)\nprint("fake version")\n')
+        tool.chmod(0o755)
+        with self.assertRaisesRegex(Unsupported, 'Yosys timeout'):
+            export_rtl(ROOT / 'fixtures/rtl/p1_concrete.v', 'p1_concrete',
+                       self.output / 'shared-deadline', executable=tool, timeout=0.5)
+
+    def test_malformed_parameter_metadata_is_unsupported(self):
+        tool = self.output / 'malformed-yosys'
+        for index, raw in enumerate((None, '', '10x', '10z', 8, '0010')):
+            with self.subTest(raw=raw):
+                module = {'parameter_default_values': {} if raw is None else {'DW': raw}}
+                netlist = json.dumps({'modules': {'p1_concrete': module}})
+                tool.write_text('#!/usr/bin/env python3\nimport pathlib, sys\n'
+                                'if "-V" in sys.argv: print("Yosys test")\n'
+                                f'else: pathlib.Path("netlist.json").write_text({netlist!r})\n')
+                tool.chmod(0o755)
+                out = self.output / f'malformed-parameter-{index}'
+                with self.assertRaisesRegex(Unsupported, 'defined binary value'):
+                    export_rtl(ROOT / 'fixtures/rtl/p1_concrete.v', 'p1_concrete',
+                               out, executable=tool, parameters={'DW': 8})
+                self.assertEqual(json.loads((out / 'frontend.json').read_text())['status'], 'UNSUPPORTED')
+
     def test_nondeterminism_is_registered_and_provenance_retained(self):
         for name, model in self.models.items():
             metadata = json.loads((self.output / name / 'frontend.json').read_text())
@@ -99,6 +145,7 @@ class FrontendTests(unittest.TestCase):
             gold.replace('8 or 1 5 3', '8 or 1 5 2'),
             gold.replace('4 const 1 0', '4 const 1 x'),
             gold.replace('9 next 1 5 8', '9 next 1 3 8'),
+            gold.replace('8 or 1 5 3', '8 redor 1 5 3 unexpected'),
         ]
         for text in variants:
             with self.subTest(text=text), self.assertRaises(Unsupported):
@@ -118,6 +165,120 @@ class FrontendTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(Unsupported):
                 export_rtl(source, 'bad', self.output / name)
             self.assertEqual(json.loads((self.output / name / 'frontend.json').read_text())['status'], 'UNSUPPORTED')
+
+    def test_reduction_and_inequality_are_bv1(self):
+        text = ('1 sort bitvec 1\n2 sort bitvec 2\n3 input 1 clk\n4 input 2 x\n'
+                '5 state 2 q\n6 zero 2\n7 init 2 5 6\n8 next 2 5 4\n'
+                '9 redor 1 4\n10 output 9 nonzero\n11 neq 1 4 6\n12 output 11 different\n')
+        model = parse_btor2(text, name='reductions', source_sha256='0' * 64)
+        types = validate_model(model)
+        for x in range(4):
+            env = {'btor_4': x, 'btor_5': 0}
+            self.assertEqual({name: evaluate(expr, env, types) for name, expr in model['observe'].items()},
+                             {'nonzero': int(x != 0), 'different': int(x != 0)})
+
+
+class PublicFrontendTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        cls.output = Path(cls.temp.name)
+        cls.sources = ROOT / 'fixtures/public/upstream'
+        cls.pipeline = export_rtl(cls.sources / 'pipeline.v', 'main', cls.output / 'pipeline',
+                                  clock='clock', profile='avr_pipeline32')
+        cls.normalized = export_rtl(cls.output / 'pipeline/normalized.v', 'main',
+                                    cls.output / 'normalized', clock='clock')
+        cls.skids = {}
+        for width in (8, 32):
+            cls.skids[width] = export_rtl(cls.sources / 'skidbuffer.v', 'skidbuffer',
+                cls.output / f'skid{width}', clock='i_clk', parameters={
+                    'DW': width, 'OPT_OUTREG': 1, 'OPT_LOWPOWER': 0,
+                    'OPT_PASSTHROUGH': 0, 'OPT_INITIAL': 1})
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    def test_pipeline_exact_assertion_is_preserved_and_not_assumed(self):
+        model = self.pipeline
+        types = validate_model(model)
+        self.assertEqual(set(model['observe']), {'dataOut', 'tmp_stageOne', 'tmp_stageTwo'})
+        self.assertEqual(sum(s['type'] for s in model['symbols'].values() if s['kind'] == 'state'), 160)
+        assertion = json.loads((self.output / 'pipeline/assertion.json').read_text())
+        self.assertEqual(assertion['model_sha256'], digest(model))
+        bindings = {key: key for key in types}
+        observed = {name: emit(expr, bindings, types) for name, expr in model['observe'].items()}
+        expected = (f"(or (= {observed['dataOut']} (bvadd {observed['tmp_stageTwo']} "
+                    f"{observed['tmp_stageOne']})) (= {observed['dataOut']} (_ bv0 32)))")
+        declarations = [f'(declare-fun {key} () {sort(typ)})' for key, typ in types.items()]
+        mismatch = f"(not (= {emit(assertion['predicate'], bindings, types)} {expected}))"
+        result = run(query(declarations, mismatch, 5000), self.output / 'predicate', 'equivalence')
+        self.assertEqual(result['status'], 'unsat', result)
+        # No init/J/property assumptions: the original predicate must still be falsifiable.
+        result = run(query(declarations, f'(not {expected})', 5000),
+                     self.output / 'predicate', 'nonvacuity')
+        self.assertEqual(result['status'], 'sat', result)
+        self.assertEqual((self.output / 'pipeline/source.v').read_bytes(),
+                         (self.sources / 'pipeline.v').read_bytes())
+
+    def test_pipeline_reset_arithmetic_monitor_and_normalized_rtl(self):
+        random_values = random.Random(42)
+        edge = [0, 1, (1 << 31), (1 << 32) - 1]
+        for model in (self.pipeline, self.normalized):
+            types = validate_model(model)
+            for index in range(200):
+                values = {key: random_values.randrange(1 << width) for key, width in types.items()}
+                if index < len(edge):
+                    values = {key: edge[index] & ((1 << width) - 1) for key, width in types.items()}
+                v = {model['symbols'][key]['origin']: val for key, val in values.items()}
+                expected = {'stageOne': (v['dataIn'] + v['c1']) & 0xffffffff,
+                            'stageTwo': v['stageOne'] & v['c2'],
+                            'tmp_stageOne': v['stageOne'], 'tmp_stageTwo': v['stageTwo'],
+                            'dataOut': 0 if v['reset'] else (v['stageTwo'] + v['stageOne']) & 0xffffffff}
+                actual = {model['symbols'][key]['origin']: evaluate(expr, values, types)
+                          for key, expr in model['next'].items()}
+                self.assertEqual(actual, expected)
+                self.assertEqual({key: evaluate(expr, values, types) for key, expr in model['observe'].items()},
+                                 {key: v[key] for key in model['observe']})
+                self.assertEqual(evaluate(model['init'], values, types),
+                                 all(values[key] == 0 for key in model['next']))
+
+    def test_skid_parameters_and_transition_boundaries(self):
+        for width, model in self.skids.items():
+            types = validate_model(model)
+            self.assertEqual(sum(s['type'] for s in model['symbols'].values() if s['kind'] == 'state'),
+                             2 * width + 2)
+            payloads = [0, 1, (1 << (width - 1)), (1 << width) - 1]
+            for r, v, reset, valid, ready in itertools.product(range(2), repeat=5):
+                for b, q, data in itertools.product(payloads, repeat=3):
+                    vals = {'LOGIC.r_valid': r, 'LOGIC.REG_OUTPUT.ro_valid': v,
+                            'LOGIC.r_data': b, 'o_data': q, 'i_reset': reset,
+                            'i_valid': valid, 'i_ready': ready, 'i_data': data}
+                    env = {key: vals[symbol['origin']] for key, symbol in model['symbols'].items()}
+                    expected = {'LOGIC.r_valid': 0 if reset else 1 if valid and not r and v and not ready else 0 if ready else r,
+                                'LOGIC.REG_OUTPUT.ro_valid': 0 if reset else valid | r if not v or ready else v,
+                                'LOGIC.r_data': data if not r else b,
+                                'o_data': (b if r else data) if not v or ready else q}
+                    actual = {model['symbols'][key]['origin']: evaluate(expr, env, types)
+                              for key, expr in model['next'].items()}
+                    self.assertEqual(actual, expected)
+                    self.assertEqual({key: evaluate(expr, env, types) for key, expr in model['observe'].items()},
+                                     {'o_ready': 1 - r, 'o_valid': v, 'o_data': q})
+            self.assertEqual((self.output / f'skid{width}/source.v').read_bytes(),
+                             (self.sources / 'skidbuffer.v').read_bytes())
+
+    def test_extraction_and_parameter_boundaries_fail_closed(self):
+        changed = self.output / 'changed-pipeline.v'
+        changed.write_text((self.sources / 'pipeline.v').read_text().replace('assert property ( prop );',
+                                                                          'assert property ( 1 );'))
+        with self.assertRaises(Unsupported):
+            export_rtl(changed, 'main', self.output / 'changed', clock='clock', profile='avr_pipeline32')
+        with self.assertRaises(Unsupported):
+            export_rtl(self.sources / 'pipeline.v', 'main', self.output / 'unextracted', clock='clock')
+        for parameters in ({'DW; shell': 8}, {'DW': '8'}, {'DW': True}, {'DW': -1}, {'missing': 8}):
+            with self.subTest(parameters=parameters), self.assertRaises(Unsupported):
+                export_rtl(self.sources / 'skidbuffer.v', 'skidbuffer', self.output / 'invalid-parameters',
+                           clock='i_clk', parameters=parameters)
 
 
 if __name__ == '__main__':
