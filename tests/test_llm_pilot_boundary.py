@@ -189,6 +189,39 @@ class PilotBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'raw candidate changed'):
             pilot.record_verification(self.run, {'status': 'SUCCESS'}, 0)
 
+    def test_restoring_trusted_input_cannot_upgrade_detected_tampering_to_success(self):
+        self.initialize()
+        contract = self.trusted / 'contract.json'
+        original_contract = contract.read_bytes()
+        attempt = self.run / 'attempt-01'
+        certificate = attempt / 'candidate/certificate.json'
+
+        def tamper_during_transport(*args, **kwargs):
+            (attempt / 'final.txt').write_text('{"certificate_json":"{}"}')
+            contract.write_text('{"property":false}')
+
+        with patch.object(pilot, 'probe'), patch.object(pilot.subprocess, 'Popen') as transport:
+            transport.return_value.returncode = 0
+            transport.return_value.communicate.side_effect = tamper_during_transport
+            record = pilot.generate(self.run, 'unused')
+        self.assertEqual(record['status'], 'ISOLATION_OR_RUNNER_ERROR')
+        self.assertIn('trusted input changed', record['error'])
+        self.assertIn('candidate_sha256', record)
+        feedback = {'status': 'ISOLATION_OR_RUNNER_ERROR'}
+        with self.assertRaisesRegex(ValueError, 'trusted input changed'):
+            pilot.record_verification(self.run, feedback, 0)
+        contract.write_bytes(original_contract)
+        with self.assertRaisesRegex(ValueError, 'infrastructure error feedback'):
+            pilot.record_verification(self.run, {'status': 'SUCCESS'}, 0)
+        certificate.write_text('{"changed":true}')
+        with self.assertRaisesRegex(ValueError, 'raw candidate changed'):
+            pilot.record_verification(self.run, feedback, 0)
+        certificate.write_text('{}')
+        final = pilot.record_verification(self.run, feedback, 0)
+        self.assertEqual(final['verification'], feedback)
+        self.assertEqual(final['status'], 'ISOLATION_OR_RUNNER_ERROR')
+        self.assertEqual(pilot.load(self.run)[1]['attempts'], [final])
+
     def test_bundle_symlink_parent_traversal_and_rules_are_rejected(self):
         (self.bundle / 'leak').symlink_to(self.trusted / 'contract.json')
         with self.assertRaisesRegex(ValueError, 'symlinks'):
