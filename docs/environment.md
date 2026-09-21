@@ -31,3 +31,5 @@ budget or measurements. Duplicate `--task` selections fail before creating outpu
 
 Formal subprocess logs retain raw stdout/stderr bytes before UTF-8 decoding.
 Malformed stdout still fails closed; its original bytes remain available for diagnosis.
+After a deadline kill, output draining has a one-second grace limit. Partial logs
+are retained when a descendant keeps a pipe open; cleanup time remains charged.
