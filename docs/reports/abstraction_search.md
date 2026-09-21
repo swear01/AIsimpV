@@ -227,3 +227,13 @@ passed all **177 unit tests**, the complete feasibility demo, the frozen public
 rewrite matrix, and the existing finite-FIFO boundary assessment. The latter
 still reports the older frontend's expected unsupported case; it is not a new
 native-memory performance result.
+
+Post-measurement review removed unused arguments/imports, validated witness
+types before set construction, accepted CRLF rIC3 verdicts, and made the Linux
+solver-cleanup regression use the active Python interpreter with an explicit
+child-start check. The raw-byte candidate preflight remains conservative:
+forbidden tasks and backticks in comments are also rejected. The v1 generation
+and v4 measurement snapshots remain unchanged. The final implementation
+regenerates byte-identical prepared models, property proofs and product proofs
+for all five distinct accepted candidates, and identical models for all 33
+single-cut controls (`post-review-proof-inputs.json` in the raw evidence).

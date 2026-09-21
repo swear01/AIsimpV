@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from rtl_relate.formal import _run
 from rtl_relate.ir import expr_type
-from scripts.screen_baselines import prove, save, sha
+from scripts.screen_baselines import save, sha
 
 PREFIX = '__ar_'
 FORMAL = {'$assert', '$assume', '$cover', '$check', '$live', '$fair',
@@ -211,7 +211,7 @@ def taps(module, names):
     return module, outputs
 
 
-def cut_candidates(module, metadata):
+def cut_candidates(module):
     inputs = {b for p in module['ports'].values() if p['direction'] == 'input' for b in p['bits']}
     result, seen = {}, set()
     for name, net in sorted(module['netnames'].items()):
@@ -225,13 +225,13 @@ def cut_candidates(module, metadata):
     return result
 
 
-def cut_model(concrete, metadata, names):
+def cut_model(concrete, names):
     """Trusted havoc template: remove drivers, add free inputs, retain all monitors.
 
     The original value at each cut is an existential witness. No assumption,
     assertion, uncut driver or initialization constraint is strengthened.
     """
-    available = cut_candidates(concrete, metadata)
+    available = cut_candidates(concrete)
     if (not isinstance(names, list) or any(not isinstance(n, str) for n in names)
             or len(set(names)) != len(names) or not set(names) <= set(available)):
         raise ValueError('unknown or duplicate cutpoint')
@@ -356,11 +356,12 @@ def witnessed_product(concrete, abstract, metadata, certificate, out, yosys, dea
         raise ValueError('every extra abstract input requires exactly one witness')
     types = {side + '.' + n: len(v['bits']) for side, mod in [('c', concrete), ('a', abstract)]
              for n, v in mod['netnames'].items() if n != metadata['clock']}
-    needed = {'c': set(witnesses.values()), 'a': set()}
+    needed = {'c': set(), 'a': set()}
     for name, signal in witnesses.items():
         identifier(name)
         if not isinstance(signal, str) or 'c.' + signal not in types:
             raise ValueError('witness must name a current concrete signal')
+        needed['c'].add(signal)
         if actual[name] != ('input', types['c.' + signal]):
             raise ValueError('witness input direction or width differs')
     for invariant in invariants:

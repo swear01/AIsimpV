@@ -1,8 +1,8 @@
 """The native gate must prove inclusion without constraining the final property."""
-import json
 import os
 from pathlib import Path
 import shutil
+import sys
 from tempfile import TemporaryDirectory
 import unittest
 
@@ -56,22 +56,24 @@ class NativeAbstractionTests(unittest.TestCase):
             self.assertEqual(checked['status'], 'SUCCESS', checked)
             self.assertEqual(checked['property']['assumptions'], 0)
             self.assertGreaterEqual(seconds, checked['property']['seconds'] + checked['correctness']['seconds'])
-            fake = root / 'slow-yosys'
-            child_pid = root / 'child.pid'
-            fake.write_text('#!/usr/bin/python3\nimport subprocess,sys,time\n'
-                'from pathlib import Path\n'
-                'p=subprocess.Popen([sys.executable,"-c","import time; time.sleep(60)"])\n'
-                f'Path({str(child_pid)!r}).write_text(str(p.pid))\n'
-                'time.sleep(60)\n')
-            fake.chmod(0o755)
-            timed, seconds = worker(ROOT, root, same, root / 'timed-worker', 'ai',
-                                    str(fake), smtbmc, 0.5)
-            self.assertEqual(timed['status'], 'UNKNOWN', timed)
-            self.assertLess(seconds, 3)
-            process = Path('/proc') / child_pid.read_text() / 'stat'
-            self.assertTrue(not process.exists() or process.read_text().split()[2] == 'Z',
-                            'timed-out evaluation left a live solver descendant')
-            cut = cut_model(concrete, contract, ['next_q'])
+            if sys.platform.startswith('linux') and Path('/proc/self/stat').is_file():
+                fake = root / 'slow-yosys'
+                child_pid = root / 'child.pid'
+                fake.write_text(f'#!{sys.executable}\nimport subprocess,sys,time\n'
+                    'from pathlib import Path\n'
+                    'p=subprocess.Popen([sys.executable,"-c","import time; time.sleep(60)"])\n'
+                    f'Path({str(child_pid)!r}).write_text(str(p.pid))\n'
+                    'time.sleep(60)\n')
+                fake.chmod(0o755)
+                timed, seconds = worker(ROOT, root, same, root / 'timed-worker', 'ai',
+                                        str(fake), smtbmc, 2)
+                self.assertEqual(timed['status'], 'UNKNOWN', timed)
+                self.assertLess(seconds, 5)
+                self.assertTrue(child_pid.exists(), 'fake frontend did not record its solver child')
+                process = Path('/proc') / child_pid.read_text() / 'stat'
+                self.assertTrue(not process.exists() or process.read_text().split()[2] == 'Z',
+                                'timed-out evaluation left a live solver descendant')
+            cut = cut_model(concrete, ['next_q'])
             cut_source = export_json(cut, 'abstract_design', root / 'cut', yosys)
             cut_property = root / 'cut-property.v'
             cut_property.write_text(property_source(cut_source, cut, contract, 'abstract_design'))
@@ -79,13 +81,17 @@ class NativeAbstractionTests(unittest.TestCase):
                                depth=5, timeout=15)
             self.assertEqual(cut_result['status'], 'CEX', cut_result)
             with self.assertRaises(ValueError):
-                cut_model(concrete, contract, ['clk'])
+                cut_model(concrete, ['clk'])
             candidate = root / 'candidate.v'
             candidate.write_text('module abstract_design(input clk, input [1:0] z,\n'
                 'output reg [1:0] q=0, output reg __ar_a, output reg __ar_en=0);\n'
                 'always @(posedge clk) begin q<=z; __ar_a<=q<=2; __ar_en<=1; end\nendmodule\n')
             abstract = prepare_candidate(candidate, root / 'candidate-prep', yosys)
             cert = {'witnesses': {'z': 'next_q'}, 'invariants': []}
+            for invalid in (['next_q'], {'ref': 'next_q'}):
+                with self.assertRaisesRegex(ValueError, 'current concrete signal'):
+                    witnessed_product(concrete, abstract, contract,
+                        {'witnesses': {'z': invalid}, 'invariants': []}, root / 'invalid-witness', yosys)
             product = witnessed_product(concrete, abstract, contract, cert, root / 'product', yosys)
             gate = prove(product, 'native_product', root / 'gate', yosys, smtbmc, depth=5, timeout=15)
             self.assertEqual(gate['status'], 'SAFE', gate)

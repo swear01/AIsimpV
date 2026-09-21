@@ -218,3 +218,9 @@ passed the previously failed induction check, additionally repeat any distinct
 accepted stateful candidate three times even if a stateless proof-transfer
 candidate had lower total validation time. This preserves the structurally
 different result without replacing the original winner-selection rule.
+
+Post-measurement review cleanup does not replace either frozen snapshot or
+change selection. Check byte identity of all five distinct accepted candidates'
+prepared models and proof inputs, and all 33 single-cut models, against v4;
+retain the comparison in `post-review-proof-inputs.json`. The conservative
+raw-byte preflight also rejects forbidden tokens inside comments.

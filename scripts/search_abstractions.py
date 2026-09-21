@@ -30,6 +30,7 @@ Do not use preprocessing, system tasks (only $signed/$unsigned/$clog2 are allowe
 assumptions/assertions/cover, internal anyseq/anyconst,
 multiple clocks, negative edges or asynchronous resets/writes. Uninitialized
 state/memory is allowed and remains unknown; never assume it has value zero.
+Raw-byte preflight rejects forbidden tasks and backticks even in comments.
 Maximum each output string is 65536 UTF-8 bytes. Choose the representation
 yourself. Fewer state bits is not required; optimize actual proof cost.
 
@@ -110,7 +111,7 @@ def prepare_task(qualification, out, yosys, smtbmc):
                    for n, p in concrete['ports'].items()}, 'normalized_baseline_seconds': result['seconds']})
     save(bundle / 'signal_manifest.json', {n: {'width': len(p['bits'])}
          for n, p in concrete['netnames'].items() if n != metadata['clock']})
-    save(bundle / 'eligible_cutpoints.json', cut_candidates(concrete, metadata))
+    save(bundle / 'eligible_cutpoints.json', cut_candidates(concrete))
     (bundle / 'syntax.md').write_text(SYNTAX)
     save(out / 'bundle-manifest.json', llm_pilot.file_hashes(bundle))
     print(json.dumps({'task': out.name, 'normalized_baseline': result['seconds'],
@@ -131,7 +132,7 @@ def evaluate(snapshot, task, candidate, out, arm, yosys, smtbmc, budget=180):
         if arm in ('templates', 'neuroabs-inspired'):
             if set(cert) != {'cuts'}:
                 raise ValueError('cut selection requires exactly cuts')
-            abstract = cut_model(concrete, metadata, cert['cuts'])
+            abstract = cut_model(concrete, cert['cuts'])
             source = export_json(abstract, 'abstract_design', out / 'abstract', yosys, deadline)
             result['correctness'] = {'status': 'ACCEPTED_BY_CONSTRUCTION',
                                      'cuts': cert['cuts'], 'transformer_sha256': sha(snapshot / 'scripts/native_abstraction.py')}

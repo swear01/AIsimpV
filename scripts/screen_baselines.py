@@ -116,7 +116,7 @@ def prove(source, top, out, yosys, smtbmc, *, depth=20, timeout=45, parameters=N
 
 def classify_ric3(returncode, stdout):
     """rIC3 1.5.2 uses SAT-solver exit codes; require a matching final verdict."""
-    verdicts = re.findall(r'^(UNSAT|SAT|UNKNOWN)$', stdout, re.MULTILINE)
+    verdicts = re.findall(r'^(UNSAT|SAT|UNKNOWN)\r?$', stdout, re.MULTILINE)
     if len(verdicts) != 1:
         return 'ERROR'
     return {(20, 'UNSAT'): 'SAFE', (10, 'SAT'): 'CEX',

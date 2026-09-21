@@ -12,6 +12,7 @@ from scripts.screen_baselines import ROOT, classify_ric3, prove
 class BaselineScreenTests(unittest.TestCase):
     def test_ric3_verdict_requires_matching_exit_and_unique_verdict(self):
         for code, output, expected in ((20, 'UNSAT\n', 'SAFE'), (10, 'SAT\n', 'CEX'),
+                                       (20, 'UNSAT\r\n', 'SAFE'), (10, 'SAT\r\n', 'CEX'),
                                        (30, 'UNKNOWN\n', 'UNKNOWN'), (0, 'UNSAT\n', 'ERROR'),
                                        (20, 'SAT\n', 'ERROR'), (20, 'UNSAT\nSAT\n', 'ERROR'),
                                        (20, 'no verdict', 'ERROR')):
