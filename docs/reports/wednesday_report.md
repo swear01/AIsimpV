@@ -2,11 +2,11 @@
 
 報告與離線簡報依凍結 evidence 人工整理，沒有自動重新產生數據區塊。
 
-報告日：2026-09-23。人工矩陣 `wednesday-20260921-final01` 已凍結；固定 C/A pilot 為 INFRASTRUCTURE_BLOCKED；joint pilot 在兩次內取得 ACCEPTED＋SAFE 候選。
+報告日：2026-09-23。人工矩陣 `wednesday-20260921-final01` 已凍結；原 fixed-pair pilot 保持 INFRASTRUCTURE_BLOCKED，原 joint pilot 在兩次內取得 ACCEPTED＋SAFE。另經生成前預註冊的 fixed-pair follow-up，第一個候選即取得 ACCEPTED＋SAFE。
 
-**人工矩陣的四個指定 rewrite 均通過包含檢查且保留目標 property；四個過粗抽象產生假反例，四份錯證書被拒絕。LLM joint pilot 另自動產生一個 18→10 bits 的安全候選；固定 C/A pilot 則因工具錯誤受阻。**本輪要驗證的是：改變 RTL 內部狀態表示後，能否以 `h / J / w` 證書，讓獨立 checker 確認指定觀察行為包含原設計，再由不讀取證書的 property backend 證明凍結的 safety property。
+**人工矩陣的四個指定 rewrite 均通過包含檢查且保留目標 property；四個過粗抽象產生假反例，四份錯證書被拒絕。LLM joint pilot 另自動產生一個 18→10 bits 的安全候選；獨立 fixed-pair follow-up 在人工固定的 occupancy 抽象上找到可驗證 h/J/w。首輪工具失敗與成本仍完整保留。**本輪要驗證的是：改變 RTL 內部狀態表示後，能否以 `h / J / w` 證書，讓獨立 checker 確認指定觀察行為包含原設計，再由不讀取證書的 property backend 證明凍結的 safety property。
 
-人工指定的改寫可驗證、LLM 能找到改寫、抽象能加快驗證，是三個分開的問題。這份報告分列人工矩陣與自主生成紀錄；沒有重複量測與完整成本證據就不宣稱加速。
+本報告分開回答四個問題：**人工指定改寫能否證成包含、LLM 能否找到可檢查的對應、抽象是否仍能證明目標 property、完整成本是否支持驗證加速**。人工矩陣、對應發現與自由 RTL 生成分列；沒有重複量測與完整成本證據就不宣稱加速。
 
 ## 1. 本輪範圍與結論位置
 
@@ -19,7 +19,7 @@
 | R3-skid32 | 同一公開家族，DW=32；同一 property | 同一改寫，增加資料位寬 | ACCEPTED / SAFE |
 | R4-pipe32 | AVR pipeline；保留原 history-sum property | 兩個 pipeline state → sum＋自由分解 | ACCEPTED / SAFE |
 
-P1 counter/P5 stalled producer 是既有回歸，不增加這四題的分母。FIFO 不屬本輪核心集合。各 task 的確切來源、參數、hash 與 reset 定義見 [source manifest](../../fixtures/public/sources.json) 與 [semantics v1](../semantics_v1.md)。
+P1 counter/P5 stalled producer 是既有回歸，不增加這四題的分母。另做 sfifo 4×8 的接入資格測試，終態 UNSUPPORTED；它不屬本輪四題核心集合，也不是第五個已完成 property task。各 task 的確切來源、參數、hash 與 reset 定義見 [source manifest](../../fixtures/public/sources.json) 與 [semantics v1](../semantics_v1.md)。
 
 ## 2. 語意與獨立檢查邊界
 
@@ -92,9 +92,11 @@ FSM 正反向 certificate 皆通過；skid8/skid32/pipeline 的 good A 各有一
 
 `T_workflow = Σ生成 + Σ前端 + Σ證書 + Σabstract property + Σreplay/strictness/refinement`。所有嘗試和失敗計入；FSM 反向證書單列但納入成本。B0 使用同一 engine、depth 與正常 preprocessing，每個固定 C/contract 僅執行一次，不能因它出現在三個 variant 列中重複相加。suite wall time 另列。以上成本的範圍是這次凍結的正式 run；開發 qualification 與工程回歸不是這 12 筆正式 attempts，也沒有納入本表，不能把本表當作整個研究的投入。人工發現／準備時間未量測，不能把 machine time 當作完整人力成本。
 
-## 6. 兩個獨立 LLM pilots
+## 6. 原始 LLM pilots 與獨立 fixed-pair follow-up
 
-兩個 pilots 各最多 4 個候選、900 秒 generation＋verification 預算，與人工 12 筆基本 attempts 分開。pilot A 固定 C/A，只尋找 certificate；pilot B 只提供 C/contract，產生 A 後重新匯出 manifest 並產生 certificate。它們各是一條回饋修正鏈，不是無回饋／有回饋的對照 ablation。
+### 6.1 首輪兩個 pilots：保留原始終態
+
+首輪兩個 pilots 各最多 4 個候選、900 秒 generation＋verification 預算，與人工 12 筆基本 attempts 分開。pilot A 固定 C/A，只尋找 certificate；pilot B 只提供 C/contract，產生 A 後重新匯出 manifest 並產生 certificate。它們各是一條回饋修正鏈，不是無回饋／有回饋的對照 ablation。
 
 生成端只讀取經審核的 input bundle，其中包含 contract 的唯讀副本，並僅能在限定候選目錄寫入。父端的可信 contract 原件、checker 與檢查紀錄不可由生成端修改；gold certificate、計畫公式、無關對話與 Git metadata 不提供給生成端。固定 C/A 檔案工作區先做 OS probe 與 trusted hash checks；qualification probe 通過不代表真正 Codex 工具啟動路徑也成功。完整 protocol 見 [llm_protocol.md](../llm_protocol.md)。
 
@@ -130,6 +132,40 @@ Joint 在開始前採用獨立 `snapshot-v3` 修訂 transport：將同一經審�
 
 兩個 pilots 的實際欄位與原始 ledger SHA-256 見 [llm-summary.json](data/llm-summary.json)。此小表也收錄 reviewed protocol-amendment sidecar：joint 原 ledger 的 `human_intervention=[]` 不代表整個實驗沒有基礎設施介入；candidate formula assistance 為 false 與 protocol 修改是兩個欄位。
 
+### 6.2 生成前預註冊的 fixed-pair follow-up
+
+新增 run 為 `skid8-certificate-inline-20260921`，來源固定在 `9dd8e24`，沿用相同 R2-skid8 C、人工 occupancy A 與 contract。它在生成前已[公開預註冊](https://github.com/swear01/AIsimpV/issues/9#issuecomment-5754280390)，規範見 [follow-up preregistration](../llm_certificate_followup.md)。這是獨立的新實驗，最多 4 個候選／900 秒；原 run 的四次 infrastructure failures 與 309.740 秒沒有改名、抹除或重設。
+
+模型只收到 C/A RTL、實際 transition model／symbol manifests、固定 contract 與一般 certificate 語法，沒有 gold h/J/w、計畫公式或先前對話。它在**第一個候選**找到：
+
+```text
+h.q = C.q
+h.n = C.r_valid ? 2 : (C.o_valid ? 1 : 0)
+J   = (C.r_valid == 0) || (C.o_valid == 1)
+w.z = C.r_data
+```
+
+其中 `C.o_valid` 是原輸出 valid register 的觀察值。J 即 `r_valid ⇒ o_valid`，由 checker 另證初始化與保持；它不是直接加入 property proof 的假設。certificate 的全部義務通過，獨立 property backend 在自由 z 下仍為 SAFE。這補上了一個含狀態重編碼與非平凡 invariant 的**固定 C/A 對應發現**實例。
+
+A 的 occupancy RTL 是人工預先固定，因此不能將這個成功寫成模型自主發現 occupancy rewrite；也沒有 repair attempt，不能宣稱 formal feedback 造成成功。原 joint pilot 所發現的仍是保留 valid bits、刪除資料 state 的另一份 A，兩者不可混成同一方法對照。
+
+新 run 的[公開摘要](data/llm-certificate-followup.json)記錄：生成 **36.688 秒**、驗證 **1.922 秒**，charged 合計 **38.610 秒**；wall **38.633 秒**。parent verification 中 gate stage 0.510 秒、property stage 1.393 秒，其餘為驗證協調成本。模型為同一 `gpt-5.6-sol / high`，Codex 0.154.0；usage 是 input 19,860／output 1,756 tokens，另記 reasoning output 1,401，不另加總，費用 unavailable。候選原始 SHA-256 為 `c6133e9a6c1d1c43582af6d9d6850481e9b60720cfd06405678830895aa6837d`；原始 ledger SHA-256 為 `daf2335d3b9ef8fa004825635629632c928b6573c43d2214d1e42831009a7709`。
+
+[乾淨 source 重驗](data/llm-certificate-followup-reproduction.json)使用 `git archive 9dd8e24`、保存的原始候選與新輸出目錄，未呼叫模型或修改 candidate。gate 再次 ACCEPTED，六個 query hashes 與原 run 相符；property 再次 SAFE，確認 z 是自由 harness input、沒有 assumptions，base／induction、工具與輸出 artifact hashes 都相符。額外 wall **1.570 秒**，其中 gate＋property stages 為 1.543 秒；這是 saved-candidate 驗證，不是第二次研究 attempt。
+
+### 6.3 研究 attempts 與工程資格成本分開
+
+| Run | 研究 attempts | 終態 | Charged 秒 |
+| --- | ---: | --- | ---: |
+| 原 fixed-pair | 4（0 可驗證候選） | INFRASTRUCTURE_BLOCKED | 309.740 |
+| 原 joint rewrite | 2（1 份 RTL、2 份證書） | SUCCESS | 86.784 |
+| 新 fixed-pair follow-up | 1（無 repair） | SUCCESS | 38.610 |
+| 三個不同 runs 合計 | 7；不可合成方法成功率 | 保留各自終態 | **435.134** |
+
+新增 follow-up 前的工程資格另有 **8.752 秒**：一次不含 RTL／對應提示的 transport smoke 模型呼叫 charged 7.152 秒（wall 7.652 秒，input 11,332／output 18 tokens），以及零模型呼叫的 frozen-backend gold qualification 1.600 秒。這兩筆工程作業另列，不納入 research candidate 的分母。再加獨立重驗 1.570 秒，新 follow-up 的搜尋、資格與首次乾淨重驗小計 **48.932 秒**；其中 research charged 仍是 38.610 秒，研究候選數保持 1。後續封存包與整合的工程驗證成本另見下方證據索引。
+
+Transport smoke 最初把兩則 pre-turn runtime warnings 誤判為 tool calls，原 `qualification.json` 因而記 FAILED。協調端與獨立檢查核對原 events 後，另存 `diagnosis.json` 更正為 PASSED_WITH_RUNTIME_WARNINGS：沒有 actual tool items、沒有追加模型呼叫，原 logs/hashes 仍保留。正式候選工具能力保持關閉，可信 bundle 與候選輸出位元組經 hash 核對；沒有 parent 公式或 RTL 修正。
+
 ## 7. 如何解讀負例
 
 skid8 的一條人工構造 trace：初始 valid=0/data=0；第一拍接受 `0x12` 後 valid=1/data=`0x12`；下一拍 `ready=0, reset=0` 時，coarse A 的 data 卻變成 `0x34`。A-prefix 為 SAT 且違反 hold，C exact replay 為 INFEASIBLE。這是過粗抽象的假反例，不是原 RTL bug。另一個控制則維持 good A，只把 witness 改為 0，checker 在 STEP_MAP 取得 SAT 反證並拒絕它。兩個失敗被不同關卡辨認。
@@ -144,17 +180,41 @@ skid8 的一條人工構造 trace：初始 valid=0/data=0；第一拍接受 `0x1
 
 每條 trace 都須從合法初值可達。本輪若使用人工構造 trace，明列其來源，再用獨立 SMT 查驗 A-prefix、P 違反與 C exact replay；不冒充 solver 自動抽出的反例。
 
-## 8. 報告結論與後續決策
+## 8. 額外 FIFO 接入：有限展開成功，驗證路徑仍不支援
+
+固定 sfifo 4×8、同步單 clock 的小規模配置：`BW=8, LGFLEN=2, OPT_ASYNC_READ=1, OPT_WRITE_ON_FULL=0, OPT_READ_ON_EMPTY=0`。檢查原 RTL 與有限 memory 展開是額外前端資格測試，不增加原四題的成功率分母。實際展開網表有 **42 state bits＝32 個任意初值 memory bits＋10 個有明確初值的 control bits**。沒有為配合 checker 把 memory 補零，也沒有把持續保存的 memory state 當成每拍自由輸入。
+
+| 實際檢查路徑 | 首個可見結果 | 能支持的結論 |
+| --- | --- | --- |
+| 原始 sfifo → 現有 frontend | UNSUPPORTED：`$memwr_v2` | 此路徑未直接支援原 memory write cells |
+| 有限展開網表 → netlist validation | 拒絕 X 分支 | 單純展開 memory 還不足以通過現有語意邊界 |
+| BTOR `-x` → typed parser | 拒絕匿名 state/input 命名 | 匿名自由 input 尚無可檢查的 symbol manifest 綁定 |
+
+**終態為 UNSUPPORTED，equivalence／certificate／property proof 均未完成。** 展開後仍保留 memory 的任意初值，只是必要條件，不構成 normalization 等義證明。現有前端要求每個 state 有明確 init，是後續已知障礙；它並不是本次所有路徑實際遇到的第一個拒絕原因。更完整的初始化與 memory 語意必須另行處理，不能由這次 smoke 宣稱 FIFO ordering 或資料行為已被證明。
+
+四次工程 run 全部保留：初次 audit 因最佳化後 `r_empty` alias 消失而 ERROR（0.504 秒）；修正 alias 檢查與 driver 後的三次均為 UNSUPPORTED（0.599、1.024、0.603 秒）。總 wall **2.731 秒**；另有 missing-executable 故障驗證 0.013 秒，回 ERROR／exit 1。這些是接入與 driver 驗證成本，不是額外研究候選或 property proofs；人工準備未量測。來源 hash、完整精度與每次命令見 [FIFO assessment](fifo_followup.md) 與 [FIFO summary](data/fifo-followup.json)。
+
+根目錄整合後另重跑一次，仍為 UNSUPPORTED，42／32／10 bits 結構相同；額外 assessment wall **0.608 秒**。此筆工程重驗單列，未取代前述四次紀錄。
+
+## 9. 報告結論與後續決策
 
 本輪在 **4/4 個預先指定 tasks** 上驗證了指定人工 rewrite 的包含關係與目標 P，其中公開部分為 **2 個家族、3/3 個實例**。FSM 有雙向證據；兩種公開 rewrite 有嚴格抽象 trace。這證成的是本組合約下的非局部改寫可驗證性，以及 checker/property/replay 能分開辨認錯證書與關係丟失。
 
-全部基本 12 attempts 均得到預期分類，沒有移除失敗列。單次 good workflow 皆高於正常 B0，不能把 state reduction 寫成驗證加速。固定 C/A pilot 的四次工具基礎設施失敗耗盡 attempt cap，0 個可驗證 certificate；其結果是 INFRASTRUCTURE_BLOCKED，無法判斷 LLM 的對應發現能力。Joint pilot 在修訂的 inline transport 下，兩次內取得一個由模型提出的資料狀態刪除候選，gate 與 P 均通過；沒有自動發現 occupancy 重編碼的證據。這支持一次具體候選的自主生成與可驗證性，不能推廣為任意 RTL rewrite 成功率。人工 gold 成果仍與 LLM 結果分開。
+| 研究問題 | 本輪可支持的答案 | 限制 |
+| --- | --- | --- |
+| 人工指定改寫可證嗎？ | 四個 good rewrites 均包含 C，且保留指定 P | 只涵蓋已固定的四個 tasks／兩個公開家族 |
+| LLM 能找到對應嗎？ | 新 fixed-pair follow-up 首候選找到 occupancy h、非平凡 J 與 w；原 joint 另產生資料抽象 | 固定 A 的證書發現與自主 RTL 生成分開；原四次工具失敗仍為 INFRASTRUCTURE_BLOCKED |
+| 抽象有用嗎？ | 四個 good A 可證 P；四個 coarse A 雖 sound 卻有 spurious trace | 有用是對這些目標 properties，並非所有功能或順序性質 |
+| 是否加速？ | 本輪沒有端到端加速證據；單次 good workflow 都高於正常 B0 | state reduction 不等於加速，LLM／失敗／資格檢查成本仍須計入 |
+
+全部基本 12 attempts 均得到預期分類，沒有移除失敗列。新增 fixed-pair 成功補上一次具體的對應發現證據，但不能改寫原工具失敗，不能推廣為一般成功率，也不能宣稱自主找到 occupancy RTL 或 feedback 的因果收益。
 
 若 gold 可證但 LLM 找不到關係，下一步應分析 mapping discovery 與 certificate 格式；若 gate 可過但 P 失敗，下一步是找回 property 所需關係。只有完整時間資料顯示重複求證的成本，才投入 summary reuse 或分解；多 clock、latency 改變、symbolic memory 仍在本輪範圍外。
 
 ### 證據與重跑索引
 
 - [凍結人工 summary](data/manual-summary.json) 與 [12 筆 CSV](data/manual-results.csv)；run ID：`wednesday-20260921-final01`。
+- [Fixed-pair follow-up](data/llm-certificate-followup.json) 與 [乾淨重驗](data/llm-certificate-followup-reproduction.json)：獨立預註冊新 run，保留原始工具失敗；新來源 `9dd8e24` 與原始 ledger/candidate hashes 分別列出。
 - [LLM summary](data/llm-summary.json) 與 [saved-candidate 重驗](data/llm-reproduction.json)：公開選錄含每次真實結果、成本、usage availability、來源 hashes 與 protocol amendment；raw ledgers/events 保留於 evidence ZIP。
 - [乾淨 source reproduction](data/manual-reproduction.json)：12/12 分類與所有 C/A/contract/certificate hashes 相符；source archive SHA-256 `ceac36cfe610b496bff9d1bfe9458205168b55f4896daefb10de9e3d18f96666`。
 - 人工正式 run 的 Git revision：`6901b49`；之後的報告或封存 commit 不改寫此來源識別。
@@ -163,9 +223,12 @@ skid8 的一條人工構造 trace：初始 valid=0/data=0；第一拍接受 `0x1
 - 凍結前 unit suite：**143 tests PASS，27.155 秒**，此 log 已封存於 ZIP。後續整合 LLM driver／基礎設施修復後，另驗證 **145 tests PASS，27.104 秒**；該最新整合 log 由發布端保留，不在前述已凍結 ZIP。工程回歸數不是研究 task 的分母。
 - 發布 review 後的 runner 保護先通過 **155 tests，27.154 秒**，補上程序恰在 timeout 時退出的回歸後為 **156 tests，35.243 秒**：涵蓋 ledger 原子寫入、setup 失敗記帳／停止、候選完整性與 CI 時間上限。這些修正晚於凍結實驗；release tag 與原始 snapshots 保留當時版本，不用新程式冒充原始量測。
 - 後續整合修正另通過 **160 tests，28.536 秒**：保留非 UTF-8 原始工具 logs、共用前端驗證的 state 集合、拒絕部分未初始化 RTL，並要求 sandbox network probe 取得明確權限拒絕。包含真實 OS probe；未新增模型呼叫或改寫凍結實驗。
-- 整合收尾回歸為 **163 tests，43.026 秒**：新增「可信檔案篡改後還原仍不得記成功」與 escaped-descendant timeout 測試；修正後逾時的輸出收集最多額外 1 秒。這是工程修正的驗證，沒有新增研究 attempts。
+- PR #15 的歷史整合回歸為 **163 tests，43.026 秒**：新增「可信檔案篡改後還原仍不得記成功」與 escaped-descendant timeout 測試；修正後逾時的輸出收集最多額外 1 秒。這是工程修正的驗證，沒有新增研究 attempts；不代表新增 follow-up 的最終 CI 結果。
+- 新 follow-up 的[本地工程驗證與成本表](data/followup-verification.json)記錄 **165 tests PASS，36.381 秒**，含真實 OS probe、無 skip；tiny demo 的 SAFE／SPURIOUS_TRACE／BUG 對照亦符合預期。另一次四題／12 attempts 工程回歸全部符合預期，CLI wall 17.913 秒；此結果不替換凍結人工量測。PR／CI 紀錄另見 GitHub，raw records 加入追加 evidence。
+- 封存包 README 命令另經實測：首次缺少輸出父目錄而在 gate 前回 FileNotFoundError，工具回報 wall 1.397 秒，沒有模型／formal 執行；README 加入建立父目錄步驟後，保存候選再驗為 ACCEPTED／SAFE，零模型呼叫、wall 0.992 秒。失敗、文檔修正與額外工程成本另存追加 evidence，不增加研究 attempts。
 - [封存索引](data/evidence-index.json)：2,927 個原檔；ZIP SHA-256 `eb8b11c4e3b112629fbe7e06c8570267d78da006378f53e9e48a61b1051b796e`，可核對下載位元組。
 - [完整 raw evidence ZIP](https://github.com/swear01/AIsimpV/releases/download/wednesday-pilot-2026-09-21/AIsimpV-wednesday-evidence.zip) 保留人工 queries、solver outputs、frontend metadata、strictness/cover/replay traces，及 LLM snapshots、input bundles、prompts、ledger、全部 candidates。附件由主發布流程核驗並上傳；LLM 重新生成具有非決定性，固定候選的驗證可獨立重跑。
+- [追加證據索引](data/followup-evidence-index.json) 與 [follow-up evidence ZIP](https://github.com/swear01/AIsimpV/releases/download/wednesday-pilot-2026-09-21/AIsimpV-wednesday-followup-evidence.zip)：另存新 fixed-pair 的預註冊、input bundle、原始候選、ledger、獨立重驗與 FIFO 接入紀錄。原 release tag、ZIP 與首輪簡報附件保留，更新簡報另附為 `wednesday-slides-complete.html`。
 
 主 runner 已實際執行下列介面；重跑使用新的輸出目錄，不覆蓋凍結 evidence。先依 [環境設定](../environment.md) 準備相同工具。
 
