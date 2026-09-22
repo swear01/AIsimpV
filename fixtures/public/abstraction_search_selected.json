@@ -1,0 +1,62 @@
+{
+  "selection": "first three complete SAFE pilot results in [20,60], before abstraction",
+  "tasks": {
+    "sfifo_sync256_d256": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 256,
+        "LGFLEN": 8,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync512_d64": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 512,
+        "LGFLEN": 6,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    },
+    "sfifo_sync512_d256": {
+      "top": "sfifo",
+      "repository": "https://github.com/ZipCPU/wb2axip",
+      "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+      "path": "rtl/sfifo.v",
+      "url": "https://raw.githubusercontent.com/ZipCPU/wb2axip/2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b/rtl/sfifo.v",
+      "sha256": "76a653781f1ecca1c1da92c4e5105ecd5d0f832b13cbfd31300ec88d9947e0c1",
+      "parameters": {
+        "BW": 512,
+        "LGFLEN": 8,
+        "OPT_ASYNC_READ": 0,
+        "OPT_WRITE_ON_FULL": 0,
+        "OPT_READ_ON_EMPTY": 0
+      },
+      "defines": [
+        "SFIFO"
+      ],
+      "recommended_depth": 4
+    }
+  }
+}
