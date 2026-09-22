@@ -1,138 +1,122 @@
-# Bounded Codex pilots
+# Bounded direct-API pilots
 
-This runner implements issue #8. Boundary tests alone do not imply a discovery result.
-The current transport supplies the audited bundle verbatim inside the prompt,
-with canonical JSON hashes as metadata. Codex returns schema-constrained strings
-for RTL/certificate text; the parent materializes them without editing formulas,
-RTL or hashes. Model shell tools and Code Mode are disabled. Output filenames are
-fixed, strings are bounded, and parent writes reject symlinks and hardlinks.
-The parent verifier authorizes the frozen input bundle and starts the two pilots
-only after the skid8 gold pair has passed its checks. Each pilot has its own
-ledger, at most four submitted candidates, and 900 seconds for generation plus
-frontend, certificate, property and replay work. Syntax/type failures count.
+The current runner calls provider Chat Completions APIs directly using Python's
+standard library. It never starts Codex CLI or loads its configuration, system
+prompt, rules, skills, tools or conversation history. Each request contains one
+`user` message: the explicit task prompt, output JSON schema, canonical input
+hashes and the complete audited bundle. Repair attempts add only this run's raw
+candidate and actual independent verification feedback. Provider-side behavior
+is outside this runner; removing the CLI does not imply access to a raw model.
 
-The certificate pilot receives C, the fixed A, their actual manifests, the frozen
-contract, and certificate syntax. The rewrite pilot receives C, its manifest,
-the contract, permitted RTL syntax and certificate syntax. Neither input bundle
-contains a gold certificate, candidate formulas from the research plan, unrelated
-conversations, Git metadata or agent instructions. The trusted parent must audit
-bundle **contents**: a filesystem allowlist cannot detect a solution pasted into
-an otherwise permitted text file.
+## Models and credentials
 
-Use the installed Codex CLI and the existing OpenAI model/reasoning configuration.
-Initialization reads only the configured model and effort into the public run
-configuration; the complete configuration is hashed, not copied. Each generation
-is a fresh, ephemeral `codex exec`, ignoring user configuration and rules, with
-project instruction loading, host skill discovery, hooks, plugins, apps, memories,
-web search and subagents disabled. Authentication remains with the existing Codex
-installation; the runner never copies credentials. The generation tools receive
-a read allowlist for the bundle and minimum runtime, a single candidate directory
-as their writable host scope, and no network access. The model service connection
-is handled by Codex itself, outside the model's shell sandbox.
+[`scripts/llm_models.toml`](../scripts/llm_models.toml) freezes both profiles:
 
-Before the first generation, an actual `codex sandbox` probe checks the underlying
-local-command profile: bundle read,
-bundle overwrite rejection, candidate writes, hidden-file and symlink read
-rejection, preservation of parent files, and blocked tool networking.
-Network denial requires `PermissionError` with `EPERM` or `EACCES`; timeout,
-connection refusal, and an unreachable network fail the probe.
-Some non-mounted parent paths may be writable inside an ephemeral namespace; the probe
-also checks that these writes do not affect the host. Codex 0.154.0 cannot reliably
-mount individual writable files, so the candidate directory is writable and the
-parent rejects extra paths, symlinks and non-regular files afterwards. This is an
-OS-enforced local-tool boundary, not a claim against defects in Codex or the OS.
-If the probe fails, no model call occurs and the pilot remains blocked. This
-probe does not qualify the entire `codex exec` tool stack: the original file-tool
-transport passed it but subsequently failed in a nested bwrap loopback setup.
-That failure is why the current transport needs no model filesystem commands.
+| CLI provider | Model | Endpoint | Credential environment variable |
+| --- | --- | --- | --- |
+| `meta` (default) | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1/chat/completions` | `META_API_KEY` |
+| `deepseek` | `deepseek-flash` (V4.1 Flash) | `https://api.deepseek.com/chat/completions` | `DEEPSEEK_API_KEY` |
 
-Only `certificate.json` is accepted in certificate mode. Rewrite mode additionally
-accepts `abstract.v`. A generated `SAFE` statement or verdict file has no authority.
-C, contract, checker and harness files are outside the writable scope and are
-hashed before and after each generation and before recording verification.
-Parents verify **raw saved candidates**; candidate changes after capture are
-rejected. Model output remains untrusted RTL: the parent must prohibit external
-`include`/`readmem`/system-task reads or isolate Yosys before compiling it.
+Both use `reasoning_effort=high`, JSON-object output and a 16,384-token completion
+cap; DeepSeek explicitly enables thinking. Temperature/top-p remain provider
+defaults. The exact provider-specific request parameters are saved per attempt.
+These settings do not imply equal reasoning effort across providers.
 
-The runner is deliberately separate from verification:
+Keys must already exist in the launching process's environment. They are sent
+only as authorization headers, never copied into the project, prompts, commands
+or ledgers. HTTP redirects are refused. Missing keys fail explicitly; API failures
+are recorded and stop the orchestration. There is no automatic provider fallback
+or hidden retry. Use a separate run/workspace for each provider. The default is
+Meta because it passed the live qualification below; DeepSeek is an explicit
+selection until its account has usable credit.
+
+Official references: [DeepSeek V4.1 Flash model ID](https://api-docs.deepseek.com/zh-cn/news/news260910/),
+[Meta Chat Completions](https://dev.meta.ai/docs/protocols/chat-completions).
+
+## Experiment boundary and evidence
+
+The certificate pilot receives C, fixed A, their manifests, the frozen contract
+and certificate syntax. The rewrite pilot receives C, its manifest, the contract
+and permitted syntax. The coordinator audits bundle **contents**: never include
+gold certificates, relationship hints, unrelated conversations or agent rules.
+Generated text has no tool access. The parent materializes exact JSON string
+values into `certificate.json` and, in rewrite mode, `abstract.v`; it rejects
+extra paths, symlinks, hardlinks and strings larger than 65,536 bytes. Only the
+independent verifier can produce an accepted result. Untrusted RTL is checked
+for forbidden external file reads before Yosys receives it.
+
+Each run retains four attempts and 900 seconds shared by generation and
+verification. A separate HTTP worker is killed at the remaining wall-time limit,
+including a stalled response body. Initialization freezes the model configuration,
+runner and trusted inputs by hash. The parent rechecks them after generation and
+before recording verification. Failed setup reserves and charges an attempt;
+existing candidate files are never overwritten by a repeated setup. Interrupted
+`RUNNING` records require investigation. One coordinator owns each run directory.
+
+Retain `prompt.txt`, `output-schema.json`, `inline-inputs.json`, `request.json`,
+`response.json` (when received), `command.json`, `stderr.txt`, `final.txt` (when
+available), raw candidates and their hashes. The ledger records requested and
+returned model IDs, request/response hashes, finish reason, token usage, generation
+time and exact verifier feedback/time. Truncated, refused, tool-call or malformed
+responses cannot become valid candidates. Token usage includes provider-reported
+reasoning/cache details when available; `cost_usd` remains null rather than guessed.
+No test fixture or transport smoke result counts as a research result.
 
 ```sh
 python scripts/llm_pilot.py init --run results/llm-certificate \
   --bundle /absolute/path/to/audited-certificate-input \
   --trusted rtl_relate --trusted /absolute/path/to/frozen-contract-and-harness \
-  --mode certificate
+  --mode certificate --provider meta
 python scripts/llm_pilot.py generate --run results/llm-certificate \
   --prompt /absolute/path/to/parent-written-prompt.txt
-# Parent runs the real frontend/checker/property/replay, timing all stages.
+# Parent runs the real frontend/checker/property/replay and measures all stages.
 python scripts/llm_pilot.py record-check --run results/llm-certificate \
   --feedback /absolute/path/to/real-feedback.json --seconds 12.34
 ```
 
-The sample `12.34` is a command placeholder, not a measurement. The equivalent
-Python interface is `initialize(run, bundle, trusted_paths, mode)`,
-`generate(run, prompt_text)` and `record_verification(run, feedback_object, seconds)`.
-The parent checks the ledger's remaining budget before running each verification
-stage and sets stage timeouts accordingly. It charges frontend failures and all
-formal/replay costs. Generation automatically uses the remaining total budget as
-its timeout. Wall time is separately retained, including coordination idle time;
-it is not silently substituted for charged tool time. No concurrent writer may
-operate on one run directory. Each generation reserves an attempt before launch;
-an interrupted `RUNNING` record needs explicit investigation and is not retried
-under a fresh budget.
+`12.34` is a placeholder, not a measurement. The Python entry point is
+`initialize(run, bundle, trusted_paths, mode, provider='meta')`; the other entry
+points remain `generate(run, prompt_text)` and
+`record_verification(run, feedback_object, seconds)`. Both task drivers expose
+`--provider meta|deepseek`. For native RTL searches, use
+`search_abstractions.py run ... --arm ai --provider meta`; `templates` uses no LLM.
 
-The development runner writes ledgers atomically and reserves the attempt before
-candidate setup or the isolation probe. Setup failures retain their elapsed cost
-and terminate as `ISOLATION_OR_RUNNER_ERROR`; resuming that terminal run returns
-the same ledger without another attempt. Existing candidate directories are never
-cleared. Every infrastructure-failed attempt permits only infrastructure-error
-feedback, even if a candidate hash exists and modified trusted files are later
-restored. Candidate hashes still must match. These post-pilot guards do not modify the archived runner
-snapshots or retroactively change the original measurements.
+Protocol version 2 refuses legacy Codex ledgers. Reproduce historical runs with
+their frozen snapshots, and start new directories for API runs. Do not replace
+old model labels or measurements. Human formula/RTL repairs require an assisted
+label; record protocol amendments separately from candidate assistance.
 
-A repair prompt includes the prior candidate, its real checker feedback and any
-new manifest verbatim. These are parent-selected task inputs, not inherited chat
-history. A changed A must be exported again; the old certificate hashes are not
-silently accepted. No human supplies h/J/w repairs while calling the outcome
-unassisted discovery. Record infrastructure/protocol amendments separately from
-candidate formula assistance. Use the ledger's `human_intervention` list, or a
-reviewed sidecar bound to the immutable raw ledger SHA256; do not interpret an
-empty raw list as proof that no protocol amendment occurred. Human formula/RTL
-repairs require an assisted-result label.
-
-For every attempt retain `prompt.txt`, `events.jsonl`, `stderr.txt`, `final.txt`,
-`command.json`, raw candidate files/hashes, generation status/time, exact formal
-feedback, charged verification time, and any usage emitted by Codex. `usage` and
-`cost_usd` remain null when unavailable. The CLI model option and CLI version are
-recorded; the provider's internal model routing is not inferred. The ledger has
-parent-only verification records and source hashes. Audit the run before public
-publication: preserve the original private copy and redact machine-specific paths
-from a separately marked public copy if necessary. Never publish auth/config
-contents or unrelated session history.
-
-Run the boundary checks without making model requests:
+Boundary checks need no API credentials or external model calls:
 
 ```sh
 python -m unittest discover -s tests -p test_llm_pilot_boundary.py -v
 ```
 
-The live OS probe requires Linux, `/usr/bin/python3`, and a current Codex CLI. CI
-without Codex skips that one check; it does not claim isolation was tested there.
-Pilot paths and their ancestors must be physical directories without symlinks;
-symlinked roots are deliberately rejected rather than normalized across the boundary.
-The other checks cover symlink and path escape, contract tampering, unauthorized
-candidate files, mutation after capture, shared budget and attempt enforcement.
-No mock result from these tests counts as an LLM experiment.
+They include a real local HTTP worker exchange, credential exclusion, frozen
+inputs, candidate tampering, truncated output, redirects, shared budget and hard
+timeout handling. Paths and ancestors must be physical, without symlinks.
 
-Official references: [permission profiles](https://learn.chatgpt.com/docs/permissions)
-and [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
-The installed CLI's `exec --help`, `sandbox --help` and feature list were also
-checked; profiles are currently a beta interface and the live probe is required
-again when changing the tool version.
+## Live transport qualification (2026-09-22)
+
+A separate trivial JSON task, containing no RTL or relationship hints, tested
+both configured APIs. Muse Spark returned `muse-spark-1.3-contributor`, passed
+verbatim materialization in 10.389 seconds, and reported 174 prompt tokens plus
+657 completion tokens (635 reasoning; 831 total). DeepSeek's authenticated model
+listing included `deepseek-flash`, but generation returned HTTP 402 in 0.578 seconds
+([insufficient balance](https://api-docs.deepseek.com/quick_start/error_codes/));
+DeepSeek generation is **not qualified** yet. Its failed attempt is retained.
+
+Private raw evidence is under
+`/home/swear01/AIsimpV/artifacts/direct-api-models-20260922/`: immutable transport
+snapshot, prompt/request/response, candidates and both ledgers. This is API
+qualification only; it supplies no new RTL correctness or speedup measurement.
+
+## Task-specific orchestration
 
 The task-specific orchestration is `scripts/run_llm_experiments.py`. `prepare`
 checks the accepted qualification's canonical C/A/contract hashes and the
 normalized RTL hashes, then copies only trusted core modules, C/A/contract,
-the two harness scripts and the audited input whitelist into a read-only snapshot.
+the two harness scripts, `llm_models.toml` and the audited input whitelist into a read-only snapshot.
 A certificate bundle contains C, A, contract and generic syntax; a rewrite bundle
 contains C, contract and the same syntax. Initial prompts are kept separately
 with audit hashes. The concrete task is skid8 and the rewrite pilot explicitly
@@ -149,10 +133,10 @@ python scripts/run_llm_experiments.py prepare --source-root /path/to/qualified/r
 # After coordinator audit; preserve the original audit and record its approval.
 RTL_RELATE_YOSYS=/path/to/yowasp-yosys \
   python /path/to/new/pilot-workspace/snapshot/scripts/run_llm_experiments.py run \
-  --workspace /path/to/new/pilot-workspace --mode certificate
+  --workspace /path/to/new/pilot-workspace --mode certificate --provider meta
 RTL_RELATE_YOSYS=/path/to/yowasp-yosys \
   python /path/to/new/pilot-workspace/snapshot/scripts/run_llm_experiments.py run \
-  --workspace /path/to/new/pilot-workspace --mode rewrite
+  --workspace /path/to/new/pilot-workspace --mode rewrite --provider meta
 ```
 
 Both pilots stop at their first qualifying success or their fixed budget. Each
@@ -192,6 +176,11 @@ The current parent materialization additionally uses directory descriptors,
 `O_NOFOLLOW` and single-link regular-file validation. This hardening postdates
 the measured v3 run; its old source and raw candidates remain unchanged.
 
+## Historical Codex experiments
+
+All September 21 results below used the archived Codex runner, not the current
+direct API implementation. Their snapshots, ledgers and measured costs are unchanged.
+
 For the recorded September 21 execution, fixed-pair attempts 1–2 used the original
 file-tool transport and attempts 3–4 used its unsuccessful Code Mode workaround.
 All four failed at infrastructure access before a meaningful certificate was
@@ -215,8 +204,8 @@ seconds beyond the original two pilots' allocation. Keep the original ledgers,
 attempt counts and costs; report this run separately and include it in cumulative
 costs. It is not a resume or reset of the infrastructure-blocked run.
 
-The fixed C/A/contract bytes are unchanged. The merged runner uses the inline
-transport already used by the joint pilot. Before research generation, a separate
+The fixed C/A/contract bytes are unchanged. That historical run used the inline
+Codex transport already used by the joint pilot. Before research generation, a separate
 trivial structured-output model call qualifies that actual transport; its prompt
 contains no RTL or relationship hints. Save its cost and any diagnosis separately
 from research attempts. A subsequent clean-source verification of saved candidates

@@ -1,10 +1,9 @@
 """Exercise the candidate/trusted boundary without substituting fake LLM results."""
-import errno
 import hashlib
 import importlib.util
 import json
 from pathlib import Path
-import shutil
+import os
 import sys
 import tempfile
 import unittest
@@ -27,15 +26,13 @@ class PilotBoundaryTests(unittest.TestCase):
         self.trusted.mkdir()
         (self.trusted / 'contract.json').write_text('{}')
         self.run = self.root / 'run'
-        config = self.root / '.codex'
-        config.mkdir()
-        (config / 'config.toml').write_text('model="configured-model"\nmodel_reasoning_effort="high"\n')
+        environment = patch.dict(os.environ, {'DEEPSEEK_API_KEY': 'unit-test-deepseek-secret',
+                                               'META_API_KEY': 'unit-test-meta-secret'})
+        environment.start()
+        self.addCleanup(environment.stop)
 
     def initialize(self):
-        with patch.object(pilot.Path, 'home', return_value=self.root), \
-                patch.object(pilot.shutil, 'which', return_value='/usr/bin/codex'), \
-                patch.object(pilot.subprocess, 'check_output', return_value='codex-cli test'):
-            return pilot.initialize(self.run, self.bundle, [self.trusted], 'certificate')
+        return pilot.initialize(self.run, self.bundle, [self.trusted], 'certificate', 'deepseek')
 
     def test_failed_atomic_save_preserves_previous_json(self):
         ledger = self.initialize()
@@ -50,12 +47,11 @@ class PilotBoundaryTests(unittest.TestCase):
 
     def test_timeout_keeps_its_status_when_the_process_group_has_exited(self):
         ledger = self.initialize()
-        ledger['isolation'] = 'LOCAL_COMMAND_READ_WRITE_NETWORK_PROBE_PASSED'
         pilot.save(self.run, ledger)
         with patch.object(pilot.subprocess, 'Popen') as launch, \
                 patch.object(pilot.os, 'killpg', side_effect=ProcessLookupError) as kill:
             process = launch.return_value
-            process.communicate.side_effect = [pilot.subprocess.TimeoutExpired('codex', 900), None]
+            process.communicate.side_effect = [pilot.subprocess.TimeoutExpired('api worker', 900), None]
             record = pilot.generate(self.run, 'unused')
         kill.assert_called_once_with(process.pid, pilot.signal.SIGKILL)
         self.assertEqual(process.communicate.call_count, 2)
@@ -67,13 +63,13 @@ class PilotBoundaryTests(unittest.TestCase):
 
     def test_preflight_failure_reserves_and_charges_attempt_without_model_call(self):
         self.initialize()
-        with patch.object(pilot, 'probe', side_effect=pilot.subprocess.TimeoutExpired('probe', 20)), \
+        with patch.dict(os.environ, {'DEEPSEEK_API_KEY': ''}), \
                 patch.object(pilot.time, 'monotonic', side_effect=[100, 102]), \
                 patch.object(pilot.subprocess, 'Popen') as launch:
             record = pilot.generate(self.run, 'unused')
         launch.assert_not_called()
         self.assertEqual(record['status'], 'ISOLATION_OR_RUNNER_ERROR')
-        self.assertIn('timed out', record['error'])
+        self.assertIn('missing credential environment variable', record['error'])
         ledger = pilot.load(self.run)[1]
         self.assertEqual(ledger['attempts'], [record])
         self.assertEqual(record['generation_seconds'], 2)
@@ -152,9 +148,6 @@ class PilotBoundaryTests(unittest.TestCase):
             return mkdir(path, *args, **kwargs)
 
         with patch.object(experiments, '__file__', str(snapshot / 'scripts/run_llm_experiments.py')), \
-                patch.object(Path, 'home', return_value=self.root), \
-                patch.object(pilot.shutil, 'which', return_value='/usr/bin/codex'), \
-                patch.object(pilot.subprocess, 'check_output', return_value='codex-cli test'), \
                 patch.object(pilot.subprocess, 'Popen') as launch, \
                 patch.object(Path, 'mkdir', autospec=True, side_effect=fail_candidate), \
                 patch.object(pilot.time, 'monotonic', side_effect=[100, 102, 103, 104]):
@@ -197,10 +190,11 @@ class PilotBoundaryTests(unittest.TestCase):
         certificate = attempt / 'candidate/certificate.json'
 
         def tamper_during_transport(*args, **kwargs):
-            (attempt / 'final.txt').write_text('{"certificate_json":"{}"}')
+            (attempt / 'response.json').write_text(json.dumps({'choices': [{
+                'finish_reason': 'stop', 'message': {'content': '{"certificate_json":"{}"}'}}]}))
             contract.write_text('{"property":false}')
 
-        with patch.object(pilot, 'probe'), patch.object(pilot.subprocess, 'Popen') as transport:
+        with patch.object(pilot.subprocess, 'Popen') as transport:
             transport.return_value.returncode = 0
             transport.return_value.communicate.side_effect = tamper_during_transport
             record = pilot.generate(self.run, 'unused')
@@ -322,37 +316,84 @@ class PilotBoundaryTests(unittest.TestCase):
         source.write_text('module abstract_design; endmodule')
         validate_candidate_rtl(source)
 
-    def test_network_probe_accepts_only_explicit_permission_denials(self):
-        for code in (errno.EPERM, errno.EACCES):
-            with self.subTest(errno=code), patch('socket.socket') as socket:
-                socket.return_value.connect.side_effect = PermissionError(code, 'denied')
-                exec(pilot.NETWORK_PROBE, {})
-                socket.return_value.connect.assert_called_once_with(('1.1.1.1', 443))
-        for error in (TimeoutError(errno.ETIMEDOUT, 'timeout'),
-                      ConnectionRefusedError(errno.ECONNREFUSED, 'refused'),
-                      OSError(errno.ENETUNREACH, 'offline'),
-                      PermissionError(errno.EINVAL, 'unexpected errno')):
-            with self.subTest(error=error), patch('socket.socket') as socket:
-                socket.return_value.connect.side_effect = error
-                with self.assertRaises(type(error)):
-                    exec(pilot.NETWORK_PROBE, {})
-        with patch('socket.socket'):
-            with self.assertRaisesRegex(SystemExit, 'network boundary failed'):
-                exec(pilot.NETWORK_PROBE, {})
+    def test_no_codex_config_dependency_and_frozen_provider(self):
+        with patch.object(Path, 'home', side_effect=AssertionError('must not read user config')):
+            ledger = self.initialize()
+        self.assertEqual(ledger['model'], 'deepseek-flash')
+        self.assertEqual(ledger['api']['api_key_env'], 'DEEPSEEK_API_KEY')
+        meta = pilot.initialize(self.root / 'meta-run', self.bundle, [self.trusted], 'certificate', 'meta')
+        self.assertEqual(meta['model'], 'muse-spark-1.3-contributor')
+        self.assertEqual(meta['api']['api_key_env'], 'META_API_KEY')
+        legacy = dict(ledger, version=1)
+        pilot.save(self.run, legacy)
+        with self.assertRaisesRegex(ValueError, 'legacy Codex run'):
+            pilot.load(self.run)
 
-    @unittest.skipUnless(shutil.which('codex') and Path('/usr/bin/python3').exists(), 'live Codex sandbox unavailable')
-    def test_live_os_boundary_blocks_gold_contract_write_and_network(self):
+    def test_completion_rejects_incomplete_or_tool_responses_and_keeps_usage(self):
+        for choice in ({'finish_reason': 'length', 'message': {'content': '{}'}},
+                       {'finish_reason': 'stop', 'message': {'content': '{}', 'tool_calls': [{}]}},
+                       {'finish_reason': 'stop', 'message': {'content': '{}', 'refusal': 'no'}},
+                       {'finish_reason': 'stop', 'message': {'content': None}}):
+            record = {}
+            with self.subTest(choice=choice), self.assertRaises(ValueError):
+                pilot.completion({'choices': [choice], 'usage': {'total_tokens': 7}, 'model': 'fixture'}, record)
+            self.assertEqual(record['usage'], {'total_tokens': 7})
+            self.assertEqual(record['response_model'], 'fixture')
+        with self.assertRaisesRegex(ValueError, 'exactly one'):
+            pilot.completion({'choices': []}, {})
+
+    def test_real_http_worker_sends_only_explicit_prompt_and_keeps_credentials_out_of_artifacts(self):
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        import threading
+        received = []
+        raw = {'model': 'fixture-model', 'usage': {'total_tokens': 12}, 'choices': [
+            {'finish_reason': 'stop', 'message': {'content': '{"certificate_json":"{}"}'}}]}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                received.append((dict(self.headers), self.rfile.read(int(self.headers['Content-Length']))))
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(json.dumps(raw).encode())
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
         ledger = self.initialize()
-        ledger['codex'] = shutil.which('codex')
-        runtime = Path(ledger['codex']).resolve()
-        ledger['runtime'] = str(runtime.parent.parent if runtime.suffix == '.js' else runtime)
-        candidate = self.run / 'candidate'
-        candidate.mkdir()
-        (candidate / 'certificate.json').write_text('')
-        pilot.probe(self.run, ledger, candidate)
-        self.assertEqual(ledger['isolation'], 'LOCAL_COMMAND_READ_WRITE_NETWORK_PROBE_PASSED')
-        self.assertEqual((self.run / 'boundary-gold.txt').read_text(), 'do not expose')
-        self.assertFalse((self.run / 'parent-verdict.json').exists())
+        ledger['api']['endpoint'] = f'http://127.0.0.1:{server.server_port}/chat/completions'
+        pilot.save(self.run, ledger)
+        record = pilot.generate(self.run, 'unit-test task prompt')
+        self.assertEqual(record['status'], 'GENERATED', record)
+        self.assertEqual(record['usage'], raw['usage'])
+        self.assertEqual(record['response_model'], raw['model'])
+        headers, body = received[0]
+        self.assertEqual(headers['Authorization'], 'Bearer unit-test-deepseek-secret')
+        request = json.loads(body)
+        self.assertEqual(set(request) & {'tools', 'tool_choice'}, set())
+        self.assertEqual([m['role'] for m in request['messages']], ['user'])
+        self.assertIn('unit-test task prompt', request['messages'][0]['content'])
+        self.assertIn('module concrete; endmodule', request['messages'][0]['content'])
+        self.assertNotIn('contract.json', request['messages'][0]['content'])
+        self.assertEqual(request['model'], 'deepseek-flash')
+        self.assertEqual(request['thinking'], {'type': 'enabled'})
+        attempt = self.run / 'attempt-01'
+        self.assertEqual(body, (attempt / 'request.json').read_bytes())
+        self.assertEqual(record['request_sha256'], hashlib.sha256(body).hexdigest())
+        self.assertEqual((attempt / 'candidate/certificate.json').read_text(), '{}')
+        for path in self.run.rglob('*'):
+            if path.is_file():
+                self.assertNotIn(b'unit-test-deepseek-secret', path.read_bytes(), path.name)
+                self.assertNotIn(b'unit-test-meta-secret', path.read_bytes(), path.name)
+        pilot.record_verification(self.run, {'status': 'UNIT_TEST_ONLY'}, 0)
+
+    def test_redirects_cannot_forward_authorization(self):
+        with self.assertRaisesRegex(ValueError, 'redirects are forbidden'):
+            pilot.NoRedirect().redirect_request(None, None, 302, '', {}, 'https://other.example/')
 
 
 if __name__ == '__main__':

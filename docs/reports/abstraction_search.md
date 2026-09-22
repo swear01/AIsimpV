@@ -204,10 +204,13 @@ omit `--candidate`, and choose a fresh `--out` directory. Repeat prepare/run for
 the other catalog entries and arms `templates` and `neuroabs-inspired`.
 Keep proofs serial. A new model search is stochastic; replaying the saved bytes
 is the way to reproduce the reported candidates exactly.
-Generation uses the existing authenticated Codex CLI and records its version,
-model, reasoning effort, actual usage and all attempts. It first probes the
-local isolation boundary; failure refuses generation. No hidden gold candidate
-or verifier outputs are part of the initial model bundle.
+The reported generation used the archived Codex CLI runner; all numbers in this
+report retain that provenance. Since September 22, new searches use the
+[direct-API runner](../llm_protocol.md), defaulting to Muse Spark 1.3 Contributor;
+add `--provider deepseek` for V4.1 Flash once its account has usable credit.
+The runner saves exact prompts, requests, responses and token usage without any
+Codex system prompt. New API results must be reported separately. No hidden gold
+candidate or verifier outputs are part of the initial model bundle.
 
 The optional secondary engine accepts `--ric3 /absolute/path/to/rIC3`; this
 experiment pins version 1.5.2 and its single-thread `-e ic3` interface. Build with

@@ -29,6 +29,8 @@ python3 -m rtl_relate.wednesday --out results/my-wednesday-run
 
 Use a new output directory for each run. The demo preserves all queries, solver outputs, models, contracts, certificates, RTL copies, Yosys exports and metadata, traces, and timing. It exits nonzero if any expected result is missing or wrong. `summary.json` and `results.csv` contain the result matrix. The installer pins YoWASP Yosys and its dependencies under `.tools/`; it does not modify system packages.
 
+New AI generation uses direct provider APIs, with **Muse Spark 1.3 Contributor** as the default (`META_API_KEY`). Select **DeepSeek V4.1 Flash** using `--provider deepseek` (`DEEPSEEK_API_KEY`, model ID `deepseek-flash`). Both task drivers support this flag. No Codex CLI or its system prompt is involved. Model settings live in [`scripts/llm_models.toml`](scripts/llm_models.toml); see [configuration, evidence and live qualification](docs/llm_protocol.md). Muse passed the live API smoke; DeepSeek generation currently returns HTTP 402 (insufficient balance). Historical Codex results above retain their original labels and measurements.
+
 Historical pilot artifacts and installed tools are local and excluded from Git. Run the commands above to generate your own evidence. The verification workflow runs the tests, tiny demo and four-task public rewrite matrix, retaining raw proof evidence as a GitHub Actions artifact. The [report](docs/reports/wednesday_report.md) links the frozen pilot evidence and saved LLM candidates.
 
 | Case | Certificate | Property / replay |
@@ -51,7 +53,7 @@ python3 -m rtl_relate check \
   --out results/rechecked-p1
 ```
 
-The supplied contract is the trusted input. A new contract is a different theorem, even if a new certificate passes. The [bounded Codex runner](docs/llm_protocol.md) isolates generation from the trusted checker, concrete model, contract and acceptance records. A generated verdict has no authority; the parent independently exports and verifies saved candidates.
+The supplied contract is the trusted input. A new contract is a different theorem, even if a new certificate passes. The [bounded direct-API runner](docs/llm_protocol.md) isolates generation from the trusted checker, concrete model, contract and acceptance records. A generated verdict has no authority; the parent independently exports and verifies saved candidates.
 
 See [public-task semantics](docs/semantics_v1.md), [original tiny-task semantics](docs/semantics_v0.md), [frontend scope](docs/frontend_decision.md), [environment](docs/environment.md), and [actual sprint results](SPRINT_REPORT.md).
 

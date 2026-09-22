@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
-"""Bounded Codex candidate generation; the caller alone runs the trusted verifier."""
+"""Bounded direct-API candidate generation; the caller alone runs the trusted verifier."""
 import argparse
 import hashlib
 import json
 import math
 import os
 from pathlib import Path
-import shutil
 import signal
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 import tomllib
+import urllib.error
+import urllib.request
 
 
-NETWORK_PROBE = '''import errno, socket
-try:
- s = socket.socket()
- s.settimeout(0.2)
- s.connect(('1.1.1.1', 443))
-except PermissionError as error:
- if error.errno not in (errno.EPERM, errno.EACCES): raise
-else: raise SystemExit('network boundary failed')
-'''
+CONFIG = Path(__file__).with_name('llm_models.toml')
+PROVIDERS = ('deepseek', 'meta')
 
 
 ALLOWED = {'certificate': ('certificate.json',), 'rewrite': ('abstract.v', 'certificate.json')}
@@ -71,13 +66,15 @@ def save(run, ledger):
 def load(run):
     run = plain_path(run)
     ledger = json.loads((run / 'ledger.json').read_text())
+    if ledger.get('version') != 2:
+        raise ValueError('legacy Codex run: use its frozen runner or start a new direct-API run')
     for path, expected in ledger['trusted'].items():
         if file_hashes(path) != expected:
             raise ValueError(f'trusted input changed: {Path(path).name}')
     return run, ledger
 
 
-def initialize(run, bundle, trusted, mode):
+def initialize(run, bundle, trusted, mode, provider='meta'):
     run, bundle = plain_path(run), plain_path(bundle)
     if mode not in ALLOWED:
         raise ValueError('unsupported pilot mode')
@@ -85,83 +82,73 @@ def initialize(run, bundle, trusted, mode):
     if any(part.startswith('.') or part in {'AGENTS.md', 'SKILL.md'}
            for name in inputs for part in Path(name).parts):
         raise ValueError('bundle must contain task inputs only, without config or agent rules')
-    config_path = Path.home() / '.codex/config.toml'
-    config = tomllib.loads(config_path.read_text())
-    if config.get('model_provider', 'openai') != 'openai':
-        raise ValueError('pilot supports the already configured OpenAI Codex provider only')
-    model, effort = config.get('model'), config.get('model_reasoning_effort')
-    if not model or not effort:
-        raise ValueError('freeze explicit existing model and reasoning effort first')
-    codex = shutil.which('codex')
-    if not codex:
-        raise ValueError('Codex CLI is not installed')
-    # The npm wrapper's package holds the native sandbox executable.
-    runtime = Path(codex).resolve()
-    if runtime.suffix == '.js':
-        runtime = runtime.parent.parent
-    roots = [bundle, *(plain_path(p) for p in trusted)]
+    if provider not in PROVIDERS:
+        raise ValueError('unsupported API provider')
+    config_path = plain_path(CONFIG)
+    profile = tomllib.loads(config_path.read_text())[provider]
+    if not os.environ.get(profile['api_key_env']):
+        raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
+    roots = [bundle, config_path, plain_path(__file__), *(plain_path(p) for p in trusted)]
     if any(run == p or p in run.parents or run in p.parents for p in roots):
         raise ValueError('evidence and trusted inputs must be disjoint')
     snapshots = {str(p): file_hashes(p) for p in roots}
     run.mkdir(parents=True, exist_ok=False)
-    ledger = {'version': 1, 'mode': mode, 'bundle': str(bundle), 'trusted': snapshots,
-              'model': model, 'reasoning_effort': effort, 'provider': 'openai',
-              'codex': codex, 'runtime': str(runtime),
-              'codex_version': subprocess.check_output([codex, '--version'], text=True).strip(),
+    ledger = {'version': 2, 'mode': mode, 'bundle': str(bundle), 'trusted': snapshots,
+              'provider': provider, 'model': profile['model'], 'api': profile,
+              'reasoning_effort': profile['parameters']['reasoning_effort'],
               'config_sha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
               'created_at_unix': time.time(), 'charged_seconds': 0.0,
               'max_attempts': 4, 'budget_seconds': 900, 'attempts': [],
-              'cost_usd': None, 'human_intervention': [], 'transport': 'inline-json', 'isolation': 'REQUIRES_PROBE'}
+              'cost_usd': None, 'human_intervention': [],
+              'transport': 'direct-chat-completions', 'isolation': 'NO_MODEL_TOOLS'}
     save(run, ledger)
     return ledger
 
 
-def permissions(ledger, candidate):
-    rules = {':minimal': 'read', ledger['runtime']: 'read', ledger['bundle']: 'read', str(candidate): 'write'}
-    return ['-c', 'permissions.pilot.filesystem={' + ','.join(json.dumps(k) + '=' + json.dumps(v) for k, v in rules.items()) + '}',
-            '-c', 'permissions.pilot.network.enabled=false']
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError('API redirects are forbidden')
 
 
-def probe(run, ledger, candidate):
-    # Probe exactly the profile generation will use, before consuming model budget.
-    script = '''import pathlib, sys
-bundle, candidate, forbidden = map(pathlib.Path, sys.argv[1:])
-assert (bundle / 'input.txt').read_text() == 'public input'
-(candidate / 'certificate.json').write_text('{}')
-for p, mode in [(bundle / 'input.txt', 'w'), (forbidden, 'r')]:
- try:
-  with p.open(mode): pass
- except OSError: pass
- else: raise SystemExit('sandbox boundary failed: ' + str(p))
-link = candidate / 'escape'
-link.symlink_to(forbidden)
-try: link.read_text()
-except OSError: pass
-else: raise SystemExit('symlink exposed hidden data')
-link.unlink()
-for p in [forbidden, forbidden.parent / 'parent-verdict.json']:
- try: p.write_text('tamper')
- except OSError: pass
-''' + NETWORK_PROBE + '''print('READ_WRITE_NETWORK_BOUNDARY_OK')
-'''
-    # A separate synthetic input avoids overwriting the real read-only bundle.
-    public = run / 'boundary-input'
-    public.mkdir()
-    (public / 'input.txt').write_text('public input')
-    forbidden = run / 'boundary-gold.txt'
-    forbidden.write_text('do not expose')
-    test_ledger = ledger | {'bundle': str(public)}
-    command = [ledger['codex'], 'sandbox', *permissions(test_ledger, candidate), '-P', 'pilot', '-C', str(public),
-               '--', '/usr/bin/python3', '-c', script, str(public), str(candidate), str(forbidden)]
-    result = subprocess.run(command, capture_output=True, text=True, timeout=20)
-    (run / 'boundary.stdout.txt').write_text(result.stdout)
-    (run / 'boundary.stderr.txt').write_text(result.stderr)
-    if (result.returncode or 'READ_WRITE_NETWORK_BOUNDARY_OK' not in result.stdout
-            or forbidden.read_text() != 'do not expose'
-            or (run / 'parent-verdict.json').exists()
-            or (public / 'input.txt').read_text() != 'public input'):
-        raise ValueError('Codex sandbox boundary probe failed; generation refused')
-    ledger['isolation'] = 'LOCAL_COMMAND_READ_WRITE_NETWORK_PROBE_PASSED'
+def api_request(run, number):
+    """One HTTP request; the parent process enforces the total wall-time budget."""
+    run, ledger = load(run)
+    profile = ledger['api']
+    attempt = run / f'attempt-{number:02d}'
+    payload = (attempt / 'request.json').read_bytes()
+    record = ledger['attempts'][number - 1]
+    if hashlib.sha256(payload).hexdigest() != record['request_sha256']:
+        raise ValueError('API request changed after capture')
+    key = os.environ.get(profile['api_key_env'])
+    if not key:
+        raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
+    request = urllib.request.Request(profile['endpoint'], data=payload, headers={
+        'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
+    with urllib.request.build_opener(NoRedirect).open(request, timeout=900) as response:
+        raw = response.read(16 * 1024 * 1024 + 1)
+    if len(raw) > 16 * 1024 * 1024:
+        raise ValueError('API response exceeds 16 MiB')
+    if key.encode() in raw:
+        raise ValueError('API response contains credential; refused to save')
+    (attempt / 'response.json').write_bytes(raw)
+
+
+def completion(response, record):
+    record['usage'] = response.get('usage')
+    record['response_model'] = response.get('model')
+    record['response_id'] = response.get('id')
+    choices = response.get('choices')
+    if not isinstance(choices, list) or len(choices) != 1:
+        raise ValueError('expected exactly one API completion')
+    choice = choices[0]
+    record['finish_reason'] = choice.get('finish_reason')
+    message = choice.get('message', {})
+    if choice.get('finish_reason') != 'stop' or message.get('tool_calls') or message.get('refusal'):
+        raise ValueError('API completion was truncated, refused, or requested tools')
+    content = message.get('content')
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError('API completion has no text content')
+    return content
 
 
 def candidate_hashes(candidate, mode):
@@ -224,9 +211,6 @@ def generate(run, prompt):
         candidate.mkdir()
         for name in ALLOWED[ledger['mode']]:
             (candidate / name).write_text('')
-        if ledger['isolation'] == 'REQUIRES_PROBE':
-            probe(run, ledger, candidate)
-            (candidate / 'certificate.json').write_text('')
         bundle = {name: (Path(ledger['bundle']) / name).read_text()
                   for name in ledger['trusted'][ledger['bundle']]}
         bindings = {name.removesuffix('.json') + '_sha256': hashlib.sha256(
@@ -239,38 +223,37 @@ def generate(run, prompt):
                   'properties': {key: {'type': 'string'} for key in outputs}, 'required': list(outputs)}
         schema_path = attempt / 'output-schema.json'
         schema_path.write_text(json.dumps(schema, indent=2) + '\n')
-        instructions = ('All task data is inline below. DO NOT CALL TOOLS or read files; no tools are needed. '
+        instructions = ('All task data is inline below. '
             'Return only the structured JSON response: certificate_json is the exact certificate file text'
             + (' and abstract_rtl is the exact RTL file text' if ledger['mode'] == 'rewrite' else '')
             + '. The parent materializes these strings verbatim and independently verifies them; do not emit a verdict. '
-            'This transport instruction replaces file-writing instructions below without changing the task.\n\n'
+            'No execution tools are available.\n\n'
+            + 'Output JSON schema:\n' + json.dumps(schema) + '\n\n'
             + prompt + '\nCanonical input JSON bindings (metadata only):\n' + json.dumps(bindings)
             + '\nComplete audited input bundle, filename -> exact content:\n' + json.dumps(bundle))
         record_inputs = {'bundle_file_sha256': ledger['trusted'][ledger['bundle']], 'canonical_bindings': bindings}
         (attempt / 'inline-inputs.json').write_text(json.dumps(record_inputs, indent=2) + '\n')
         (attempt / 'prompt.txt').write_text(instructions)
-        command = [ledger['codex'], 'exec', '--ignore-user-config', '--ignore-rules', '--ephemeral',
-                   '--skip-git-repo-check', '--json', '--color', 'never', '-C', ledger['bundle'],
-                   '-o', str(attempt / 'final.txt'), '-m', ledger['model'],
-                   '-c', 'model_reasoning_effort=' + json.dumps(ledger['reasoning_effort']),
-                   '-c', 'approval_policy="never"', '-c', 'default_permissions="pilot"',
-                   '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
-                   '-c', 'memories.use_memories=false', '-c', 'memories.generate_memories=false',
-                   '-c', 'shell_environment_policy.inherit="none"',
-                   '--disable', 'apps', '--disable', 'plugins', '--disable', 'hooks',
-                   '--disable', 'multi_agent', '--disable', 'multi_agent_v2',
-                   '--disable', 'code_mode_host', '--disable', 'unified_exec', '--disable', 'shell_tool',
-                   '--output-schema', str(schema_path),
-                   '--enable', 'skip_host_skill_discovery', *permissions(ledger, candidate), '-']
+        profile = ledger['api']
+        if not os.environ.get(profile['api_key_env']):
+            raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
+        request = {'model': ledger['model'], 'messages': [{'role': 'user', 'content': instructions}],
+                   'stream': False, 'response_format': {'type': 'json_object'}, **profile['parameters']}
+        request_path = attempt / 'request.json'
+        request_path.write_text(json.dumps(request, indent=2) + '\n')
+        record['request_sha256'] = hashlib.sha256(request_path.read_bytes()).hexdigest()
+        save(run, ledger)
+        command = [sys.executable, '-B', '-I', str(Path(__file__).resolve()), '_request',
+                   '--run', str(run), '--number', str(record['number'])]
         (attempt / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
         environment = {k: v for k, v in os.environ.items() if k in
-                       {'PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'LANG', 'LC_ALL', 'TERM',
-                        'SSL_CERT_FILE', 'SSL_CERT_DIR', 'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY'}}
-        with (attempt / 'events.jsonl').open('w') as stdout, (attempt / 'stderr.txt').open('w') as stderr:
-            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout, stderr=stderr,
-                                       text=True, env=environment, start_new_session=True)
+                       {'PATH', 'LANG', 'LC_ALL', 'SSL_CERT_FILE', 'SSL_CERT_DIR',
+                        'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY', profile['api_key_env']}}
+        with (attempt / 'stderr.txt').open('w') as stderr:
+            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                       stderr=stderr, env=environment, start_new_session=True)
             try:
-                process.communicate(instructions, timeout=max(0, remaining - (time.monotonic() - started)))
+                process.communicate(timeout=max(0, remaining - (time.monotonic() - started)))
                 record['returncode'] = process.returncode
                 record['status'] = 'GENERATED' if process.returncode == 0 else 'GENERATION_ERROR'
             except subprocess.TimeoutExpired:
@@ -280,19 +263,18 @@ def generate(run, prompt):
                     pass
                 process.communicate()
                 record['status'] = 'TIMEOUT'
-        for line in (attempt / 'events.jsonl').read_text().splitlines():
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if event.get('type') == 'turn.completed':
-                record['usage'] = event.get('usage')
         if record['status'] == 'GENERATED':
             try:
-                materialize_response((attempt / 'final.txt').read_text(), candidate, ledger['mode'])
-            except (OSError, ValueError) as exc:
+                response_path = attempt / 'response.json'
+                record['response_sha256'] = hashlib.sha256(response_path.read_bytes()).hexdigest()
+                content = completion(json.loads(response_path.read_bytes()), record)
+                (attempt / 'final.txt').write_text(content)
+                materialize_response(content, candidate, ledger['mode'])
+            except (OSError, ValueError, TypeError, AttributeError) as exc:
                 record.update(status='CANDIDATE_FORMAT_ERROR', error=str(exc))
-        record['transport'] = 'inline-json'
+        elif record['status'] == 'GENERATION_ERROR':
+            record['error'] = (attempt / 'stderr.txt').read_text().strip()
+        record['transport'] = ledger['transport']
         record['candidate_sha256'] = candidate_hashes(candidate, ledger['mode'])
         load(run)  # Recheck C, contracts, checker and harness after generation.
     except Exception as exc:
@@ -335,6 +317,7 @@ def main():
     init.add_argument('--bundle', type=Path, required=True)
     init.add_argument('--trusted', type=Path, action='append', required=True)
     init.add_argument('--mode', choices=ALLOWED, required=True)
+    init.add_argument('--provider', choices=PROVIDERS, default='meta')
     gen = sub.add_parser('generate')
     gen.add_argument('--run', type=Path, required=True)
     gen.add_argument('--prompt', type=Path, required=True)
@@ -342,9 +325,21 @@ def main():
     check.add_argument('--run', type=Path, required=True)
     check.add_argument('--feedback', type=Path, required=True)
     check.add_argument('--seconds', type=float, required=True)
+    worker = sub.add_parser('_request', help=argparse.SUPPRESS)
+    worker.add_argument('--run', type=Path, required=True)
+    worker.add_argument('--number', type=int, required=True)
     args = parser.parse_args()
+    if args.action == '_request':
+        try:
+            api_request(args.run, args.number)
+        except Exception as error:
+            # Never print headers, credentials, or a provider's echoed error body.
+            detail = f'HTTP {error.code}' if isinstance(error, urllib.error.HTTPError) else type(error).__name__
+            print('API transport failed: ' + detail, file=sys.stderr)
+            raise SystemExit(1)
+        return
     if args.action == 'init':
-        result = initialize(args.run, args.bundle, args.trusted, args.mode)
+        result = initialize(args.run, args.bundle, args.trusted, args.mode, args.provider)
     elif args.action == 'generate':
         result = generate(args.run, args.prompt.read_text())
     else:
