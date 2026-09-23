@@ -1,6 +1,6 @@
 # Bounded direct-API pilots
 
-The current runner calls provider Chat Completions APIs directly using Python's
+The current runner calls Chat Completions over HTTP using Python's
 standard library. It never starts Codex CLI or loads its configuration, system
 prompt, rules, skills, tools or conversation history. Each request contains one
 `user` message: the explicit task prompt, output JSON schema, canonical input
@@ -12,23 +12,40 @@ is outside this runner; removing the CLI does not imply access to a raw model.
 
 [`scripts/llm_models.toml`](../scripts/llm_models.toml) freezes both profiles:
 
-| CLI provider | Model | Endpoint | Credential environment variable |
+| CLI provider | Model | Endpoint | Authentication |
 | --- | --- | --- | --- |
 | `meta` (default) | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1/chat/completions` | `META_API_KEY` |
-| `deepseek` | `deepseek-flash` (V4.1 Flash) | `https://api.deepseek.com/chat/completions` | `DEEPSEEK_API_KEY` |
+| `deepseek` | `deepseek-flash` (V4.1 Flash) | `http://127.0.0.1:35001/v1/chat/completions` | Public `local-gateway` placeholder; upstream credentials stay in gateway |
 
 Both use `reasoning_effort=high`, JSON-object output and a 16,384-token completion
 cap; DeepSeek explicitly enables thinking. Temperature/top-p remain provider
 defaults. The exact provider-specific request parameters are saved per attempt.
 These settings do not imply equal reasoning effort across providers.
 
-Keys must already exist in the launching process's environment. They are sent
-only as authorization headers, never copied into the project, prompts, commands
-or ledgers. HTTP redirects are refused. Missing keys fail explicitly; API failures
-are recorded and stop the orchestration. There is no automatic provider fallback
-or hidden retry. Use a separate run/workspace for each provider. The default is
-Meta because it passed the live qualification below; DeepSeek is an explicit
-selection until its account has usable credit.
+Meta reads `META_API_KEY` from the launching process's environment. DeepSeek
+uses the existing same-machine gateway with the public `local-gateway` bearer
+placeholder and does **not** read `DEEPSEEK_API_KEY`. Upstream keys, account
+selection and priority fallback are managed by that gateway. The project does
+not copy or change gateway credentials/configuration. The loopback URL matches
+mazu's existing Pi configuration; if another machine uses a different port
+(e.g. Zeus uses 35002), change the project endpoint before freezing a new run.
+Gateway authentication rejects non-loopback URLs and bypasses environment HTTP
+proxies. Neither provider permits redirects or uses an agent CLI.
+
+Each gateway run sends a recorded, stable `x-opencode-session` ID. The runner
+makes one HTTP call per attempt and never switches between DeepSeek and Meta.
+The gateway itself may retry or switch upstream accounts/providers; preserve
+`X-Gateway-Active-Endpoint` and `X-Gateway-Attempt` on successful **and failed**
+responses. The response model ID is also recorded when a completion exists.
+These labels describe routing, not independent evidence of model weights.
+Meta remains the default; select the local DeepSeek route with `--provider deepseek`.
+
+The [gateway's API contract](https://github.com/swear01/deepseek-latch-gateway#-deepseek-official-contract-first-統一正規化)
+can remove `response_format` for incompatible upstreams and normalize reasoning
+fields. The parent still validates the returned JSON and raw candidate text.
+Recorded request bytes are the client-to-gateway request, not a claim about the
+exact upstream wire request. Source configuration hashes and response routing
+metadata should accompany gateway experiments.
 
 Official references: [DeepSeek V4.1 Flash model ID](https://api-docs.deepseek.com/zh-cn/news/news260910/),
 [Meta Chat Completions](https://dev.meta.ai/docs/protocols/chat-completions).
@@ -54,7 +71,7 @@ existing candidate files are never overwritten by a repeated setup. Interrupted
 `RUNNING` records require investigation. One coordinator owns each run directory.
 
 Retain `prompt.txt`, `output-schema.json`, `inline-inputs.json`, `request.json`,
-`response.json` (when received), `command.json`, `stderr.txt`, `final.txt` (when
+`response.json` (when received), `response-metadata.json`, `command.json`, `stderr.txt`, `final.txt` (when
 available), raw candidates and their hashes. The ledger records requested and
 returned model IDs, request/response hashes, finish reason, token usage, generation
 time and exact verifier feedback/time. Truncated, refused, tool-call or malformed
@@ -104,12 +121,26 @@ verbatim materialization in 10.389 seconds, and reported 174 prompt tokens plus
 657 completion tokens (635 reasoning; 831 total). DeepSeek's authenticated model
 listing included `deepseek-flash`, but generation returned HTTP 402 in 0.578 seconds
 ([insufficient balance](https://api-docs.deepseek.com/quick_start/error_codes/));
-DeepSeek generation is **not qualified** yet. Its failed attempt is retained.
+That request used the **wrong route** for this project. The official-account
+balance says nothing about availability through the user's local gateway. Its
+failed attempt remains historical evidence, not a gateway qualification.
 
 Private raw evidence is under
 `/home/swear01/AIsimpV/artifacts/direct-api-models-20260922/`: immutable transport
 snapshot, prompt/request/response, candidates and both ledgers. This is API
 qualification only; it supplies no new RTL correctness or speedup measurement.
+
+## Local-gateway correction (2026-09-23)
+
+The user explicitly requires DeepSeek through the existing local gateway.
+Project configuration now uses `http://127.0.0.1:35001/v1/chat/completions` with
+`deepseek-flash`, matching live Pi/gateway configuration. A real smoke with
+`DEEPSEEK_API_KEY` removed reached `opencode-go-1` (`X-Gateway-Attempt: 1`) but
+returned HTTP 403 with Cloudflare error 1010. This is an upstream client-signature
+rejection, **not** the earlier official-API balance failure. No generated model
+output was received, so successful DeepSeek generation is not yet qualified.
+No gateway service/routing change was made. Raw attempts and diagnosis are under
+`/home/swear01/AIsimpV/artifacts/local-gateway-20260923/`.
 
 ## Task-specific orchestration
 
