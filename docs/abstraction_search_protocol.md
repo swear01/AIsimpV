@@ -224,3 +224,26 @@ change selection. Check byte identity of all five distinct accepted candidates'
 prepared models and proof inputs, and all 33 single-cut models, against v4;
 retain the comparison in `post-review-proof-inputs.json`. The conservative
 raw-byte preflight also rejects forbidden tokens inside comments.
+
+
+## Prospective model/transport amendment — 2026-09-22
+
+Future AI runs use direct Chat Completions APIs, not Codex CLI. The default is
+`muse-spark-1.3-contributor` (`META_API_KEY`); explicit `--provider deepseek` selects
+`deepseek-flash`, the V4.1 Flash ID (`DEEPSEEK_API_KEY`). Project settings,
+reasoning effort, token caps, explicit prompts and exact request/response bytes
+are recorded as described in the [current runner protocol](llm_protocol.md).
+Both profiles use high reasoning; provider defaults otherwise remain recorded
+by the request rather than inferred to be equivalent.
+
+Each attempt sends one user message, no system/developer message or tool schema.
+No Codex configuration, agent rules or inherited session is loaded. Native
+assertions, reset/init, assumptions, independent correctness/property checks,
+selection criteria, four attempts and the shared 900-second budget are unchanged.
+New runs have separate ledgers; there is no cross-provider fallback or pooling.
+The template arm remains deterministic and independent of model configuration.
+
+Meta passed a separate transport-only smoke. DeepSeek generation returned HTTP
+402 and is not qualified until account credit is available. These checks contain
+no candidate relationship hints and are outside research budgets. This amendment
+does not relabel the completed Codex experiment or alter its frozen evidence.

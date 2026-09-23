@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare audited inputs and run the two pre-registered, bounded Codex pilots."""
+"""Prepare audited inputs and run the two bounded direct-API pilots."""
 import argparse
 import hashlib
 import json
@@ -10,7 +10,7 @@ import sys
 import time
 sys.dont_write_bytecode = True
 
-from llm_pilot import initialize, generate, load, record_verification, file_hashes, save
+from llm_pilot import initialize, generate, load, record_verification, file_hashes, PROVIDERS
 
 CORE = ('__init__.py', 'checker.py', 'frontend.py', 'formal.py', 'ir.py', 'solver.py', 'properties.py', 'witness.py')
 SYNTAX = '''# Frozen task and certificate interface
@@ -54,26 +54,26 @@ multiple clocks, asynchronous reset, X/Z, latch, delay, initial processes beyond
 constant initialization, assume/assert/cover, external modules, preprocessing
 (backtick), or system task/function ($). Maximum candidate RTL or certificate
 file size is 65536 bytes. The trusted frontend is Yosys 0.69 -> BTOR2; it may reject
-unsupported constructs. Use /usr/bin/python3 if local calculations are useful.
+unsupported constructs. No execution tools are available to the model.
 '''
 
-CERT_PROMPT = '''Read all files in this input bundle. Produce a valid h/J/w certificate for the
+CERT_PROMPT = '''Use all supplied input bundle contents. Produce a valid h/J/w certificate for the
 fixed concrete.json and abstract.json pair, respecting contract.json and syntax.md.
-Derive the relationship yourself. Write only certificate.json in the candidate
-path specified by the runner. The first response and every repair count as one
+Derive the relationship yourself. Return the exact certificate.json text in
+the certificate_json output string. The first response and every repair count as one
 of at most four attempts; the total generation and verification budget is 900
 seconds. You receive actual formal feedback between attempts. No gold certificate
 or solution is available. Do not change either design or the contract.
 '''
 
-REWRITE_PROMPT = '''Read all files in this input bundle. Propose a simpler abstract RTL design and
+REWRITE_PROMPT = '''Use all supplied input bundle contents. Propose a simpler abstract RTL design and
 a corresponding h/J/w certificate using syntax.md. Preserve all concrete behavior
 visible under contract.json. The abstraction may change the internal state
 representation and add nondeterminism, but it must preserve the frozen cycle,
 clock, reset, input, observation and safety-property semantics.
 
-Write abstract.v and certificate.json only in the candidate paths specified by
-the runner. Use top module abstract_design and exactly the public input/output
+Return the exact abstract.v and certificate.json texts in abstract_rtl and
+certificate_json output strings. Use top module abstract_design and exactly the public input/output
 ports and widths in contract.json plus its clock input. Additionally declare one
 unconstrained input wire [7:0] z; this is the only registered nondeterministic port.
 Do not constrain z. Its witness belongs only in the certificate.
@@ -128,7 +128,7 @@ def prepare(source_root, qualification, workspace):
     (snapshot / 'scripts').mkdir()
     for name in CORE:
         shutil.copyfile(source_root / 'rtl_relate' / name, snapshot / 'rtl_relate' / name)
-    for name in ('llm_pilot.py', 'run_llm_experiments.py'):
+    for name in ('llm_pilot.py', 'llm_models.toml', 'run_llm_experiments.py'):
         shutil.copyfile(Path(__file__).with_name(name), snapshot / 'scripts' / name)
     for name in ('concrete', 'abstract', 'contract'):
         shutil.copyfile(qualification / f'{name}.json', snapshot / f'{name}.json')
@@ -234,7 +234,7 @@ def evaluate(snapshot, mode, candidate, out, remaining):
     return result
 
 
-def run(workspace, mode):
+def run(workspace, mode, provider='meta'):
     workspace = Path(workspace).resolve()
     snapshot = Path(__file__).resolve().parents[1]
     if snapshot.parent != workspace or not snapshot.name.startswith('snapshot'):
@@ -253,19 +253,19 @@ def run(workspace, mode):
         _, ledger = load(run_dir)
         if ledger['attempts'] and 'verification' not in ledger['attempts'][-1]:
             raise ValueError('incomplete previous attempt: parent verification is required before resuming')
-        if ledger['attempts'] and ledger['attempts'][-1]['status'] == 'ISOLATION_OR_RUNNER_ERROR':
+        if ledger['attempts'] and ledger['attempts'][-1]['status'] in {'ISOLATION_OR_RUNNER_ERROR', 'GENERATION_ERROR'}:
             return ledger
-        ledger['trusted'][str(snapshot)] = file_hashes(snapshot)
-        ledger['human_intervention'].append({'type': 'runner_infrastructure_fix', 'description': 'Continue same budget/attempt ledger with separately frozen runtime disabling code_mode_host and unified_exec; filesystem/network permissions unchanged', 'snapshot': snapshot.name})
-        save(run_dir, ledger)
+        if ledger['provider'] != provider:
+            raise ValueError('provider cannot change within a run; use a new workspace')
+        if str(snapshot) not in ledger['trusted']:
+            raise ValueError('runner snapshot differs from the frozen run')
     else:
-        ledger = initialize(run_dir, workspace / f'bundle-{mode}', [snapshot], mode)
+        ledger = initialize(run_dir, workspace / f'bundle-{mode}', [snapshot], mode, provider)
     prompt = prompt_path.read_text()
     if ledger['attempts']:
         last = ledger['attempts'][-1]
         previous = {p.name: p.read_text() for p in (run_dir / f'attempt-{last["number"]:02d}/candidate').iterdir()}
         prompt += '\nPrevious raw candidate:\n' + json.dumps(previous) + '\nActual independent verification feedback:\n' + json.dumps(last['verification'])
-        prompt += '\nInfrastructure update: code_mode_host and unified_exec are disabled, with identical filesystem/network limits. Verify a permitted bundle read and candidate write through the actual tool before deriving the certificate. No relationship hints were supplied.\n'
     for _ in range(len(ledger['attempts']), 4):
         record = generate(run_dir, prompt)
         _, ledger = load(run_dir)
@@ -278,7 +278,7 @@ def run(workspace, mode):
         record_verification(run_dir, feedback, time.monotonic() - started)
         print(json.dumps({'mode': mode, 'attempt': record['number'], 'status': feedback['status']}), flush=True)
         _, ledger = load(run_dir)
-        if feedback['status'] == 'SUCCESS' or ledger['charged_seconds'] >= 900 or record['status'] == 'ISOLATION_OR_RUNNER_ERROR':
+        if feedback['status'] == 'SUCCESS' or ledger['charged_seconds'] >= 900 or record['status'] in {'ISOLATION_OR_RUNNER_ERROR', 'GENERATION_ERROR'}:
             break
         # Only this run's raw output and real verifier feedback enter its next fresh context.
         previous = {p.name: p.read_text() for p in candidate.iterdir()}
@@ -295,6 +295,7 @@ def main():
     pilot = sub.add_parser('run')
     pilot.add_argument('--workspace', type=Path, required=True)
     pilot.add_argument('--mode', choices=('certificate', 'rewrite'), required=True)
+    pilot.add_argument('--provider', choices=PROVIDERS, default='meta')
     worker = sub.add_parser('phase')
     for name in ('snapshot', 'candidate', 'out', 'target'):
         worker.add_argument('--' + name, type=Path, required=True)
@@ -305,7 +306,7 @@ def main():
     if args.command == 'prepare':
         print(prepare(args.source_root, args.qualification, args.workspace))
     elif args.command == 'run':
-        run(args.workspace, args.mode)
+        run(args.workspace, args.mode, args.provider)
     else:
         try:
             result = phase(args.snapshot, args.mode, args.candidate, args.out, args.action, args.seconds)

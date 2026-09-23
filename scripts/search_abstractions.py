@@ -190,7 +190,7 @@ def worker(snapshot, task, candidate, out, arm, yosys, smtbmc, budget):
     return result, row['seconds']
 
 
-def run(snapshot, task, out, arm, yosys, smtbmc):
+def run(snapshot, task, out, arm, yosys, smtbmc, provider='meta'):
     if arm == 'templates':
         out.mkdir(parents=True, exist_ok=False)
         options = json.loads((task / 'bundle/eligible_cutpoints.json').read_text())
@@ -210,7 +210,7 @@ def run(snapshot, task, out, arm, yosys, smtbmc):
             print(json.dumps({'arm': arm, 'attempt': i+1, 'status': result['status'], 'seconds': seconds}), flush=True)
         return
     ledger = llm_pilot.initialize(out, task / 'bundle', [snapshot, task / 'normalized'],
-                                  'rewrite' if arm == 'ai' else 'certificate')
+                                  'rewrite' if arm == 'ai' else 'certificate', provider)
     ledger['arm'] = arm
     llm_pilot.save(out, ledger)
     prompt = FULL_PROMPT if arm == 'ai' else CUT_PROMPT
@@ -232,6 +232,8 @@ def run(snapshot, task, out, arm, yosys, smtbmc):
         llm_pilot.record_verification(out, result, seconds)
         print(json.dumps({'arm': arm, 'attempt': i+1, 'status': result['status'],
                           'generation_seconds': generated['generation_seconds'], 'verification_seconds': seconds}), flush=True)
+        if generated['status'] in {'ISOLATION_OR_RUNNER_ERROR', 'GENERATION_ERROR'}:
+            break
         feedback = {k: v for k, v in result.items() if k not in ('property', 'correctness')}
         for name in ('property', 'correctness'):
             if name in result:
@@ -249,6 +251,7 @@ def main():
     parser.add_argument('--snapshot', type=Path, default=ROOT)
     parser.add_argument('--candidate', type=Path)
     parser.add_argument('--arm', choices=('templates', 'neuroabs-inspired', 'ai'))
+    parser.add_argument('--provider', choices=llm_pilot.PROVIDERS, default='meta')
     parser.add_argument('--yosys', required=True)
     parser.add_argument('--smtbmc', required=True)
     parser.add_argument('--budget', type=float, default=180, help='evaluation subprocess budget in seconds')
@@ -268,7 +271,7 @@ def main():
     else:
         if args.arm is None:
             parser.error('--arm required for search')
-        run(args.snapshot, args.task, args.out, args.arm, args.yosys, args.smtbmc)
+        run(args.snapshot, args.task, args.out, args.arm, args.yosys, args.smtbmc, args.provider)
 
 
 if __name__ == '__main__':
