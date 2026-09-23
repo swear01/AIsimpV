@@ -153,8 +153,8 @@ def api_request(run, number):
             name: response.headers[name] for name in ('X-Gateway-Active-Endpoint', 'X-Gateway-Attempt')
             if name in response.headers}}
         (attempt / 'response-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
-        if response.status >= 400:
-            raise urllib.error.HTTPError(profile['endpoint'], response.status, 'API request rejected', {}, None)
+        if isinstance(response, urllib.error.HTTPError):
+            raise response
         raw = response.read(16 * 1024 * 1024 + 1)
     if len(raw) > 16 * 1024 * 1024:
         raise ValueError('API response exceeds 16 MiB')
