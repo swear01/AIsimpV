@@ -207,7 +207,9 @@ is the way to reproduce the reported candidates exactly.
 The reported generation used the archived Codex CLI runner; all numbers in this
 report retain that provenance. Since September 22, new searches use the
 [direct-API runner](../llm_protocol.md), defaulting to Muse Spark 1.3 Contributor;
-add `--provider deepseek` for V4.1 Flash once its account has usable credit.
+add `--provider deepseek` for V4.1 Flash through the existing local gateway.
+The earlier official-account balance diagnosis was for the wrong route; consult
+the current runner protocol for actual gateway qualification.
 The runner saves exact prompts, requests, responses and token usage without any
 Codex system prompt. New API results must be reported separately. No hidden gold
 candidate or verifier outputs are part of the initial model bundle.

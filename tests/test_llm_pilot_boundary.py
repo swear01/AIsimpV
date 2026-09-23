@@ -31,8 +31,8 @@ class PilotBoundaryTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
 
-    def initialize(self):
-        return pilot.initialize(self.run, self.bundle, [self.trusted], 'certificate', 'deepseek')
+    def initialize(self, provider='deepseek'):
+        return pilot.initialize(self.run, self.bundle, [self.trusted], 'certificate', provider)
 
     def test_failed_atomic_save_preserves_previous_json(self):
         ledger = self.initialize()
@@ -62,8 +62,8 @@ class PilotBoundaryTests(unittest.TestCase):
         self.assertEqual(ledger['charged_seconds'], record['generation_seconds'])
 
     def test_preflight_failure_reserves_and_charges_attempt_without_model_call(self):
-        self.initialize()
-        with patch.dict(os.environ, {'DEEPSEEK_API_KEY': ''}), \
+        self.initialize('meta')
+        with patch.dict(os.environ, {'META_API_KEY': ''}), \
                 patch.object(pilot.time, 'monotonic', side_effect=[100, 102]), \
                 patch.object(pilot.subprocess, 'Popen') as launch:
             record = pilot.generate(self.run, 'unused')
@@ -320,7 +320,9 @@ class PilotBoundaryTests(unittest.TestCase):
         with patch.object(Path, 'home', side_effect=AssertionError('must not read user config')):
             ledger = self.initialize()
         self.assertEqual(ledger['model'], 'deepseek-flash')
-        self.assertEqual(ledger['api']['api_key_env'], 'DEEPSEEK_API_KEY')
+        self.assertEqual(ledger['api']['auth'], 'local-gateway')
+        self.assertEqual(ledger['api']['endpoint'], 'http://127.0.0.1:35001/v1/chat/completions')
+        self.assertNotIn('api_key_env', ledger['api'])
         meta = pilot.initialize(self.root / 'meta-run', self.bundle, [self.trusted], 'certificate', 'meta')
         self.assertEqual(meta['model'], 'muse-spark-1.3-contributor')
         self.assertEqual(meta['api']['api_key_env'], 'META_API_KEY')
@@ -352,7 +354,9 @@ class PilotBoundaryTests(unittest.TestCase):
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self):
                 received.append((dict(self.headers), self.rfile.read(int(self.headers['Content-Length']))))
-                self.send_response(200)
+                self.send_response(403 if self.path.endswith('/reject') else 200)
+                self.send_header('X-Gateway-Active-Endpoint', 'fixture-upstream')
+                self.send_header('X-Gateway-Attempt', '2')
                 self.end_headers()
                 self.wfile.write(json.dumps(raw).encode())
 
@@ -367,12 +371,17 @@ class PilotBoundaryTests(unittest.TestCase):
         ledger = self.initialize()
         ledger['api']['endpoint'] = f'http://127.0.0.1:{server.server_port}/chat/completions'
         pilot.save(self.run, ledger)
-        record = pilot.generate(self.run, 'unit-test task prompt')
+        with patch.dict(os.environ, {'HTTP_PROXY': 'http://127.0.0.1:1',
+                                     'NO_PROXY': '', 'DEEPSEEK_API_KEY': ''}):
+            record = pilot.generate(self.run, 'unit-test task prompt')
         self.assertEqual(record['status'], 'GENERATED', record)
         self.assertEqual(record['usage'], raw['usage'])
         self.assertEqual(record['response_model'], raw['model'])
         headers, body = received[0]
-        self.assertEqual(headers['Authorization'], 'Bearer unit-test-deepseek-secret')
+        self.assertEqual(headers['Authorization'], 'Bearer local-gateway')
+        self.assertEqual(headers['X-Opencode-Session'], ledger['gateway_session_id'])
+        self.assertEqual(record['response_metadata']['gateway_headers'], {
+            'X-Gateway-Active-Endpoint': 'fixture-upstream', 'X-Gateway-Attempt': '2'})
         request = json.loads(body)
         self.assertEqual(set(request) & {'tools', 'tool_choice'}, set())
         self.assertEqual([m['role'] for m in request['messages']], ['user'])
@@ -390,6 +399,25 @@ class PilotBoundaryTests(unittest.TestCase):
                 self.assertNotIn(b'unit-test-deepseek-secret', path.read_bytes(), path.name)
                 self.assertNotIn(b'unit-test-meta-secret', path.read_bytes(), path.name)
         pilot.record_verification(self.run, {'status': 'UNIT_TEST_ONLY'}, 0)
+        ledger = pilot.load(self.run)[1]
+        ledger['api']['endpoint'] += '/reject'
+        pilot.save(self.run, ledger)
+        rejected = pilot.generate(self.run, 'unit-test rejection')
+        self.assertEqual(rejected['status'], 'GENERATION_ERROR')
+        self.assertEqual(rejected['response_metadata']['status'], 403)
+        self.assertEqual(rejected['response_metadata']['gateway_headers']['X-Gateway-Active-Endpoint'], 'fixture-upstream')
+        self.assertEqual(len(received), 2)  # One HTTP request per attempt, no client retry or fallback.
+
+    def test_gateway_does_not_require_official_key_and_rejects_remote_endpoint(self):
+        with patch.dict(os.environ, {}, clear=True):
+            ledger = self.initialize()
+            self.assertEqual(pilot.api_key(ledger['api']), 'local-gateway')
+            with self.assertRaisesRegex(ValueError, 'META_API_KEY'):
+                pilot.initialize(self.root / 'missing-meta', self.bundle, [self.trusted], 'certificate', 'meta')
+        for endpoint in ('https://api.deepseek.com/chat/completions', 'http://127.0.0.1.evil.example/v1',
+                         'http://user:password@127.0.0.1:35001/v1'):
+            with self.subTest(endpoint=endpoint), self.assertRaisesRegex(ValueError, 'loopback'):
+                pilot.api_key(dict(ledger['api'], endpoint=endpoint))
 
     def test_redirects_cannot_forward_authorization(self):
         with self.assertRaisesRegex(ValueError, 'redirects are forbidden'):

@@ -15,6 +15,8 @@ import time
 import tomllib
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
+import uuid
 
 
 CONFIG = Path(__file__).with_name('llm_models.toml')
@@ -74,6 +76,21 @@ def load(run):
     return run, ledger
 
 
+def api_key(profile):
+    if profile.get('auth') == 'local-gateway':
+        endpoint = urlsplit(profile['endpoint'])
+        if (endpoint.scheme not in {'http', 'https'}
+                or endpoint.hostname not in {'127.0.0.1', 'localhost', '::1'}
+                or endpoint.username or endpoint.password):
+            raise ValueError('local-gateway authentication requires a loopback endpoint')
+        return 'local-gateway'  # Public placeholder; upstream keys stay in the gateway.
+    name = profile['api_key_env']
+    key = os.environ.get(name)
+    if not key:
+        raise ValueError('missing credential environment variable: ' + name)
+    return key
+
+
 def initialize(run, bundle, trusted, mode, provider='meta'):
     run, bundle = plain_path(run), plain_path(bundle)
     if mode not in ALLOWED:
@@ -86,8 +103,7 @@ def initialize(run, bundle, trusted, mode, provider='meta'):
         raise ValueError('unsupported API provider')
     config_path = plain_path(CONFIG)
     profile = tomllib.loads(config_path.read_text())[provider]
-    if not os.environ.get(profile['api_key_env']):
-        raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
+    api_key(profile)
     roots = [bundle, config_path, plain_path(__file__), *(plain_path(p) for p in trusted)]
     if any(run == p or p in run.parents or run in p.parents for p in roots):
         raise ValueError('evidence and trusted inputs must be disjoint')
@@ -101,6 +117,8 @@ def initialize(run, bundle, trusted, mode, provider='meta'):
               'max_attempts': 4, 'budget_seconds': 900, 'attempts': [],
               'cost_usd': None, 'human_intervention': [],
               'transport': 'direct-chat-completions', 'isolation': 'NO_MODEL_TOOLS'}
+    if profile.get('auth') == 'local-gateway':
+        ledger['gateway_session_id'] = uuid.uuid4().hex
     save(run, ledger)
     return ledger
 
@@ -119,16 +137,28 @@ def api_request(run, number):
     record = ledger['attempts'][number - 1]
     if hashlib.sha256(payload).hexdigest() != record['request_sha256']:
         raise ValueError('API request changed after capture')
-    key = os.environ.get(profile['api_key_env'])
-    if not key:
-        raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
-    request = urllib.request.Request(profile['endpoint'], data=payload, headers={
-        'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
-    with urllib.request.build_opener(NoRedirect).open(request, timeout=900) as response:
+    key = api_key(profile)
+    headers = {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'}
+    handlers = [NoRedirect]
+    if profile.get('auth') == 'local-gateway':
+        headers['x-opencode-session'] = ledger['gateway_session_id']
+        handlers.append(urllib.request.ProxyHandler({}))
+    request = urllib.request.Request(profile['endpoint'], data=payload, headers=headers)
+    try:
+        response = urllib.request.build_opener(*handlers).open(request, timeout=900)
+    except urllib.error.HTTPError as error:
+        response = error
+    with response:
+        metadata = {'status': response.status, 'gateway_headers': {
+            name: response.headers[name] for name in ('X-Gateway-Active-Endpoint', 'X-Gateway-Attempt')
+            if name in response.headers}}
+        (attempt / 'response-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
+        if response.status >= 400:
+            raise urllib.error.HTTPError(profile['endpoint'], response.status, 'API request rejected', {}, None)
         raw = response.read(16 * 1024 * 1024 + 1)
     if len(raw) > 16 * 1024 * 1024:
         raise ValueError('API response exceeds 16 MiB')
-    if key.encode() in raw:
+    if profile.get('api_key_env') and key.encode() in raw:
         raise ValueError('API response contains credential; refused to save')
     (attempt / 'response.json').write_bytes(raw)
 
@@ -235,8 +265,7 @@ def generate(run, prompt):
         (attempt / 'inline-inputs.json').write_text(json.dumps(record_inputs, indent=2) + '\n')
         (attempt / 'prompt.txt').write_text(instructions)
         profile = ledger['api']
-        if not os.environ.get(profile['api_key_env']):
-            raise ValueError('missing credential environment variable: ' + profile['api_key_env'])
+        api_key(profile)
         request = {'model': ledger['model'], 'messages': [{'role': 'user', 'content': instructions}],
                    'stream': False, 'response_format': {'type': 'json_object'}, **profile['parameters']}
         request_path = attempt / 'request.json'
@@ -248,7 +277,7 @@ def generate(run, prompt):
         (attempt / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
         environment = {k: v for k, v in os.environ.items() if k in
                        {'PATH', 'LANG', 'LC_ALL', 'SSL_CERT_FILE', 'SSL_CERT_DIR',
-                        'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY', profile['api_key_env']}}
+                        'HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY', 'NO_PROXY', profile.get('api_key_env')}}
         with (attempt / 'stderr.txt').open('w') as stderr:
             process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                        stderr=stderr, env=environment, start_new_session=True)
@@ -263,6 +292,9 @@ def generate(run, prompt):
                     pass
                 process.communicate()
                 record['status'] = 'TIMEOUT'
+        metadata_path = attempt / 'response-metadata.json'
+        if metadata_path.exists():
+            record['response_metadata'] = json.loads(metadata_path.read_text())
         if record['status'] == 'GENERATED':
             try:
                 response_path = attempt / 'response.json'

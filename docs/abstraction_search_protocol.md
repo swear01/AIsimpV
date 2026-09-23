@@ -228,6 +228,9 @@ raw-byte preflight also rejects forbidden tokens inside comments.
 
 ## Prospective model/transport amendment — 2026-09-22
 
+The DeepSeek routing assumption in this amendment was corrected on September 23;
+see the routing correction below and the current runner protocol.
+
 Future AI runs use direct Chat Completions APIs, not Codex CLI. The default is
 `muse-spark-1.3-contributor` (`META_API_KEY`); explicit `--provider deepseek` selects
 `deepseek-flash`, the V4.1 Flash ID (`DEEPSEEK_API_KEY`). Project settings,
@@ -247,3 +250,20 @@ Meta passed a separate transport-only smoke. DeepSeek generation returned HTTP
 402 and is not qualified until account credit is available. These checks contain
 no candidate relationship hints and are outside research budgets. This amendment
 does not relabel the completed Codex experiment or alter its frozen evidence.
+
+
+## Routing correction — 2026-09-23
+
+The September 22 DeepSeek configuration selected the wrong endpoint. The user's
+standard route is the existing same-machine gateway: `deepseek-flash` at
+`http://127.0.0.1:35001/v1/chat/completions`, with the public `local-gateway`
+placeholder. Upstream credentials and routing stay in the gateway; this project
+must not use `DEEPSEEK_API_KEY` or official-account balance to decide availability.
+The previous 402 evidence is retained and does not qualify the gateway route.
+
+Client prompts and verification budgets stay unchanged. Record the gateway's
+active endpoint and upstream-attempt headers, its session ID and returned model
+ID, because internal retry/fallback and compatibility normalization may occur.
+A real call with the official key absent reached OpenCode Go but received HTTP
+403 / Cloudflare 1010; no new generation or speedup result is claimed. See the
+[current protocol](llm_protocol.md) for the corrected connection and evidence.
