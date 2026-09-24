@@ -17,8 +17,9 @@ is outside this runner; removing the CLI does not imply access to a raw model.
 | `meta` (default) | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1/chat/completions` | `META_API_KEY` |
 | `deepseek` | `deepseek-flash` (V4.1 Flash) | `http://127.0.0.1:35001/v1/chat/completions` | Public `local-gateway` placeholder; upstream credentials stay in gateway |
 
-Both use `reasoning_effort=high`, JSON-object output and a 16,384-token completion
-cap; DeepSeek explicitly enables thinking. Temperature/top-p remain provider
+Both use `reasoning_effort=high` and JSON-object output. DeepSeek has a 65,536-token
+completion cap and explicitly enables thinking; Muse has a 16,384-token cap.
+Reasoning tokens count toward these limits. Temperature/top-p remain provider
 defaults. The exact provider-specific request parameters are saved per attempt.
 These settings do not imply equal reasoning effort across providers.
 
@@ -141,6 +142,20 @@ rejection, **not** the earlier official-API balance failure. No generated model
 output was received, so successful DeepSeek generation is not yet qualified.
 No gateway service/routing change was made. Raw attempts and diagnosis are under
 `/home/swear01/AIsimpV/artifacts/local-gateway-20260923/`.
+
+## Live RTL pilots (2026-09-24)
+
+A new DeepSeek transport smoke returned HTTP 200 through `opencode-go-1` and
+materialized the requested JSON. On the frozen skid8 tasks, DeepSeek and Muse
+each found a valid fixed-pair certificate on their first attempt. Muse produced
+a 10-bit rewrite with an accepted certificate and safe free-choice property on
+attempt three. At the original 16,384-token cap, all four DeepSeek rewrite
+attempts ended with `finish_reason=length` before visible output. A separately
+recorded 65,536-token run first received gateway HTTP 503; an exact retry
+produced a 10-bit accepted/safe rewrite on attempt two. The original attempts,
+transport failure and extra costs remain separate. See the [result report](reports/direct_api_pilots.md)
+and its local raw evidence. This is one small design family and supplies no
+end-to-end proof-speedup result.
 
 ## Task-specific orchestration
 
