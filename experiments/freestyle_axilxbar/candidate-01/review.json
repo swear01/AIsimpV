@@ -1,0 +1,73 @@
+{
+  "summary": "第一份獨立生成候選把 4×8 crossbar 縮成 master 0／slave 0 的單一路徑讀取模型；property 本文保持原樣，環境說明另外限制其他流量。這是明確的局部問題，不足以推回原 crossbar 的驗證結果。",
+  "frontend": "原版與候選連接 property 後的 frontend 均 PASS；無 formal proof",
+  "metadata": "DeepSeek Flash，單輪生成；來源 wb2axip 2e8d3bc；未做形式證明",
+  "manual_note": "已人工核對下列四張卡片所列程式碼，未逐行審查完整 2394 行。獨立分析原文另存 independent_analysis.json；其中引用原 property 第 18 行（實際只有 17 行），且把上游 FORMAL suite 說成由候選移除，但本輪原始任務本來就沒有啟用該 suite。分析當下僅分別檢查檔案；事後補做兩邊的 property 接線及 frontend 檢查，均 PASS，仍未跑 solver。",
+  "changes": [
+    {
+      "title": "所有 master 0 讀取被接到 slave 0",
+      "original_locations": [
+        {"file": "original/axilxbar.v", "start": 500, "end": 518},
+        {"file": "original/axilxbar.v", "start": 1395, "end": 1399},
+        {"file": "original/axilxbar.v", "start": 1461, "end": 1471}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/axilxbar.v", "start": 7, "end": 8},
+        {"file": "candidate/axilxbar.v", "start": 71, "end": 74},
+        {"file": "candidate/axilxbar.v", "start": 107, "end": 114}
+      ],
+      "analysis": "原版以 addrdecode 和 grant/index 選擇 slave，也有無效地址的 error response；候選把地址直接送到 slave 0，其他 slave 的 ARVALID 固定為 0，且將 SLAVE_ADDR/MASK 預設值改成 0。",
+      "property_impact": "hold property 不檢查來源或地址，因此仍可能成立；這個通過不能覆蓋原設計不同 slave 與 error path 的行為。",
+      "concern": "原版指向 slave 1 的讀取，在候選中被送往 slave 0；是否能把這份候選當成原題的局部替代，需要明確限定後續能推論的範圍。",
+      "human_status": "程式碼支持此解讀",
+      "human_note": "核對過 addrdecode 實例、原讀取回傳的 srindex/rgrant 選擇、候選固定接線；具體地址值尚未計算。"
+    },
+    {
+      "title": "回覆暫存器保留 stall 資料，但握手時機可疑",
+      "original_locations": [
+        {"file": "original/axilxbar.v", "start": 1401, "end": 1409},
+        {"file": "original/axilxbar.v", "start": 1438, "end": 1480}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/axilxbar.v", "start": 76, "end": 96}
+      ],
+      "analysis": "候選以 rvalid_q、rdata_q、rresp_q 直接記錄 slave 0 訊號，輸出 stall 時保持。原版則有路由、暫存與來源 ready 控制。",
+      "property_impact": "候選的 hold branch 直接對應起始 assertion 的保持要求；但這只顯示候選寫了該保持條件，沒有證明它承接原設計的回覆行為。",
+      "concern": "候選在輸出 valid=0、ready=0 時可捕捉 M_AXI_RVALID=1，但同時令 M_AXI_RREADY=0，亦即沒有完成 slave 握手。之後 ready=1 時又可捕捉同一筆仍有效的資料，造成重複回覆的可能。",
+      "human_status": "有具體疑點",
+      "human_note": "逐拍推導自候選 80–96 行；尚未用模擬或 formal 工具重播，不宣稱已找到原設計與候選的正式反例。"
+    },
+    {
+      "title": "寫入與其他端口被關閉",
+      "original_locations": [
+        {"file": "original/axilxbar.v", "start": 1266, "end": 1350}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/axilxbar.v", "start": 58, "end": 69},
+        {"file": "candidate/axilxbar.v", "start": 98, "end": 114}
+      ],
+      "analysis": "候選將全部寫入回覆、寫入有效訊號，以及其他 master/slave 的部分讀取端口固定為 0；原版保有相應回覆與路由邏輯。",
+      "property_impact": "這些端口不直接出現在起始 property，但其流量與仲裁可能影響讀取路徑；是否可安全省略仍未判定。",
+      "concern": "模型的環境說明稱這些流量 idle，原始 task 則讓全部 design inputs 自由；不能直接把候選的環境限制套回原題。",
+      "human_status": "程式碼支持刪除；關係不明",
+      "human_note": "核對過原 B 回覆與候選 tie-off。沒有檢查所有寫入/讀取仲裁交互作用。"
+    },
+    {
+      "title": "Property 本文不變，環境說明另行縮窄",
+      "original_locations": [
+        {"file": "original/property.v", "start": 11, "end": 16},
+        {"file": "original/task.json", "start": 14, "end": 23}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/property.v", "start": 10, "end": 16},
+        {"file": "candidate/environment.md", "start": 1, "end": 1},
+        {"file": "candidate/frontend.txt", "start": 1, "end": 3}
+      ],
+      "analysis": "候選 property 的 assert 與 reset guard 同原版；另在文字中要求只考慮 master 0／slave 0 讀取，且其他流量 idle。",
+      "property_impact": "沒有看到自主改寫 property 表示；事後已將 property 接到原版與候選並通過 frontend，但未執行 property proof。",
+      "concern": "將更窄的環境當成同一道題會誇大候選價值。",
+      "human_status": "程式碼支持此解讀",
+      "human_note": "比較了兩份 assertion、task.json 與候選環境文字；原 property 只有 17 行，獨立分析的第 18 行引用已修正於本卡。補做結果見 bound_frontend.txt。"
+    }
+  ]
+}

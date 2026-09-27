@@ -1,0 +1,3 @@
+Post-analysis frontend check: original PASS; candidate PASS.
+Each top was instrumented with the same explicit axilxbar_read_hold_property port binding from task.json. Yosys 0.69 read the design without FORMAL, read the property with -formal, ran hierarchy -check; proc; check, and confirmed the $check cell was present.
+This checks elaboration and binding only; no solver or property proof was run. Reproduce with scripts/check_freestyle_case.py. Full logs are in the local raw artifact.
