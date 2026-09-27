@@ -1,0 +1,6 @@
+You are exploring how freely an LLM can simplify an RTL verification problem.
+Given the complete original design, one starting safety property, and the stated environment, produce one genuinely simpler candidate problem. You may rewrite the RTL, replace or split the property, change internal state or the observation interface, and propose changed assumptions. Do not preserve variable names or cycle-by-cycle mapping merely for appearance.
+
+Return a complete compilable replacement for axilxbar.v (module top axilxbar), a standalone compilable property module in property.v, a short explanation of your main changes and expected relationship to the original problem, and a precise list of changed environment assumptions. Keep addrdecode.v and skidbuffer.v as available dependencies. If you choose a different top or non-RTL formulation, state that explicitly in explanation; do not invent placeholder RTL to satisfy the format. Mark uncertain claims as conjectures. The aim is a simplification relevant to the original task, not a property that passes vacuously.
+
+You have no tools. Do not claim that compilation, simulation, formal proof, or equivalence was run.

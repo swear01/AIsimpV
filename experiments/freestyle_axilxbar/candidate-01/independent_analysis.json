@@ -1,0 +1,227 @@
+{
+  "summary": "candidate/axilxbar.v is a drastic rewrite: the full NMxNS AXI-Lite crossbar is replaced by a master0/slave0 read-only stub with one registered hold stage; writes and other masters/slaves are tied off; addrdecode/skidbuffer/arbitration/outstanding counters/error-slave logic and the original formal suite are removed. candidate/property.v is textually the same single read-hold property as original/property.v apart from default_nettype wrappers, but candidate/environment.md narrows the environment to master0/slave0 read traffic with writes and other ports idle, and candidate/frontend.txt states property-to-design binding was not checked. The single hold property is plausibly satisfied by the candidate rvalid_q hold branch, but this does not establish crossbar correctness or equivalence.",
+  "changes": [
+    {
+      "title": "Full crossbar replaced by minimal master0/slave0 read stub",
+      "original_locations": [
+        {
+          "file": "original/axilxbar.v",
+          "start": 81,
+          "end": 198
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 351,
+          "end": 564
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 566,
+          "end": 1030
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 1032,
+          "end": 1508
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 1510,
+          "end": 1612
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 58,
+          "end": 69
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 71,
+          "end": 96
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 98,
+          "end": 114
+        }
+      ],
+      "analysis": "Original implements a full NMxNS crossbar with write/read arbitration, address decode, skid buffers, index selection, outstanding counters, and an error slave. Candidate keeps the port/parameter shell but only wires master0 read to slave0; writes are tied off and other masters/slaves are disabled. Information disappeared: all crossbar routing, arbitration, outstanding tracking, write handling, error response generation, and addrdecode/skidbuffer instances.",
+      "property_impact": "The single property only observes master0 read response hold. Candidate's rvalid_q/rdata_q/rresp_q hold branch likely satisfies it, but the property does not cover routing, writes, other ports, or error responses.",
+      "concern": "Candidate is not a crossbar. Any correctness claim beyond the single master0 read-hold property is unsupported by this RTL."
+    },
+    {
+      "title": "Read return path reduced to one registered hold stage",
+      "original_locations": [
+        {
+          "file": "original/axilxbar.v",
+          "start": 1175,
+          "end": 1265
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 1370,
+          "end": 1508
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 71,
+          "end": 96
+        }
+      ],
+      "analysis": "Original read return path uses mrindex/mrgrant/srgrant/rgrant/srindex, m_rvalid/m_rdata/m_rresp, r_rvalid/r_rdata/r_rresp, and axi_rvalid/axi_rdata/axi_rresp. Candidate directly passes master0 AR to slave0, captures M_AXI_RVALID[0], M_AXI_RDATA[0], and M_AXI_RRESP[0] into rvalid_q/rdata_q/rresp_q, holds when rvalid_q && !S_AXI_RREADY[0], and drives M_AXI_RREADY[0] directly from S_AXI_RREADY[0].",
+      "property_impact": "The hold condition in candidate RTL directly enforces the unchanged property's stability requirement for S_AXI_RVALID[0]/RDATA[0]/RRESP[0], assuming correct binding. Original property is supported by the original registered return path.",
+      "concern": "Under free inputs, if M_AXI_RVALID[0] is asserted without a matching master0 read grant, candidate forwards it to S_AXI_R*[0]; original only returns after arbitration/decode. The property does not check request-response correlation. Candidate also ignores OPT_LOWPOWER zeroing when invalid."
+    },
+    {
+      "title": "Address decode and SLAVE_ADDR/SLAVE_MASK behavior removed",
+      "original_locations": [
+        {
+          "file": "original/axilxbar.v",
+          "start": 97,
+          "end": 114
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 477,
+          "end": 518
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 7,
+          "end": 8
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 71,
+          "end": 74
+        }
+      ],
+      "analysis": "Original defaults and uses SLAVE_ADDR/SLAVE_MASK with addrdecode to select the target slave or the no-slave/error path. Candidate defaults both parameters to 0 and never uses them for routing; every master0 read is sent to slave0. Information disappeared: address mapping, invalid-address detection, and error-slave decode.",
+      "property_impact": "The read-hold property only checks response stability and does not constrain address routing, so it can pass even when address decode is wrong.",
+      "concern": "Suspect scenario: master0 reads an address that originally decodes to slave1; original asserts M_AXI_ARVALID[1] and returns slave1 data, while candidate asserts M_AXI_ARVALID[0] and returns slave0 data or no response."
+    },
+    {
+      "title": "Write channel and other master/slave ports stubbed or tied off",
+      "original_locations": [
+        {
+          "file": "original/axilxbar.v",
+          "start": 351,
+          "end": 465
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 661,
+          "end": 806
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 1032,
+          "end": 1172
+        },
+        {
+          "file": "original/axilxbar.v",
+          "start": 1268,
+          "end": 1368
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 58,
+          "end": 69
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 98,
+          "end": 114
+        }
+      ],
+      "analysis": "Original implements the full AW/W/B write path, write arbitration, counters, and B responses. Candidate drives S_AXI_AWREADY, S_AXI_WREADY, S_AXI_BVALID, S_AXI_BRESP, M_AXI_AWVALID, M_AXI_WVALID, and M_AXI_BREADY to zero; other master ARREADY/RVALID and other slave ARVALID/RREADY are tied off. Information disappeared: all write support and multi-master/multi-slave connectivity.",
+      "property_impact": "The single property ignores writes and non-master0 ports, so it can pass despite these stubs.",
+      "concern": "Suspect scenario: master0 issues a write; original can accept it and return B, while candidate never asserts AWREADY/WREADY/BVALID. With task.json's free-input environment, this is a functional failure despite the narrowed candidate/environment.md metadata."
+    },
+    {
+      "title": "Property module unchanged but environment narrowed and binding not checked",
+      "original_locations": [
+        {
+          "file": "original/property.v",
+          "start": 3,
+          "end": 18
+        },
+        {
+          "file": "task.json",
+          "start": 1,
+          "end": 1
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/property.v",
+          "start": 2,
+          "end": 17
+        },
+        {
+          "file": "candidate/environment.md",
+          "start": 1,
+          "end": 1
+        },
+        {
+          "file": "candidate/frontend.txt",
+          "start": 3,
+          "end": 3
+        }
+      ],
+      "analysis": "candidate/property.v is textually the same read-hold property as original/property.v apart from default_nettype wrappers. task.json says no additional assumptions, all inputs free, reset guards both observed edges. candidate/environment.md instead restricts to master0/slave0 read traffic, treats writes as idle/inactive, treats other masters/slaves as idle/inactive, and says M_AXI_R* stability is not required. candidate/frontend.txt says design and property were elaborated separately and property-to-design binding was not checked.",
+      "property_impact": "The assertion semantics are unchanged, but the effective environment and verification binding differ. If bound, candidate's registered hold stage likely passes the assertion; however, the PASS evidence is weakened by unbound elaboration and the narrower environment.",
+      "concern": "Mismatch between task.json's free-input environment and candidate/environment.md's restricted environment. Do not infer soundness from the reported PASS."
+    },
+    {
+      "title": "Original formal suite and helper modules not carried into candidate",
+      "original_locations": [
+        {
+          "file": "original/axilxbar.v",
+          "start": 1632,
+          "end": 1632
+        },
+        {
+          "file": "original/addrdecode.v",
+          "start": 66,
+          "end": 66
+        },
+        {
+          "file": "original/skidbuffer.v",
+          "start": 81,
+          "end": 81
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/property.v",
+          "start": 1,
+          "end": 17
+        },
+        {
+          "file": "candidate/frontend.txt",
+          "start": 3,
+          "end": 3
+        }
+      ],
+      "analysis": "Original axilxbar contains a large FORMAL section and relies on addrdecode/skidbuffer. Candidate axilxbar has no formal assertions or helper-module instances; only the standalone property.v remains. frontend.txt admits design and property were elaborated separately and binding was not checked.",
+      "property_impact": "All original crossbar invariant and cover checks are gone. Candidate verification evidence is limited to the single derived property, and integrated property binding is not demonstrated.",
+      "concern": "Clean compile/PASS is not an integrated proof of the candidate design against the property."
+    }
+  ],
+  "open_questions": [
+    "Which environment governs evaluation: task.json's no-additional-assumptions/free-input environment, or candidate/environment.md's restricted idle master0/slave0 read environment?",
+    "Is candidate/axilxbar.v intended as a property-only abstraction/stub, or as a replacement full axilxbar implementation?",
+    "Was the property actually bound to candidate/axilxbar.v in the frontend run? candidate/frontend.txt says property-to-design binding was not checked.",
+    "Should address decoding, writes, other masters/slaves, outstanding limits, and error-slave responses be considered in scope for this verification task?",
+    "Does the original full axilxbar satisfy the same single read-hold property under the same free-input environment? The bundle does not establish this independently."
+  ]
+}

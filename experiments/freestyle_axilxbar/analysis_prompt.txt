@@ -1,0 +1,5 @@
+Independently analyze the original and candidate RTL verification problems from their actual source files. You have not seen the generator's explanation. Do not modify any candidate.
+
+Identify the important changes, including design state, control/data relationships, property and environment. For every main change, cite original and candidate file paths and line numbers or ranges, state what information disappeared or was retained, and say which claims follow from code versus remain conjectures. Give concrete suspect scenarios using states/events and expected differences where possible. If the candidate is unchanged, say there is no substantive rewrite. Do not infer correctness from a clean compile, and do not call a candidate sound merely because you found no error.
+
+Return concise JSON with summary, changes (array of objects containing title, original_locations, candidate_locations, analysis, property_impact, concern), and open_questions. Locations use {file, start, end}; file names must be from the supplied input bundle.

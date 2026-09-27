@@ -1,0 +1,3 @@
+original design: PASS; original property: PASS
+candidate design: PASS; candidate property: PASS
+Yosys 0.69; hierarchy -check; proc; check. Design and property elaborated separately; property-to-design binding not checked.

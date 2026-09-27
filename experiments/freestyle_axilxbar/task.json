@@ -1,0 +1,25 @@
+{
+  "id": "axilxbar-read-hold-v1",
+  "source": "ZipCPU/wb2axip",
+  "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+  "source_url": "https://github.com/ZipCPU/wb2axip",
+  "top": "axilxbar",
+  "parameters": {
+    "NM": 4,
+    "NS": 8,
+    "C_AXI_ADDR_WIDTH": 32,
+    "C_AXI_DATA_WIDTH": 32,
+    "OPT_LOWPOWER": 1
+  },
+  "property": "At consecutive rising edges with resetn high, a stalled read response for master 0 retains valid, data, and response code at the following edge.",
+  "property_binding": {
+    "clk": "S_AXI_ACLK",
+    "resetn": "S_AXI_ARESETN",
+    "rvalid": "S_AXI_RVALID[0]",
+    "rready": "S_AXI_RREADY[0]",
+    "rdata": "S_AXI_RDATA[0+:32]",
+    "rresp": "S_AXI_RRESP[0+:2]"
+  },
+  "environment": "No additional assumptions; all design inputs are free. Reset guards both observed edges.",
+  "files": ["original/axilxbar.v", "original/addrdecode.v", "original/skidbuffer.v", "original/property.v"]
+}
