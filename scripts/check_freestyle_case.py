@@ -19,18 +19,23 @@ BINDING = '''
 '''
 
 
+def bind_property(text, label):
+    pattern = re.compile(r'(?m)^[ \t]*endmodule\b')
+    if len(list(pattern.finditer(text))) != 1:
+        raise ValueError(f'{label}: expected exactly one top module')
+    return pattern.sub(lambda match: BINDING + match.group(), text, count=1)
+
+
 def check(label, design, prop, out, yosys):
     text = design.read_text()
     # ponytail: lexical guard may reject commented directives; use an isolated frontend for broader RTL syntax.
     forbidden = r'(?m)^\s*`(?:include|line)\b|\$(?:readmem[bh]|fopen|system|exec)\s*\('
     if re.search(forbidden, text) or re.search(forbidden, prop.read_text()):
         raise ValueError(f'{label}: external file or command directive in candidate')
-    if text.count('\nendmodule') != 1:
-        raise ValueError(f'{label}: expected exactly one top module')
     case = out / label
     case.mkdir()
     bound = case / 'bound_design.v'
-    bound.write_text(text.replace('\nendmodule', BINDING + '\nendmodule'))
+    bound.write_text(bind_property(text, label))
     script = (f'read_verilog -sv -defer {ORIGINAL / "addrdecode.v"} {ORIGINAL / "skidbuffer.v"} {bound}; '
               f'read_verilog -formal -sv -defer {prop}; '
               'hierarchy -check -top axilxbar; proc; check; '
