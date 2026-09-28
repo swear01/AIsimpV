@@ -7336,43 +7336,43 @@ pre {white-space:pre-wrap;overflow:auto;background:#eef2f5;padding:.8rem;max-hei
 <div class="line" id="candidate-frontend.txt-11"><span class="number">11</span><span class="mark"></span><code>    &quot;check_cells&quot;: 618,</code></div>
 <div class="line" id="candidate-frontend.txt-12"><span class="number">12</span><span class="mark"></span><code>    &quot;design_sha256&quot;: &quot;64b2c2e6899c1dfe22b161548d57b1ee334ac32ef9c8e126415503f5855b6db0&quot;</code></div>
 <div class="line" id="candidate-frontend.txt-13"><span class="number">13</span><span class="mark"></span><code>  }</code></div>
-<div class="line" id="candidate-frontend.txt-14"><span class="number">14</span><span class="mark"></span><code>}</code></div></div></section></div></details><details ><summary>axilxbar.v</summary><div class="pair"><section class="codepane"><h3>candidate/first-output/axilxbar.v</h3><div class="source"><div class="line" id="candidate-first-output/axilxbar.v-1"><span class="number">1</span><span class="mark"></span><code>Patch to upstream/rtl/axilxbar.v: keep the file unchanged except replace the read-grant checking block inside `CHECK_MASTER_GRANTS` (the section beginning with `// Read grant checking` and ending before its `end endgenerate`) with the following:</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-2"><span class="number">2</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-3"><span class="number">3</span><span class="mark"></span><code>```verilog</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-4"><span class="number">4</span><span class="mark"></span><code>`ifdef FORMAL</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-5"><span class="number">5</span><span class="mark"></span><code>    generate for (N=0; N&lt;NM; N=N+1)</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-6"><span class="number">6</span><span class="mark"></span><code>    begin : CHECK_MASTER_GRANTS_READ_SIMPLE</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-7"><span class="number">7</span><span class="mark"></span><code>        always @(*)</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-8"><span class="number">8</span><span class="mark"></span><code>        begin</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-9"><span class="number">9</span><span class="mark"></span><code>            // Grant and valid must agree for the read channel.</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-10"><span class="number">10</span><span class="mark"></span><code>            assert(srgrant[N] == (rgrant[N] != 0));</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-11"><span class="number">11</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-12"><span class="number">12</span><span class="mark"></span><code>            if (srgrant[N])</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-13"><span class="number">13</span><span class="mark"></span><code>            begin</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-14"><span class="number">14</span><span class="mark"></span><code>                // Index must be a valid route index: 0..NS inclusive.</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-15"><span class="number">15</span><span class="mark"></span><code>                assert(srindex[N] &lt;= NS);</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-16"><span class="number">16</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-17"><span class="number">17</span><span class="mark"></span><code>                // Exactly one selected route, and it matches srindex.</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-18"><span class="number">18</span><span class="mark"></span><code>                assert(rgrant[N] == ({{(NS){1&#x27;b0}}, 1&#x27;b1} &lt;&lt; srindex[N]));</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-19"><span class="number">19</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-20"><span class="number">20</span><span class="mark"></span><code>                // If a real slave is selected, reciprocal slave-side</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-21"><span class="number">21</span><span class="mark"></span><code>                // grant/index must agree.</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-22"><span class="number">22</span><span class="mark"></span><code>                if (srindex[N] &lt; NS)</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-23"><span class="number">23</span><span class="mark"></span><code>                begin</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-24"><span class="number">24</span><span class="mark"></span><code>                    assert(mrgrant[srindex[N]]);</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-25"><span class="number">25</span><span class="mark"></span><code>                    assert(mrindex[srindex[N]] == N);</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-26"><span class="number">26</span><span class="mark"></span><code>                end</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-27"><span class="number">27</span><span class="mark"></span><code>            end</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-28"><span class="number">28</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-29"><span class="number">29</span><span class="mark"></span><code>            // Error route is exclusive of real slave routes.</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-30"><span class="number">30</span><span class="mark"></span><code>            if (rrequest[N][NS])</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-31"><span class="number">31</span><span class="mark"></span><code>                assert(rrequest[N][NS-1:0] == 0);</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-32"><span class="number">32</span><span class="mark"></span><code>        end</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-33"><span class="number">33</span><span class="mark"></span><code>    end endgenerate</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-34"><span class="number">34</span><span class="mark"></span><code>`endif</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-35"><span class="number">35</span><span class="mark"></span><code>```</code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-36"><span class="number">36</span><span class="mark"></span><code> </code></div>
-<div class="line" id="candidate-first-output/axilxbar.v-37"><span class="number">37</span><span class="mark"></span><code>Rest of upstream/rtl/axilxbar.v is unchanged.</code></div></div></section></div></details><details><summary>一般 unified diff</summary><pre>--- original/upstream/rtl/axilxbar.v
+<div class="line" id="candidate-frontend.txt-14"><span class="number">14</span><span class="mark"></span><code>}</code></div></div></section></div></details><details ><summary>axilxbar.txt</summary><div class="pair"><section class="codepane"><h3>candidate/first-output/axilxbar.txt</h3><div class="source"><div class="line" id="candidate-first-output/axilxbar.txt-1"><span class="number">1</span><span class="mark"></span><code>Patch to upstream/rtl/axilxbar.v: keep the file unchanged except replace the read-grant checking block inside `CHECK_MASTER_GRANTS` (the section beginning with `// Read grant checking` and ending before its `end endgenerate`) with the following:</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-2"><span class="number">2</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-3"><span class="number">3</span><span class="mark"></span><code>```verilog</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-4"><span class="number">4</span><span class="mark"></span><code>`ifdef FORMAL</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-5"><span class="number">5</span><span class="mark"></span><code>    generate for (N=0; N&lt;NM; N=N+1)</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-6"><span class="number">6</span><span class="mark"></span><code>    begin : CHECK_MASTER_GRANTS_READ_SIMPLE</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-7"><span class="number">7</span><span class="mark"></span><code>        always @(*)</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-8"><span class="number">8</span><span class="mark"></span><code>        begin</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-9"><span class="number">9</span><span class="mark"></span><code>            // Grant and valid must agree for the read channel.</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-10"><span class="number">10</span><span class="mark"></span><code>            assert(srgrant[N] == (rgrant[N] != 0));</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-11"><span class="number">11</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-12"><span class="number">12</span><span class="mark"></span><code>            if (srgrant[N])</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-13"><span class="number">13</span><span class="mark"></span><code>            begin</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-14"><span class="number">14</span><span class="mark"></span><code>                // Index must be a valid route index: 0..NS inclusive.</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-15"><span class="number">15</span><span class="mark"></span><code>                assert(srindex[N] &lt;= NS);</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-16"><span class="number">16</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-17"><span class="number">17</span><span class="mark"></span><code>                // Exactly one selected route, and it matches srindex.</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-18"><span class="number">18</span><span class="mark"></span><code>                assert(rgrant[N] == ({{(NS){1&#x27;b0}}, 1&#x27;b1} &lt;&lt; srindex[N]));</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-19"><span class="number">19</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-20"><span class="number">20</span><span class="mark"></span><code>                // If a real slave is selected, reciprocal slave-side</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-21"><span class="number">21</span><span class="mark"></span><code>                // grant/index must agree.</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-22"><span class="number">22</span><span class="mark"></span><code>                if (srindex[N] &lt; NS)</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-23"><span class="number">23</span><span class="mark"></span><code>                begin</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-24"><span class="number">24</span><span class="mark"></span><code>                    assert(mrgrant[srindex[N]]);</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-25"><span class="number">25</span><span class="mark"></span><code>                    assert(mrindex[srindex[N]] == N);</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-26"><span class="number">26</span><span class="mark"></span><code>                end</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-27"><span class="number">27</span><span class="mark"></span><code>            end</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-28"><span class="number">28</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-29"><span class="number">29</span><span class="mark"></span><code>            // Error route is exclusive of real slave routes.</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-30"><span class="number">30</span><span class="mark"></span><code>            if (rrequest[N][NS])</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-31"><span class="number">31</span><span class="mark"></span><code>                assert(rrequest[N][NS-1:0] == 0);</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-32"><span class="number">32</span><span class="mark"></span><code>        end</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-33"><span class="number">33</span><span class="mark"></span><code>    end endgenerate</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-34"><span class="number">34</span><span class="mark"></span><code>`endif</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-35"><span class="number">35</span><span class="mark"></span><code>```</code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-36"><span class="number">36</span><span class="mark"></span><code> </code></div>
+<div class="line" id="candidate-first-output/axilxbar.txt-37"><span class="number">37</span><span class="mark"></span><code>Rest of upstream/rtl/axilxbar.v is unchanged.</code></div></div></section></div></details><details><summary>一般 unified diff</summary><pre>--- original/upstream/rtl/axilxbar.v
 +++ candidate/axilxbar.v
 @@ -6,25 +6,25 @@
  //

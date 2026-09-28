@@ -25,6 +25,12 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def original_files(case, task, mode):
+    return {(f'original/{name.removeprefix("original/")}' if mode == 'analyze' else name):
+            (case / name).read_text()
+            for name in task['files']}
+
+
 def validated_output(mode, result, outputs=None):
     outputs = outputs or {'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
                           'explanation': 'explanation.md', 'environment_changes': 'environment.md'}
@@ -57,7 +63,7 @@ def main():
     outputs = task.get('candidate_outputs', {
         'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
         'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
-    files = {name: (case / name).read_text() for name in task['files']}
+    files = original_files(case, task, args.mode)
     files['task.json'] = (case / 'task.json').read_text()
     if args.mode in ('repair', 'analyze'):
         candidate = args.candidate.resolve()
@@ -65,10 +71,12 @@ def main():
             files[f'candidate/{name}'] = (candidate / name).read_text()
         files['candidate/frontend.txt'] = (candidate / 'frontend.txt').read_text()
         if args.mode == 'analyze':
-            original_name = next(name for name in task['files'] if name.endswith('/axilxbar.v'))
+            design_name = outputs['axilxbar_v']
+            original_name = next(name for name in files
+                                 if name.startswith('original/') and name.endswith('/' + design_name))
             files['candidate/diff.patch'] = ''.join(unified_diff(
-                files[original_name].splitlines(True), files['candidate/axilxbar.v'].splitlines(True),
-                original_name, 'candidate/axilxbar.v'))
+                files[original_name].splitlines(True), files[f'candidate/{design_name}'].splitlines(True),
+                original_name, f'candidate/{design_name}'))
         if args.mode == 'repair':
             frontend = json.loads(files['candidate/frontend.txt'])
             log_name = frontend.get('candidate', {}).get('log')

@@ -39,19 +39,22 @@ def render(candidate, review, output, case=CASE):
     sources = {f'original/{name.removeprefix("original/")}': (case / name).read_text()
                for name in task['files']}
     sources['original/task.json'] = (case / 'task.json').read_text()
-    candidate_names = set(task.get('candidate_outputs', {
+    outputs = task.get('candidate_outputs', {
         'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
-        'explanation': 'explanation.md', 'environment_changes': 'environment.md'}).values())
+        'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
+    candidate_names = set(outputs.values())
     candidate_names.update(('frontend.txt', 'bound_frontend.txt'))
     sources.update({f'candidate/{name}': (candidate / name).read_text()
                     for name in sorted(candidate_names) if (candidate / name).is_file() and name != 'explanation.md'})
-    if (candidate / 'first-output/axilxbar.v').is_file():
-        sources['candidate/first-output/axilxbar.v'] = (candidate / 'first-output/axilxbar.v').read_text()
+    if (candidate / 'first-output/axilxbar.txt').is_file():
+        sources['candidate/first-output/axilxbar.txt'] = (candidate / 'first-output/axilxbar.txt').read_text()
     cards = review['changes']
     validate(cards, sources)
-    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/axilxbar.v'))
-    sections = [(primary, 'candidate/axilxbar.v')]
-    used = {primary, 'candidate/axilxbar.v'}
+    design_name = outputs['axilxbar_v']
+    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/' + design_name))
+    candidate_primary = f'candidate/{design_name}'
+    sections = [(primary, candidate_primary)]
+    used = {primary, candidate_primary}
     for name in sources:
         if name in used or name.startswith('candidate/'):
             continue
@@ -81,8 +84,8 @@ def render(candidate, review, output, case=CASE):
                             f'<p>{escape(card.get("human_note", ""))}</p>'
                             f'</article>')
     diff = ''.join(unified_diff(sources[primary].splitlines(True),
-                                sources['candidate/axilxbar.v'].splitlines(True),
-                                primary, 'candidate/axilxbar.v'))
+                                sources[candidate_primary].splitlines(True),
+                                primary, candidate_primary))
     status = escape(review.get('frontend', 'NOT_RUN'))
     metadata = escape(review.get('metadata', ''))
     intro = escape(review.get('summary', ''))

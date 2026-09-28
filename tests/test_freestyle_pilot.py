@@ -1,11 +1,12 @@
-import sys
+import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from freestyle_pilot import validated_output
+from freestyle_pilot import original_files, validated_output
 
 
 class PilotOutputTest(unittest.TestCase):
@@ -35,3 +36,12 @@ class PilotOutputTest(unittest.TestCase):
             ], text=True, capture_output=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('rerun the frontend check', result.stderr)
+
+    def test_analysis_source_keys_match_review_panes(self):
+        case = Path(__file__).resolve().parents[1] / 'experiments/upstream_axilxbar'
+        task = json.loads((case / 'task.json').read_text())
+        self.assertIn('upstream/rtl/axilxbar.v', original_files(case, task, 'rewrite'))
+        self.assertIn('original/upstream/rtl/axilxbar.v', original_files(case, task, 'analyze'))
+        legacy = case.parent / 'freestyle_axilxbar'
+        legacy_task = json.loads((legacy / 'task.json').read_text())
+        self.assertIn('original/axilxbar.v', original_files(legacy, legacy_task, 'rewrite'))
