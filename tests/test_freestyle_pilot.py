@@ -15,3 +15,9 @@ class PilotOutputTest(unittest.TestCase):
             validated_output('rewrite', {**valid, 'extra': 'ignored'})
         with self.assertRaises(ValueError):
             validated_output('rewrite', {**valid, 'axilxbar_v': 42})
+
+    def test_upstream_case_accepts_inline_formal_output(self):
+        fields = {'axilxbar_v': '', 'explanation': '', 'environment_changes': ''}
+        self.assertEqual(validated_output('rewrite', fields, fields), fields)
+        with self.assertRaises(ValueError):
+            validated_output('rewrite', {**fields, 'property_v': ''}, fields)

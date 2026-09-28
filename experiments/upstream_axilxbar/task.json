@@ -1,0 +1,32 @@
+{
+  "id": "axilxbar-upstream-read-grant-v1",
+  "source": "ZipCPU/wb2axip",
+  "revision": "2e8d3bc2d26ddc33d1881022a2a2b9d3f0c16b9b",
+  "source_url": "https://github.com/ZipCPU/wb2axip",
+  "top": "axilxbar",
+  "parameters": {
+    "NM": 4,
+    "NS": 8,
+    "C_AXI_ADDR_WIDTH": 32,
+    "C_AXI_DATA_WIDTH": 32,
+    "OPT_LOWPOWER": 1
+  },
+  "upstream_sby_task": "prf4x8_lp",
+  "parameter_difference": "Upstream SBY sets C_AXI_ADDR_WIDTH=16; this pilot uses the upstream RTL default of 32 because Yosys 0.69 fails internally on hierarchy -chparam for this source.",
+  "target": "Read-grant consistency assertions in upstream rtl/axilxbar.v lines 1743-1754 (CHECK_MASTER_GRANTS): a granted read has one selected route, matching source index, and reciprocal slave-side grant/index.",
+  "environment": "Original upstream FORMAL code and faxil_slave/faxil_master modules are enabled and included. No assumptions are added or removed by the experiment harness. The original upstream SBY task is preserved as a source snapshot; its proof run is not claimed for this parameter variant.",
+  "files": [
+    "upstream/rtl/axilxbar.v",
+    "upstream/rtl/addrdecode.v",
+    "upstream/rtl/skidbuffer.v",
+    "upstream/bench/formal/faxil_slave.v",
+    "upstream/bench/formal/faxil_master.v",
+    "upstream/bench/formal/axilxbar.sby"
+  ],
+  "candidate_outputs": {
+    "axilxbar_v": "axilxbar.v",
+    "explanation": "explanation.md",
+    "environment_changes": "environment.md"
+  },
+  "analysis_inputs": ["axilxbar.v", "environment.md"]
+}

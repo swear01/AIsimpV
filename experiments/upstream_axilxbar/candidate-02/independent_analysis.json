@@ -1,0 +1,91 @@
+{
+  "summary": "The candidate does not preserve the upstream read-grant consistency obligation. It repeats the same textual assertion block in CHECK_MASTER_GRANTS, but the referenced rgrant/srgrant/srindex/mrgrant/mrindex signals are redefined as combinational outputs of a simplified fixed-priority arbiter over raw addrdecode output. Upstream grants are registered, deconflicted, lingering, outstanding-aware signals tied to the real AXI read datapath and slave-side mrindex. The candidate removes nearly the entire design and formal environment, ties AXI handshakes to 0, and only contains the reduced read-grant checks plus two initial asserts. Frontend PASS only shows elaboration; it does not prove equivalence or preserve the upstream property.",
+  "changes": [
+    {
+      "title": "Read-grant consistency assertions reused over different grant state",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1743,
+          "end": 1754
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 162,
+          "end": 177
+        }
+      ],
+      "analysis": "The candidate's CHECK_MASTER_GRANTS assertions textually mirror the upstream read checks: one-hot rgrant, srgrant, matching srindex, and reciprocal mrgrant/mrindex for real slaves. However, candidate rgrant/srgrant/srindex/mrgrant/mrindex are combinational signals assigned in candidate/axilxbar.v 114-154 from rrequest. rrequest is produced by addrdecode with OPT_REGISTERED=0 and i_stall=0 in candidate/axilxbar.v 91-112. Upstream rgrant/srgrant/srindex come from registered ARBITRATE_READ_REQUESTS logic and depend on stay_on_channel, srempty, deconflicted request masks, lingering, and outstanding counters; upstream mrindex comes from SLAVE_READ_INDEX registered logic. Thus the assertions constrain a different abstraction, not the upstream read-grant state.",
+      "property_impact": "Syntactically similar, semantically different/narrower. The candidate's arbiter makes the invariant true by construction for one-hot addrdecode output, but this does not prove the upstream routing, registered grant holding, response correlation, or master/slave interaction.",
+      "concern": "No refinement or equivalence proof ties candidate rgrant/srgrant/mrgrant/mrindex to upstream state. Passing these assertions is not evidence that the upstream obligation holds."
+    },
+    {
+      "title": "Entire upstream datapath and formal environment removed/replaced",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1,
+          "end": 2394
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1,
+          "end": 182
+        }
+      ],
+      "analysis": "The candidate shrinks the module from 2394 lines to 182 lines. It removes the write path, read skid buffer, registered read address decode, read/write deconfliction, registered arbitration, pending/outstanding counters, response paths, error handling, and formal checker instances such as faxil_slave/faxil_master in CHECK_MASTERS/CHECK_SLAVES, CORRELATE_OUTSTANDING, cover/connectivity checks, negation checks, and most initial formal environment. candidate/environment.md admits removing all other formal properties except the read-grant checks and abstracting the write/data paths.",
+      "property_impact": "The read-grant assertions are no longer embedded in the original formal environment. Master/slave protocol assumptions and counter/response correlation obligations disappeared.",
+      "concern": "Entire design blocks, checker instances, assumptions, and assertions disappeared outside the target lines; this is not a local change."
+    },
+    {
+      "title": "AXI read handshake and master/slave interaction abstracted away",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1,
+          "end": 1600
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 70,
+          "end": 112
+        }
+      ],
+      "analysis": "The candidate ties S_AXI_ARREADY=0, S_AXI_RVALID=0, M_AXI_ARVALID=0, M_AXI_RREADY=0, and other AXI handshake outputs to 0 in candidate/axilxbar.v 70-89. It drives rrequest directly from S_AXI_ARVALID/S_AXI_ARADDR through addrdecode with i_stall=0 and without involving ARREADY in candidate/axilxbar.v 91-112. Upstream read requests pass through arskid, registered addrdecode, r_marvalid gating by !srfull, slave_raccepts, and actual M_AXI_ARVALID/RVALID interaction.",
+      "property_impact": "Candidate can assert grants while S_AXI_ARREADY=0 and while no M_AXI_ARVALID is issued. The assertions do not cover actual read request acceptance, backpressure, response return, or slave selection handshake.",
+      "concern": "The upstream read-grant consistency obligation concerns the crossbar's real AXI read routing; the candidate's abstracted handshake cannot validate that."
+    },
+    {
+      "title": "Dynamic grant holding, lingering, and outstanding tracking replaced by combinational fixed-priority arbiter",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1,
+          "end": 1600
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 114,
+          "end": 154
+        }
+      ],
+      "analysis": "Candidate rgrant/srgrant/mrgrant/mrindex are purely combinational and select the lowest master per slave on each evaluation from rrequest. Upstream registers rgrant/srgrant, keeps grants via stay_on_channel, uses srempty/outstanding state, OPT_LINGER, deconflicted request masks, and registered mrindex. candidate/environment.md admits dynamic grant holding, lingering, outstanding tracking, and error-slave sharing are lost.",
+      "property_impact": "Different arbitration and sequencing semantics. The same textual assertion over candidate combinational grants does not establish upstream registered-grant invariants.",
+      "concern": "Concrete suspect sequence: masters 0 and 1 both request slave 0. Candidate grants slave 0 to master 0 and, if master 0 drops its request, can switch combinational grant behavior immediately, while upstream may hold/linger and track outstanding responses. The candidate's assertion does not cover grant stability or response correlation."
+    }
+  ],
+  "open_questions": [
+    "Was any formal proof run for the candidate, or only frontend/Yosys elaboration? candidate/frontend.txt reports PASS/check_cells but no proof result.",
+    "Are addrdecode formal assertions enabled in the intended candidate proof, and are they sufficient to constrain rrequest one-hot?",
+    "Is the candidate intended as an abstraction of upstream? If so, where is the refinement proof connecting candidate rgrant/srgrant/mrgrant/mrindex to upstream state?",
+    "What exact upstream subranges cover removed CHECK_MASTERS, CHECK_SLAVES, CORRELATE_OUTSTANDING, cover, and negation checks? The diff shows they disappeared, but this analysis uses broad ranges."
+  ]
+}

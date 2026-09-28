@@ -1,0 +1,86 @@
+{
+  "summary": "Candidate rewrites the target read-grant consistency assertions and also deletes the entire CHECK_MASTERS formal block. By inspection, the rewritten read-grant block appears to express the same obligation as upstream: srgrant iff rgrant nonzero, one selected route matching srindex, reciprocal mrgrant/mrindex for real slaves, and error-route exclusivity. However, the candidate is not proven sound here. The deletion of CHECK_MASTERS removes faxil_slave checker instances, master-side assumptions, and many counter/full-empty assertions outside the target lines, materially weakening the formal environment. Frontend PASS only means the candidate elaborates.",
+  "changes": [
+    {
+      "title": "Read-grant consistency assertions rewritten",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1743,
+          "end": 1765
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1743,
+          "end": 1769
+        }
+      ],
+      "analysis": "Upstream asserts, per set rgrant[N][iM], that rgrant[N] is one-hot at iM, srgrant[N] is high, srindex[N] equals iM, and for iM<NS that mrgrant[iM] is high and mrindex[iM]==N. It also asserts srgrant[N] implies rgrant[N]!=0 and rrequest[N][NS] excludes real-slave request bits. Candidate replaces this with assert(srgrant[N] == (rgrant[N] != 0)), srindex[N]<=NS, assert(rgrant[N] == ({{(NS){1'b0}},1'b1} << srindex[N])), reciprocal mrgrant/mrindex checks when srindex[N]<NS, and the same rrequest[N][NS] exclusivity. Under normal Verilog bit-width semantics, this is logically equivalent to the upstream obligation for rgrant/srgrant/srindex/mrgrant/mrindex. No concrete failing sequence was found where upstream would fail but this rewritten block would pass.",
+      "property_impact": "Same target obligation by inspection; not narrower in the read-grant block itself. It is a different expression but appears equivalent, additionally making the srindex<=NS bound explicit. This conclusion is manual, not tool-proven.",
+      "concern": "Requires formal equivalence checking or proof across parameterizations (NS=1,3,8 and the pilot's C_AXI_ADDR_WIDTH=32 variant). No proof evidence is supplied; do not call it sound."
+    },
+    {
+      "title": "Entire CHECK_MASTERS generate block and faxil_slave checker instances deleted",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1770,
+          "end": 1917
+        }
+      ],
+      "candidate_locations": [],
+      "analysis": "The candidate diff removes the whole generate block beginning CHECK_MASTERS. This block instantiated faxil_slave for each master N and included numerous formal assumptions/assertions: master AXI stability assumptions coming from faxil_slave, reset/outstanding-count checks, read/write counter equalities, full/empty flag assertions, and no-response-without-grant checks. faxil_master remains in CHECK_SLAVES, but the master-side faxil_slave instances are gone. candidate/environment.md claims no checker-module changes, but the axilxbar.v diff contradicts that. Candidate frontend check_cells drops from 905 to 618, consistent with removed checker logic.",
+      "property_impact": "The target read-grant assertions are still present in the rewritten CHECK_MASTER_GRANTS block, but the surrounding formal environment is materially weakened. Any candidate proof result would not cover the deleted CHECK_MASTERS obligations and would be incomparable to the upstream task. Removed assumptions can also expose the solver to illegal master stimulus sequences; removed assertions can hide counter/full-empty and response-without-grant failures.",
+      "concern": "Missing evidence: no proof run, no justification that these checker instances and assumptions are irrelevant, and no equivalence/comparability argument to upstream. Deleting assumptions or assertions outside the target can make any apparent success unsound relative to the original verification claim."
+    },
+    {
+      "title": "Formatting/indentation-only edits in comments and slave-index loops",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 6,
+          "end": 30
+        },
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 967,
+          "end": 975
+        },
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1007,
+          "end": 1015
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 6,
+          "end": 30
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 967,
+          "end": 975
+        },
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1007,
+          "end": 1015
+        }
+      ],
+      "analysis": "Diff hunks in the header comments and in SLAVE_WRITE_INDEX/SLAVE_READ_INDEX only change indentation/whitespace. No RTL semantics or formal assertions are changed by these hunks.",
+      "property_impact": "None identified.",
+      "concern": "None for semantics, but line-number shifts complicate exact location mapping."
+    }
+  ],
+  "open_questions": [
+    "Is the rewritten read-grant assertion formally equivalent to the original for NS=1, NS=3, NS=8, and the pilot's C_AXI_ADDR_WIDTH=32 parameter variant?",
+    "Why was the entire CHECK_MASTERS block, including faxil_slave checker instances and master-side assumptions, removed? Are those removed assumptions/assertions truly irrelevant to the target proof?",
+    "Has any proof or cover run been performed on the candidate, and under which SBY task/parameters? The supplied frontend PASS is only elaboration.",
+    "The bundle notes upstream SBY used C_AXI_ADDR_WIDTH=16 while the pilot uses 32; no proof at 32 is claimed. Does this parameter difference invalidate comparability with upstream prf4x8_lp?",
+    "candidate/environment.md says no formal harness, parameter, or checker-module changes, but the axilxbar.v diff deletes checker instances. Which statement is authoritative?"
+  ]
+}

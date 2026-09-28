@@ -1,0 +1,38 @@
+{
+  "summary": "候選將跨週期仲裁改成組合式固定優先權 grant，但把所有 AXI 對外輸出固定為 0；縮小的是另一個問題。",
+  "frontend": "原／候選 PASS（formal check cells 905→211）",
+  "metadata": "上游 wb2axip 2e8d3bc；DeepSeek Flash；沒有 formal proof",
+  "manual_note": "人工已核對候選 70–89、114–178 與原版相關介面。S_AXI_ARREADY、M_AXI_ARVALID、S_AXI_RVALID 都固定 0，因此沒有實際讀取交易；非 FORMAL opt 後 top 為 0 cells。生成者有明列此限制。",
+  "changes": [
+    {
+      "title": "讀取握手與回覆對外輸出被固定為 0",
+      "original_locations": [
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 489, "end": 494},
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1240, "end": 1247},
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1478, "end": 1480}
+      ],
+      "candidate_locations": [{"file": "candidate/axilxbar.v", "start": 70, "end": 89}],
+      "analysis": "候選仍計算內部 read grant，卻沒有任何 AXI read address 可以被接受，也不會向 slave 發出 read request 或回覆 master。",
+      "property_impact": "目標 assertion 被移到無法進行真實交易的候選系統；它不能代表原 crossbar 在合法交易下的義務。",
+      "concern": "原題的可發生交易被排除。",
+      "human_status": "有具體問題",
+      "human_note": "候選明確 assign S_AXI_ARREADY/M_AXI_ARVALID/S_AXI_RVALID = 0；功能 top 經 opt 後沒有 cells。"
+    },
+    {
+      "title": "跨週期 grant 改成組合式固定優先權",
+      "original_locations": [
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 821, "end": 873},
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1743, "end": 1754}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/axilxbar.v", "start": 114, "end": 154},
+        {"file": "candidate/axilxbar.v", "start": 160, "end": 178}
+      ],
+      "analysis": "原版 grant 受未完成交易和 linger 影響；候選依當拍 rrequest 重新選擇。原文 assertion 看似保留，受檢查的狀態已換成候選自己算出的 grant。",
+      "property_impact": "缺少從候選組合式 grant 回到上游 registered grant 的對應證據。",
+      "concern": "多 master 競爭與回覆未完成時，兩版可能選擇不同通道。",
+      "human_status": "程式碼支持此解讀",
+      "human_note": "核對原版 stay_on_channel/linger 與候選 114–154；未進行完整逐拍等價檢查。"
+    }
+  ]
+}

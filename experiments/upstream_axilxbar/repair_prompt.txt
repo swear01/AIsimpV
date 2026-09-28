@@ -1,0 +1,3 @@
+The first candidate failed the recorded frontend check. Repair only its output-format or compiler errors; do not change the intended read-grant simplification or add new environment restrictions. The axilxbar_v JSON field must contain the complete Verilog source file, with no prose, patch instructions, or Markdown fences. Return all required fields again. If you cannot supply a complete file, say so in the explanation; do not pretend it compiles.
+
+You have no tools. The supplied frontend log is the only compiler feedback. Do not claim that compilation or formal proof was run after your repair.

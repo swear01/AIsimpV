@@ -1,2 +1,5 @@
 experiments/freestyle_axilxbar/original/*.v whitespace=-blank-at-eol
 experiments/freestyle_axilxbar/candidate-01/review.html whitespace=-blank-at-eol
+experiments/upstream_axilxbar/upstream/rtl/*.v whitespace=-blank-at-eol
+experiments/upstream_axilxbar/upstream/bench/formal/*.v whitespace=-blank-at-eol
+experiments/upstream_axilxbar/candidate-*/review.html whitespace=-blank-at-eol,-space-before-tab

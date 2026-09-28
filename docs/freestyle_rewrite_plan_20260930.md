@@ -1,5 +1,7 @@
 # 9/30 報告：LLM 自由改寫 RTL 驗證問題的初步探索
 
+後續選題修正：本文是衍生 property 的第一版計畫與流程試跑紀錄。主要研究證據已改用[上游 axilxbar formal assertions 的三次獨立實驗](reports/upstream_axilxbar_pilot.md)；兩組任務與候選不混算。
+
 日期：2026-09-28，Asia/Taipei。這是新研究問題；[9/23 的 certificate pilot](wednesday_plan.md) 是既有成果，不計入本輪三份候選。
 
 ## 研究問題與可說的結論

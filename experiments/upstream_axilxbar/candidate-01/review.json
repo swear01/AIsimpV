@@ -1,0 +1,28 @@
+{
+  "summary": "第一次輸出是 patch 說明，非合法 RTL；一次編譯錯誤修補後可 elaboration。修補版主要改寫 read-grant assertion，功能設計規模未變，並意外刪除 master-side formal checker。",
+  "frontend": "初版 FAIL；修補版原／候選 PASS（formal check cells 905→618）",
+  "metadata": "上游 wb2axip 2e8d3bc；DeepSeek Flash；沒有 formal proof",
+  "manual_note": "人工已比對完整 diff。非 FORMAL 讀取與 opt 後，兩版 design hierarchy 均為 2664 cells；沒有觀察到功能 RTL 的實質簡化。初版盲分析漏看整段 checker 刪除；加上機械 diff 後才辨認出來。",
+  "changes": [
+    {
+      "title": "把逐 bit 的 read-grant assertions 改成索引式檢查",
+      "original_locations": [{"file": "original/upstream/rtl/axilxbar.v", "start": 1743, "end": 1765}],
+      "candidate_locations": [{"file": "candidate/axilxbar.v", "start": 1743, "end": 1768}],
+      "analysis": "候選用 srgrant、srindex 與 rgrant 的單一關係取代原先的迴圈，並保留 real-slave 的反向 grant/index 檢查。這是 property 表達方式的改寫；沒有證明兩式等價。",
+      "property_impact": "目標 assertion 仍可辨認，但與上游原式的等價性未檢查。",
+      "concern": "不要把 assertion 數量或文字減少當作設計 abstraction。",
+      "human_status": "程式碼支持此解讀",
+      "human_note": "核對原版 1743–1765 與候選 1743–1768；非 FORMAL stat 在兩版皆為 2664 cells。"
+    },
+    {
+      "title": "整段 CHECK_MASTERS 與 faxil_slave 實例消失",
+      "original_locations": [{"file": "original/upstream/rtl/axilxbar.v", "start": 1770, "end": 1917}],
+      "candidate_locations": [],
+      "analysis": "修補版從 read-grant block 直接跳到 CHECK_SLAVES；上游每個 master 的 faxil_slave、AXI 輸入假設與 outstanding/full-empty assertions 都未接入。",
+      "property_impact": "有效 formal 環境和待檢查義務已改變，與生成者的「沒有其他變動」說法不符。",
+      "concern": "前端 PASS 只表示剩下的電路可 elaboration；905→618 不是驗證成本改善的證據。",
+      "human_status": "有具體問題",
+      "human_note": "完整 diff 確認刪除原版 1770–1917；修補版不存在 CHECK_MASTERS/faxil_slave 實例。"
+    }
+  ]
+}
