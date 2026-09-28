@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """One isolated API request for the axilxbar rewrite or blind analysis pilot."""
 import argparse
+from difflib import unified_diff
 import hashlib
 import json
 from pathlib import Path
@@ -24,9 +25,16 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def validated_output(mode, result):
-    required = ({'axilxbar_v', 'property_v', 'explanation', 'environment_changes'}
-                if mode == 'rewrite' else {'summary', 'changes', 'open_questions'})
+def original_files(case, task, mode):
+    return {(f'original/{name.removeprefix("original/")}' if mode == 'analyze' else name):
+            (case / name).read_text()
+            for name in task['files']}
+
+
+def validated_output(mode, result, outputs=None):
+    outputs = outputs or {'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
+                          'explanation': 'explanation.md', 'environment_changes': 'environment.md'}
+    required = (set(outputs) if mode == 'rewrite' else {'summary', 'changes', 'open_questions'})
     if not isinstance(result, dict) or set(result) != required:
         raise ValueError(f'{mode} response fields must be {sorted(required)}')
     if mode == 'rewrite':
@@ -40,27 +48,50 @@ def validated_output(mode, result):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('rewrite', 'analyze'))
+    parser.add_argument('mode', choices=('rewrite', 'repair', 'analyze'))
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--candidate', type=Path, help='candidate directory for blind analysis')
     parser.add_argument('--provider', choices=('deepseek', 'meta'), default='deepseek')
+    parser.add_argument('--case', type=Path, default=CASE, help='frozen experiment case')
     args = parser.parse_args()
-    if args.mode == 'analyze' and args.candidate is None:
-        parser.error('--candidate is required for analysis')
+    if args.mode in ('repair', 'analyze') and args.candidate is None:
+        parser.error('--candidate is required for repair or analysis')
     if args.out.exists():
         parser.error('output directory already exists')
-    original = CASE / 'original'
-    files = {f'original/{name}': (original / name).read_text()
-             for name in ('axilxbar.v', 'addrdecode.v', 'skidbuffer.v', 'property.v')}
-    files['task.json'] = (CASE / 'task.json').read_text()
-    if args.mode == 'analyze':
+    case = args.case.resolve()
+    task = json.loads((case / 'task.json').read_text())
+    outputs = task.get('candidate_outputs', {
+        'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
+        'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
+    files = original_files(case, task, args.mode)
+    files['task.json'] = (case / 'task.json').read_text()
+    if args.mode in ('repair', 'analyze'):
         candidate = args.candidate.resolve()
-        for name in ('axilxbar.v', 'property.v', 'environment.md'):
+        for name in task.get('analysis_inputs', ('axilxbar.v', 'property.v', 'environment.md')):
             files[f'candidate/{name}'] = (candidate / name).read_text()
         files['candidate/frontend.txt'] = (candidate / 'frontend.txt').read_text()
-    prompt = (CASE / f'{"rewrite" if args.mode == "rewrite" else "analysis"}_prompt.txt').read_text()
-    schema = ({'axilxbar_v': '', 'property_v': '', 'explanation': '', 'environment_changes': ''}
-              if args.mode == 'rewrite' else {'summary': '', 'changes': [], 'open_questions': []})
+        if args.mode == 'analyze':
+            design_name = outputs['axilxbar_v']
+            originals = [name for name in files
+                         if name.startswith('original/') and name.endswith('/axilxbar.v')]
+            if len(originals) != 1 or f'candidate/{design_name}' not in files:
+                parser.error('analysis inputs must contain the original axilxbar.v and '
+                             f'candidate {design_name}')
+            original_name = originals[0]
+            files['candidate/diff.patch'] = ''.join(unified_diff(
+                files[original_name].splitlines(True), files[f'candidate/{design_name}'].splitlines(True),
+                original_name, f'candidate/{design_name}'))
+        if args.mode == 'repair':
+            frontend = json.loads(files['candidate/frontend.txt'])
+            log_name = frontend.get('candidate', {}).get('log')
+            if not log_name or not Path(log_name).is_file():
+                parser.error('Yosys log is unavailable; rerun the frontend check '
+                             'on this candidate before repair')
+            files['candidate/yosys.log'] = Path(log_name).read_text()
+    prompt_name = 'analysis' if args.mode == 'analyze' else args.mode
+    prompt = (case / f'{prompt_name}_prompt.txt').read_text()
+    schema = ({key: '' for key in outputs} if args.mode != 'analyze'
+              else {'summary': '', 'changes': [], 'open_questions': []})
     message = prompt + '\nReturn JSON with these exact fields:\n' + json.dumps(schema) + '\n\nFrozen input bundle:\n' + json.dumps(files)
     profile = tomllib.loads((ROOT / 'scripts/llm_models.toml').read_text())[args.provider]
     key = api_key(profile)
@@ -103,16 +134,16 @@ def main():
             raise ValueError('response is too large or contains credential')
         (args.out / 'response.json').write_bytes(raw)
         record = {}
-        result = validated_output(args.mode, json.loads(completion(json.loads(raw), record)))
+        result = validated_output('analyze' if args.mode == 'analyze' else 'rewrite',
+                                  json.loads(completion(json.loads(raw), record)), outputs)
         metadata.update({key: record.get(key) for key in ('response_model', 'response_id', 'usage', 'finish_reason')})
         metadata['response_sha256'] = digest(raw)
         metadata['elapsed_seconds'] = time.monotonic() - started
         (args.out / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-        if args.mode == 'rewrite':
+        if args.mode != 'analyze':
             candidate = args.out / 'candidate'
             candidate.mkdir()
-            for key, name in (('axilxbar_v', 'axilxbar.v'), ('property_v', 'property.v'),
-                              ('explanation', 'explanation.md'), ('environment_changes', 'environment.md')):
+            for key, name in outputs.items():
                 (candidate / name).write_text(result[key])
         (args.out / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
     except Exception as error:

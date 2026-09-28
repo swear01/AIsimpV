@@ -34,26 +34,46 @@ def validate(cards, sources):
                     raise ValueError(f'invalid source location: {loc}')
 
 
-def render(candidate, review, output):
-    sources = {f'original/{name}': (CASE / 'original' / name).read_text()
-               for name in ('axilxbar.v', 'property.v', 'addrdecode.v', 'skidbuffer.v')}
-    sources['original/task.json'] = (CASE / 'task.json').read_text()
+def render(candidate, review, output, case=CASE):
+    task = json.loads((case / 'task.json').read_text())
+    sources = {f'original/{name.removeprefix("original/")}': (case / name).read_text()
+               for name in task['files']}
+    sources['original/task.json'] = (case / 'task.json').read_text()
+    outputs = task.get('candidate_outputs', {
+        'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
+        'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
+    explanation_name = outputs['explanation']
+    environment_name = outputs['environment_changes']
+    candidate_names = set(outputs.values())
+    candidate_names.update(('frontend.txt', 'bound_frontend.txt'))
     sources.update({f'candidate/{name}': (candidate / name).read_text()
-                    for name in ('axilxbar.v', 'property.v', 'environment.md',
-                                 'frontend.txt', 'bound_frontend.txt')})
+                    for name in sorted(candidate_names) if (candidate / name).is_file() and name != explanation_name})
+    if (candidate / 'first-output/axilxbar.txt').is_file():
+        sources['candidate/first-output/axilxbar.txt'] = (candidate / 'first-output/axilxbar.txt').read_text()
     cards = review['changes']
     validate(cards, sources)
+    design_name = outputs['axilxbar_v']
+    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/axilxbar.v'))
+    candidate_primary = f'candidate/{design_name}'
+    sections = [(primary, candidate_primary)]
+    used = {primary, candidate_primary}
+    for name in sources:
+        if name in used or name.startswith('candidate/'):
+            continue
+        candidate_key = f'candidate/{Path(name).name}'
+        pair = (name, candidate_key) if candidate_key in sources and candidate_key not in used else (name,)
+        sections.append(pair)
+        used.update(pair)
+    sections.extend((name,) for name in sources if name not in used)
     panes = []
-    for name in ('axilxbar.v', 'property.v', 'task.json', 'environment.md',
-                 'frontend.txt', 'bound_frontend.txt', 'addrdecode.v', 'skidbuffer.v'):
+    for section in sections:
         columns = []
-        for side in ('original', 'candidate'):
-            key = f'{side}/{name}'
-            if key in sources:
-                columns.append(f'<section class="codepane"><h3>{escape(key)}</h3>'
-                               f'<div class="source">{rows(side, name, sources[key], cards)}</div></section>')
-        panes.append(f'<details {"open" if name == "axilxbar.v" else ""}>'
-                     f'<summary>{escape(name)}</summary><div class="pair">{"".join(columns)}</div></details>')
+        for key in section:
+            side, name = key.split('/', 1)
+            columns.append(f'<section class="codepane"><h3>{escape(key)}</h3>'
+                           f'<div class="source">{rows(side, name, sources[key], cards)}</div></section>')
+        panes.append(f'<details {"open" if primary in section else ""}>'
+                     f'<summary>{escape(Path(section[0]).name)}</summary><div class="pair">{"".join(columns)}</div></details>')
     change_cards = []
     for index, card in enumerate(cards):
         change_cards.append(f'<article class="card" onclick="focusCard({index})" tabindex="0" '
@@ -65,14 +85,14 @@ def render(candidate, review, output):
                             f'<p><strong>人工狀態：</strong>{escape(card.get("human_status", "未核對"))}</p>'
                             f'<p>{escape(card.get("human_note", ""))}</p>'
                             f'</article>')
-    diff = ''.join(unified_diff(sources['original/axilxbar.v'].splitlines(True),
-                                sources['candidate/axilxbar.v'].splitlines(True),
-                                'original/axilxbar.v', 'candidate/axilxbar.v'))
+    diff = ''.join(unified_diff(sources[primary].splitlines(True),
+                                sources[candidate_primary].splitlines(True),
+                                primary, candidate_primary))
     status = escape(review.get('frontend', 'NOT_RUN'))
     metadata = escape(review.get('metadata', ''))
     intro = escape(review.get('summary', ''))
-    explanation = escape((candidate / 'explanation.md').read_text())
-    environment = escape((candidate / 'environment.md').read_text())
+    explanation = escape((candidate / explanation_name).read_text())
+    environment = escape((candidate / environment_name).read_text())
     manual = escape(review.get('manual_note', '尚未人工核對'))
     locations = json.dumps([{'original': card['original_locations'], 'candidate': card['candidate_locations']}
                             for card in cards])
@@ -113,5 +133,6 @@ if __name__ == '__main__':
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--review', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--case', type=Path, default=CASE)
     args = parser.parse_args()
-    render(args.candidate, json.loads(args.review.read_text()), args.out)
+    render(args.candidate, json.loads(args.review.read_text()), args.out, args.case)

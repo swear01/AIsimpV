@@ -1,0 +1,33 @@
+{
+  "http_status": 200,
+  "provider": "deepseek",
+  "endpoint": "http://127.0.0.1:35001/v1/chat/completions",
+  "requested_model": "deepseek-flash",
+  "request_sha256": "3cdacdf2d52021f621c8e2bc6345e4f5d23c211cbf8e69eafaa73147d36e1566",
+  "gateway_headers": {
+    "X-Gateway-Active-Endpoint": "opencode-go-1",
+    "X-Gateway-Attempt": "2"
+  },
+  "response_model": "deepseek-flash",
+  "response_id": "4e9cc7203345d0c044f28fbe669e33ae",
+  "usage": {
+    "prompt_tokens": 60531,
+    "completion_tokens": 37138,
+    "total_tokens": 97669,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cached_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_write_tokens": 0
+    },
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 10052,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "response_sha256": "2f92052b1f4a00228b074bfb9392965893aea41e8e9012171e9113320e5a1982",
+  "elapsed_seconds": 403.69790005590767
+}

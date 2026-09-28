@@ -1,0 +1,30 @@
+{
+  "summary": "The supplied candidate is an unchanged copy of the upstream design for the target area. candidate/diff.patch is empty, candidate/environment.md says \"No changes.\", and candidate/frontend.txt reports identical design_sha256 a71760b622ee8856a95d2bc802ddcad1dc5498704b8fb283abfebd5704b22445 and 905 cells for original and candidate. The upstream read-grant consistency block at upstream/rtl/axilxbar.v:1743-1754 is textually present at candidate/axilxbar.v:1743-1754: for any rgrant[N][iM], it still asserts rgrant one-hot on iM, srgrant asserted, srindex equal to iM, and for iM < NS, reciprocal mrgrant[iM] and mrindex[iM] == N. It also retains the srgrant -> rgrant != 0 and rrequest[N][NS] -> lower request bits zero checks. Based on the supplied empty diff, no entire design blocks, checker instances, assumptions, or assertions disappeared outside the target lines. Property impact: same obligation, not narrower/conditional/different/absent. However frontend PASS only proves elaboration; no formal prove result is supplied for the pilot parameter variant, so the candidate cannot be called sound.",
+  "changes": [
+    {
+      "title": "No candidate modification to the read-grant consistency assertions",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1743,
+          "end": 1754
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1743,
+          "end": 1754
+        }
+      ],
+      "analysis": "candidate/diff.patch is empty, so the target CHECK_MASTER_GRANTS read-grant block was not modified. The original block is under FORMAL and iterates iM from 0 to NS inclusive. If rgrant[N][iM] is set, it asserts (rgrant[N] ^ (1<<iM))==0, srgrant[N], and srindex[N] == iM. For real-slave routes iM < NS, it additionally asserts mrgrant[iM] and mrindex[iM] == N. The unchanged surrounding checks assert srgrant[N] implies rgrant[N] != 0 and that the no-slave/error route rrequest[N][NS] excludes all real-slave request bits. This traces the same read arbitration state in both versions: rrequest/rrequested feed rgrant/srgrant/srindex, while SLAVE_READ_INDEX and the mrgrant reduction provide the reciprocal slave-side mrindex/mrgrant view. No added guards, assumptions, or fixed outputs weaken or narrow the obligation.",
+      "property_impact": "Same obligation. It is not narrower, not a different obligation, and not absent. The candidate does not add or remove constraints relative to the upstream target assertions.",
+      "concern": "No formal proof result is provided for the candidate under the pilot parameters. Identical design hash and frontend PASS only show elaboration equivalence for the supplied flow, not that the assertions hold."
+    }
+  ],
+  "open_questions": [
+    "Was a formal prove run performed for the candidate under NM=4, NS=8, C_AXI_ADDR_WIDTH=32, OPT_LOWPOWER=1? The supplied evidence only shows frontend PASS and an identical design hash.",
+    "Does the parameter difference from the upstream SBY task listed as C_AXI_ADDR_WIDTH=16 to the pilot default C_AXI_ADDR_WIDTH=32 affect proof convergence or any cover/assume properties? No proof logs for this variant are supplied.",
+    "Are there any hidden modifications outside the supplied candidate files? The supplied diff.patch is empty and candidate/environment.md says no changes, but no formal run transcript is included."
+  ]
+}

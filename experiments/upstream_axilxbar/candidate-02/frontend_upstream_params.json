@@ -1,0 +1,14 @@
+{
+  "original": {
+    "status": "PASS",
+    "exit_code": 0,
+    "check_cells": 905,
+    "design_sha256": "a71760b622ee8856a95d2bc802ddcad1dc5498704b8fb283abfebd5704b22445"
+  },
+  "candidate": {
+    "status": "PASS",
+    "exit_code": 0,
+    "check_cells": 211,
+    "design_sha256": "ae0637a052c36d1ce2c5c555defb0a6b87f723396b3c5ed1fdffc5520880321d"
+  }
+}

@@ -1,9 +1,12 @@
+import json
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from freestyle_pilot import validated_output
+from freestyle_pilot import original_files, validated_output
 
 
 class PilotOutputTest(unittest.TestCase):
@@ -15,3 +18,31 @@ class PilotOutputTest(unittest.TestCase):
             validated_output('rewrite', {**valid, 'extra': 'ignored'})
         with self.assertRaises(ValueError):
             validated_output('rewrite', {**valid, 'axilxbar_v': 42})
+
+    def test_upstream_case_accepts_inline_formal_output(self):
+        fields = {'axilxbar_v': '', 'explanation': '', 'environment_changes': ''}
+        self.assertEqual(validated_output('rewrite', fields, fields), fields)
+        with self.assertRaises(ValueError):
+            validated_output('rewrite', {**fields, 'property_v': ''}, fields)
+
+    def test_repair_explains_missing_frontend_log(self):
+        root = Path(__file__).resolve().parents[1]
+        case = root / 'experiments/upstream_axilxbar'
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run([
+                sys.executable, str(root / 'scripts/freestyle_pilot.py'), 'repair',
+                '--case', str(case), '--candidate', str(case / 'candidate-01'),
+                '--out', str(Path(directory) / 'repair'),
+            ], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('rerun the frontend check', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
+
+    def test_analysis_source_keys_match_review_panes(self):
+        case = Path(__file__).resolve().parents[1] / 'experiments/upstream_axilxbar'
+        task = json.loads((case / 'task.json').read_text())
+        self.assertIn('upstream/rtl/axilxbar.v', original_files(case, task, 'rewrite'))
+        self.assertIn('original/upstream/rtl/axilxbar.v', original_files(case, task, 'analyze'))
+        legacy = case.parent / 'freestyle_axilxbar'
+        legacy_task = json.loads((legacy / 'task.json').read_text())
+        self.assertIn('original/axilxbar.v', original_files(legacy, legacy_task, 'rewrite'))

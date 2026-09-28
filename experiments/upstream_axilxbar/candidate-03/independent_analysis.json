@@ -1,0 +1,65 @@
+{
+  "summary": "Candidate contains a CHECK_MASTER_GRANTS block with read-grant assertions textually matching upstream lines 1743-1754, but the unified diff replaces the entire upstream axilxbar implementation with a simplified read-only one-outstanding stub. The retained assertions operate on new candidate-local rgrant/srgrant/srindex/mrgrant/mrindex state, not the original registered arbiter/addrdecode/skidbuffer crossbar. Candidate srgrant is just OR of rgrant, and mrgrant/mrindex are combinational derivatives of rgrant. Thus the candidate expresses at best a narrower/derived local bookkeeping obligation, not the same upstream read-grant consistency obligation. Original write grant checks, CHECK_MASTERS/CHECK_SLAVES faxil_slave/faxil_master instances, correlation assertions, cover/negation properties, and assumptions disappeared. Frontend PASS is only elaboration; no proof result is supplied.",
+  "changes": [
+    {
+      "title": "Entire axilxbar implementation replaced by simplified read-only stub",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1,
+          "end": 2394
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1,
+          "end": 290
+        }
+      ],
+      "analysis": "The diff deletes the full upstream module and adds a 290-line replacement. Upstream contained addrdecode/skidbuffer instances, registered read/write decoders, linger arbiters, outstanding counters, full write and read return channels, and formal checker instances. Candidate has a combinational priority read decoder (candidate/axilxbar.v lines 119-135), one-outstanding read grant state (lines 158-191), tied-off write outputs (lines 105-111), and a simple SLVERR write stub (lines 238-263). candidate/environment.md lines 1-8 confirms addrdecode, skidbuffer, faxil_slave, faxil_master are not instantiated and OPT_LINGER/LGMAXBURST/OPT_LOWPOWER are ignored. Concrete interaction difference: in the original, S_AXI_ARVALID/address pass through arskid and registered addrdecode, so dropping S_AXI_ARVALID after a grant does not necessarily drop the downstream request; in the candidate, m_arvalid[j] is combinational from S_AXI_ARVALID[i] and rgrant[i][j] (lines 205-209), so the same sequence drops M_AXI_ARVALID.",
+      "property_impact": "The target read-grant assertions are now embedded in a different design. They cannot establish the original crossbar/arbiter behavior involving registered decoding, skid buffering, linger, multiple outstanding reads, or slave-side return routing.",
+      "concern": "This is a design replacement, not a local patch. A proof of the candidate would prove a much smaller simplified design, not the upstream target under original behavior."
+    },
+    {
+      "title": "Read-grant consistency assertions retained but over redefined state",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1743,
+          "end": 1754
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 269,
+          "end": 282
+        }
+      ],
+      "analysis": "Candidate lines 269-282 contain the same read-grant assertion shapes: one-hot rgrant, srgrant true, srindex equals selected kk, and if kk<NS then mrgrant[kk] and mrindex[kk]==gN. However candidate srgrant is defined as |rgrant[gN] (lines 137-139), so assert(srgrant[gN]) is derived directly from rgrant. Candidate mrgrant and mrindex are combinationally recomputed from all rgrant bits in lines 141-156, whereas upstream mrindex was a registered slave-side index and srgrant was separate arbiter state. Candidate grants are also one-outstanding only; no linger, skid, addrdecode, or multi-outstanding read pipeline is present.",
+      "property_impact": "Same textual local formula, but a narrower/derived obligation over the candidate's simplified bookkeeping. It does not express the upstream obligation over the original read arbiter, registered slave index, skid/decoder pipeline, and multi-outstanding interaction.",
+      "concern": "The check can pass without proving the original design obligation. In particular, srgrant consistency is tautological, and reciprocal slave-index checks are derived from rgrant rather than independent registered state."
+    },
+    {
+      "title": "Original formal checker instances, assumptions, correlation/cover/negation checks removed",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1755,
+          "end": 2394
+        }
+      ],
+      "candidate_locations": [],
+      "analysis": "The diff removes the upstream CHECK_MASTERS faxil_slave instances, CHECK_SLAVES faxil_master instances, CHECK_MASTER_GRANTS write-grant checks, CORRELATE_OUTSTANDING assertions, cover properties, and the anyconst negation/cross-talk checks. candidate/environment.md lines 7-8 states the original formal checkers and cover properties are not instantiated and the effective formal environment is smaller. candidate/axilxbar.v has only the read CHECK_MASTER_GRANTS block (lines 266-284).",
+      "property_impact": "The target assertions are no longer constrained or correlated by the original master/slave AXI protocol assumptions, outstanding counters, or address-routing checks. A candidate proof would be in a different, weaker formal environment.",
+      "concern": "Missing checker instances and assumptions are outside the focused read-grant lines but directly affect whether the retained assertions mean the same thing. No proof evidence is provided for the candidate; candidate/frontend.txt records only Yosys elaboration."
+    }
+  ],
+  "open_questions": [
+    "Was the candidate actually proved under the original axilxbar.sby task with FORMAL enabled, or is the only evidence the frontend elaboration PASS in candidate/frontend.txt?",
+    "Should the target be judged textually as the retained local read-grant assertions, or semantically as the upstream crossbar read-grant obligation over the original arbiter/decoder/skid-buffer state?",
+    "Can the candidate's simplified arbitration be shown to maintain one grant per slave under all input sequences? Inspection suggests a likely invariant, but no formal proof is supplied here.",
+    "The upstream SBY task sets C_AXI_ADDR_WIDTH=16 while the task parameters use 32; does this parameter difference affect any intended proof claim for the candidate?"
+  ]
+}

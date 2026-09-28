@@ -1,0 +1,37 @@
+{
+  "summary": "候選提出約 290 行、保留部分讀取握手的狀態模型；它有實質 RTL 簡化，但只追蹤每個 master 一個 grant，且移除原 formal checker。",
+  "frontend": "原／候選 PASS（formal check cells 905→180）",
+  "metadata": "上游 wb2axip 2e8d3bc；DeepSeek Flash；沒有 formal proof",
+  "manual_note": "人工核對 grant 更新、讀取輸出與 formal block。非 FORMAL opt 後原設計為 2664 cells，候選為 949 cells；這是結構規模，不是驗證加速或 soundness。具體疑點：同一 master 的第一筆 AR 被接受後若緊接著提出另一個 slave 的 AR，候選可能仍按舊 grant 將第二筆送往舊 slave；此事件序列尚未用工具重播。",
+  "changes": [
+    {
+      "title": "把 outstanding/linger 仲裁縮成單一 read grant 狀態",
+      "original_locations": [
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 821, "end": 873},
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1864, "end": 1896}
+      ],
+      "candidate_locations": [{"file": "candidate/axilxbar.v", "start": 137, "end": 191}],
+      "analysis": "候選用每個 master 的 rgrant/srindex 和每個 slave 的 busy 表達讀取配置；原版的未完成交易計數與 linger 條件不見了。",
+      "property_impact": "相同形狀的 grant assertions 作用在不同的狀態機；仍缺少原題到新題的關係。",
+      "concern": "第一筆讀取未回覆時提出第二個地址，候選可能沿舊 grant 向舊 slave 再送一筆 AR。",
+      "human_status": "有具體疑點",
+      "human_note": "核對候選 165–185 的 grant 保持條件與 203–225 的 AR 轉送；尚未做 trace 重播。"
+    },
+    {
+      "title": "保留部分讀取路徑，但移除上游 checker",
+      "original_locations": [
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1395, "end": 1480},
+        {"file": "original/upstream/rtl/axilxbar.v", "start": 1770, "end": 1980}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/axilxbar.v", "start": 193, "end": 235},
+        {"file": "candidate/axilxbar.v", "start": 266, "end": 285}
+      ],
+      "analysis": "候選仍可轉送 AR/R 訊號，並保留 read-grant assertion 的形狀；但原版 faxil_slave/master、counter 關聯、cover 與其他斷言沒有被實例化。",
+      "property_impact": "候選僅提供局部 grant 一致性問題，未保留原始 formal 環境的其餘檢查與假設。",
+      "concern": "對候選證明 P，也無法直接回推原 crossbar 的 P。",
+      "human_status": "有具體問題",
+      "human_note": "核對原版 CHECK_MASTERS/CHECK_SLAVES 與候選唯一 FORMAL block；905→180 check cells。"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Replaced the non-Verilog patch text with the complete Verilog source file. The read-grant simplification from the candidate was integrated into the existing CHECK_MASTER_GRANTS block by replacing the old read-grant assertion section with the new single always @(*) block. No other changes were made.

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>axilxbar 上游 formal 改寫實驗</title>
+<style>
+body{max-width:850px;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui,sans-serif;color:#182334;background:#f5f7fa}
+table{border-collapse:collapse;width:100%;background:white}th,td{border:1px solid #cad3db;padding:.6rem;text-align:left}
+a{color:#145d97}.notice{background:#fff4d4;padding:.7rem;border-left:4px solid #b77b00}
+</style>
+<h1>axilxbar：上游 formal property 的自由改寫</h1>
+<p>原題取自 ZipCPU/wb2axip commit <code>2e8d3bc</code> 的 4×8 AXI-lite crossbar 與內嵌 read-grant assertions。三份候選使用相同輸入與模型設定獨立生成。</p>
+<p class="notice">這些頁面呈現生成內容與人工審查；frontend PASS 不表示抽象正確。生成輸入採上游 RTL 預設的 32-bit address，另以 16-bit address 跑過上游參數的 frontend；未執行原始 proof task。</p>
+<table><thead><tr><th>候選</th><th>觀察</th><th>對照頁</th></tr></thead><tbody>
+<tr><td>01</td><td>初版非 RTL；修補後只改 property，並漏掉 checker。</td><td><a href="candidate-01/review.html">查看 01</a></td></tr>
+<tr><td>02</td><td>組合式 grant；所有 AXI 輸出固定為 0。</td><td><a href="candidate-02/review.html">查看 02</a></td></tr>
+<tr><td>03</td><td>保留部分讀取路徑；改為單 grant 狀態，存在具體行為疑點。</td><td><a href="candidate-03/review.html">查看 03</a></td></tr>
+</tbody></table>
+<p>完整方法、來源版本與驗證界線見 <a href="README.md">案例說明</a>；逐項結果見 <a href="../../docs/reports/upstream_axilxbar_pilot.md">研究紀錄</a>。</p>
+</html>

@@ -1,0 +1,30 @@
+{
+  "summary": "Candidate refactors the upstream read-grant consistency assertions in CHECK_MASTER_GRANTS. The original per-bit loop and separate srgrant check are replaced by an equivalent assert on srgrant == (rgrant != 0), a one-hot match rgrant == (1 << srindex), a range check srindex <= NS, and conditional reciprocal slave-side checks for srindex < NS. The error-route exclusivity is unchanged. I find the same obligation, not a weakened or different one, assuming standard Verilog width semantics for the shift. Frontend PASS is only elaboration; no formal proof is claimed.",
+  "changes": [
+    {
+      "title": "Read-grant consistency assertions refactored",
+      "original_locations": [
+        {
+          "file": "upstream/rtl/axilxbar.v",
+          "start": 1743,
+          "end": 1754
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/axilxbar.v",
+          "start": 1743,
+          "end": 1760
+        }
+      ],
+      "analysis": "Upstream lines 1743-1754, inside CHECK_MASTER_GRANTS, iterate iM=0..NS and, when rgrant[N][iM] is set, assert (rgrant[N] ^ (1<<iM))==0, srgrant[N], srindex[N]==iM, and for iM<NS assert mrgrant[iM] and mrindex[iM]==N. Upstream also has separate blocks asserting srgrant[N] -> rgrant[N]!=0 and rrequest[N][NS] -> rrequest[N][NS-1:0]==0. Candidate replaces this with one always block: assert(srgrant[N] == (rgrant[N] != 0)); if srgrant, assert(srindex[N] <= NS); assert(rgrant[N] == ({{(NS){1'b0}}, 1'b1} << srindex[N])); if srindex<NS, assert mrgrant[srindex] and mrindex[srindex]==N; and the same rrequest error-route exclusivity. The equivalence assertion covers both original srgrant directions. The one-hot equality covers the original per-bit XOR and srindex match. The conditional reciprocal check matches the original iM<NS branch. For NS=8, the shift literal has NS+1=9 bits, so the one-hot expression is correctly sized. No new assumptions or fixed outputs are introduced in candidate/axilxbar.v; candidate/environment.md states no harness changes. Concrete sequences that both versions should flag: srgrant=1,rgrant=0; rgrant=2'b11,srgrant=1; rgrant=1<<2,srgrant=1,srindex=3; rgrant=1<<(NS-1),srgrant=1,srindex=NS-1,mrgrant[NS-1]=0.",
+      "property_impact": "Same obligation. The candidate is a refactor of the same read-grant consistency property: granted read => one selected route at srindex, with reciprocal slave-side grant/index for real slaves. It is not narrower and does not appear to introduce a different obligation. No property weakening identified.",
+      "concern": "No formal proof run is provided; frontend PASS only shows elaboration. The candidate was not shown to prove or fail the upstream assertions. The proof target parameter differs from upstream SBY (C_AXI_ADDR_WIDTH=32 vs 16), so upstream proof status is not inherited."
+    }
+  ],
+  "open_questions": [
+    "Does the candidate pass the same formal proof under the specified parameter variant? No formal result is supplied.",
+    "Are there any other candidate differences outside the read-grant block? Only axilxbar.v and environment.md were inspected here; candidate/frontend.txt only reports elaboration.",
+    "Could the shift-width or assert-order in the candidate cause tool-specific differences? Standard Verilog gives an NS+1-bit left operand and srindex<=NS guard, so no semantic gap was identified, but a formal run would confirm."
+  ]
+}

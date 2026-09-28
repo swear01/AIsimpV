@@ -1,0 +1,7 @@
+You are exploring whether an LLM can simplify a real RTL verification task. The frozen input is ZipCPU/wb2axip's axilxbar design, its actual FORMAL code, faxil_slave/faxil_master checkers, and the original SBY configuration. Focus on the read-grant consistency assertions in rtl/axilxbar.v under CHECK_MASTER_GRANTS, identified in task.json. The full upstream suite is context; do not pretend that this pilot proves every assertion.
+
+Produce one genuinely simpler candidate. You may change the internal representation and rewrite the target property, including its signals and structure. You may propose changed environment assumptions, but list each change precisely. Do not simply disable FORMAL, delete the target obligation, constrain away valid crossbar traffic, or reduce the number of masters/slaves without identifying the lost cases. If the full problem cannot be simplified, say so and return your best partial candidate with explicit limits.
+
+Return a complete Verilog replacement for rtl/axilxbar.v, including any candidate property you propose under FORMAL, plus a short explanation and environment-change record. Keep addrdecode.v, skidbuffer.v, faxil_slave.v, and faxil_master.v available unchanged. Explain which original grant assertions your candidate is intended to address and which original behaviors it may no longer represent. Your explanation is a hypothesis, not a proof.
+
+You have no tools. Do not claim that compilation, simulation, formal proof, or equivalence was run.
