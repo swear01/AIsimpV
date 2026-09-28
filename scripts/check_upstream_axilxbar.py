@@ -62,7 +62,7 @@ def check(label, design, out, yosys, upstream_params=False):
     (directory / 'yosys.log').write_text(log)
     counts = re.findall(r'(?m)^(\d+) objects\.$', log)
     checks = int(counts[-1]) if counts else None
-    if status == 'PASS' and checks == 0:
+    if status == 'PASS' and not checks:
         status = 'NO_FORMAL_CHECKS'
     return {'status': status, 'exit_code': exit_code, 'check_cells': checks,
             'design_sha256': hashlib.sha256(design.read_bytes()).hexdigest(),

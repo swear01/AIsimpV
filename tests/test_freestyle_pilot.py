@@ -34,8 +34,9 @@ class PilotOutputTest(unittest.TestCase):
                 '--case', str(case), '--candidate', str(case / 'candidate-01'),
                 '--out', str(Path(directory) / 'repair'),
             ], text=True, capture_output=True)
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 2)
         self.assertIn('rerun the frontend check', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
 
     def test_analysis_source_keys_match_review_panes(self):
         case = Path(__file__).resolve().parents[1] / 'experiments/upstream_axilxbar'

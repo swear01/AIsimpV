@@ -72,8 +72,12 @@ def main():
         files['candidate/frontend.txt'] = (candidate / 'frontend.txt').read_text()
         if args.mode == 'analyze':
             design_name = outputs['axilxbar_v']
-            original_name = next(name for name in files
-                                 if name.startswith('original/') and name.endswith('/' + design_name))
+            originals = [name for name in files
+                         if name.startswith('original/') and name.endswith('/axilxbar.v')]
+            if len(originals) != 1 or f'candidate/{design_name}' not in files:
+                parser.error('analysis inputs must contain the original axilxbar.v and '
+                             f'candidate {design_name}')
+            original_name = originals[0]
             files['candidate/diff.patch'] = ''.join(unified_diff(
                 files[original_name].splitlines(True), files[f'candidate/{design_name}'].splitlines(True),
                 original_name, f'candidate/{design_name}'))
@@ -81,8 +85,8 @@ def main():
             frontend = json.loads(files['candidate/frontend.txt'])
             log_name = frontend.get('candidate', {}).get('log')
             if not log_name or not Path(log_name).is_file():
-                raise FileNotFoundError('Yosys log is unavailable; rerun the frontend check '
-                                        'on this candidate before repair')
+                parser.error('Yosys log is unavailable; rerun the frontend check '
+                             'on this candidate before repair')
             files['candidate/yosys.log'] = Path(log_name).read_text()
     prompt_name = 'analysis' if args.mode == 'analyze' else args.mode
     prompt = (case / f'{prompt_name}_prompt.txt').read_text()

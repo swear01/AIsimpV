@@ -42,16 +42,18 @@ def render(candidate, review, output, case=CASE):
     outputs = task.get('candidate_outputs', {
         'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
         'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
+    explanation_name = outputs['explanation']
+    environment_name = outputs['environment_changes']
     candidate_names = set(outputs.values())
     candidate_names.update(('frontend.txt', 'bound_frontend.txt'))
     sources.update({f'candidate/{name}': (candidate / name).read_text()
-                    for name in sorted(candidate_names) if (candidate / name).is_file() and name != 'explanation.md'})
+                    for name in sorted(candidate_names) if (candidate / name).is_file() and name != explanation_name})
     if (candidate / 'first-output/axilxbar.txt').is_file():
         sources['candidate/first-output/axilxbar.txt'] = (candidate / 'first-output/axilxbar.txt').read_text()
     cards = review['changes']
     validate(cards, sources)
     design_name = outputs['axilxbar_v']
-    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/' + design_name))
+    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/axilxbar.v'))
     candidate_primary = f'candidate/{design_name}'
     sections = [(primary, candidate_primary)]
     used = {primary, candidate_primary}
@@ -89,8 +91,8 @@ def render(candidate, review, output, case=CASE):
     status = escape(review.get('frontend', 'NOT_RUN'))
     metadata = escape(review.get('metadata', ''))
     intro = escape(review.get('summary', ''))
-    explanation = escape((candidate / 'explanation.md').read_text())
-    environment = escape((candidate / 'environment.md').read_text())
+    explanation = escape((candidate / explanation_name).read_text())
+    environment = escape((candidate / environment_name).read_text())
     manual = escape(review.get('manual_note', '尚未人工核對'))
     locations = json.dumps([{'original': card['original_locations'], 'candidate': card['candidate_locations']}
                             for card in cards])
