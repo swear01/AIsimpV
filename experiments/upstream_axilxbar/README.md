@@ -21,3 +21,5 @@ python3 scripts/freestyle_pilot.py analyze --case experiments/upstream_axilxbar 
 ```
 
 The check uses `read_verilog -formal`, which activates upstream `FORMAL` code, followed by hierarchy, process conversion, and structural checking. It is neither an SBY proof nor a soundness check. The candidate analysis does not receive the generator's explanation. Keep original and candidate artifacts separate from the earlier derived-property pilot.
+
+`repair` needs the local `yosys.log` from a failed frontend run. The committed `frontend.txt` snapshots are compact result summaries; rerun the frontend check before trying to repair a candidate from a fresh clone.

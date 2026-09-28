@@ -71,7 +71,11 @@ def main():
                 original_name, 'candidate/axilxbar.v'))
         if args.mode == 'repair':
             frontend = json.loads(files['candidate/frontend.txt'])
-            files['candidate/yosys.log'] = Path(frontend['candidate']['log']).read_text()
+            log_name = frontend.get('candidate', {}).get('log')
+            if not log_name or not Path(log_name).is_file():
+                raise FileNotFoundError('Yosys log is unavailable; rerun the frontend check '
+                                        'on this candidate before repair')
+            files['candidate/yosys.log'] = Path(log_name).read_text()
     prompt_name = 'analysis' if args.mode == 'analyze' else args.mode
     prompt = (case / f'{prompt_name}_prompt.txt').read_text()
     schema = ({key: '' for key in outputs} if args.mode != 'analyze'
