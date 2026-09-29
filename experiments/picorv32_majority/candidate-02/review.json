@@ -1,0 +1,98 @@
+{
+  "summary": "候選 02 選用上游既有的 register-read abstraction。RVFI/ALTOPS 結構綜合通用 cell 12,412→7,221（少 41.8%），但跨指令暫存器值關係被抽掉；assertion 行為保留率未測。",
+  "frontend": "未跑 Formal 或 assertion 檢查；僅做 size-only synthesis",
+  "metadata": "PicoRV32 ef203c2；riscv-formal c992aa6；Codex GPT-6 選用上游既有分支",
+  "manual_note": "人工核對 macro 與 register read 的原始條件分支、M/C/RVFI 程式碼是否保留；沒有逐項審查 86 個任務的完整語意。Yosys 結構綜合不是行為檢查。",
+  "changes": [
+    {
+      "title": "非零暫存器讀值改為每拍可變的自由值",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 203,
+          "end": 211
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1350,
+          "end": 1373
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 59,
+          "end": 61
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1356,
+          "end": 1379
+        }
+      ],
+      "analysis": "候選定義 RISCV_FORMAL_BLACKBOX_REGS，使原始碼既有的 $anyseq 分支啟用。x0 仍為 0；非零 rs1、rs2 讀值不再由 32×32 register file 決定。",
+      "property_impact": "多數單指令計算路徑仍可使用非零運算元；reg_ch0 關心的先寫後讀一致性不再保留。",
+      "concern": "相依指令可能讀到與前一拍寫入不一致的值，導致原版不會出現的軌跡。",
+      "human_status": "程式碼支持",
+      "human_note": "核對定義、條件編譯及兩個 anyseq 讀值。"
+    },
+    {
+      "title": "保留原版 M、C、記憶體與 RVFI 執行路徑",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 893,
+          "end": 1020
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1977,
+          "end": 2085
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2318,
+          "end": 2510
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 899,
+          "end": 1026
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1983,
+          "end": 2091
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 2324,
+          "end": 2516
+        }
+      ],
+      "analysis": "這些區塊在候選中沿用原始碼；不同之處來自它們讀到的暫存器值可能任意變動。",
+      "property_impact": "70 個指令 task 和 10 個 CSR task 的實作路徑仍在，但完整 assertion 行為關係沒有判定。",
+      "concern": "M、分支、load/store 等跨指令資料依賴是否導致假反例仍未知。",
+      "human_status": "差異檢視支持",
+      "human_note": "檢視原版與候選的 diff；未讀完每個 opcode。"
+    },
+    {
+      "title": "移除本 wrapper 不使用的 AXI／Wishbone 模組",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2517,
+          "end": 3049
+        }
+      ],
+      "candidate_locations": [],
+      "analysis": "source 文件變短，但這些 module 原本未被此 wrapper 實例化。",
+      "property_impact": "不應把這部分文字刪除算成 solver 模型的縮減。",
+      "concern": "候選不再是所有原 public module 的替代品。",
+      "human_status": "已核對模組邊界",
+      "human_note": "固定 wrapper 只實例化 picorv32。"
+    }
+  ]
+}

@@ -16,9 +16,11 @@
   ],
   "checks_run": [
     "source diff inspection",
-    "task inventory count"
+    "task inventory count",
+    "size-only Yosys synthesis"
   ],
   "formal_run": false,
-  "compilation_run": false,
+  "frontend_only_check_run": false,
+  "size_synthesis_run": true,
   "simulation_run": false
 }

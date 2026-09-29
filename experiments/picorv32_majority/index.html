@@ -2,15 +2,21 @@
 <html lang="zh-Hant">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PicoRV32 多數 assertion 行為的簡化候選</title>
+<title>PicoRV32 多數 assertion 行為的簡化候選對照</title>
 <style>
 body{max-width:850px;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui,sans-serif;color:#182334;background:#f5f7fa}
 table{border-collapse:collapse;width:100%;background:white}th,td{border:1px solid #cad3db;padding:.6rem;text-align:left}
 a{color:#145d97}.notice{background:#fff4d4;padding:.7rem;border-left:4px solid #b77b00}
 </style>
-<h1>PicoRV32：一份面向多數 assertion 的簡化候選</h1>
-<p>固定上游 PicoRV32 核心與 riscv-formal 的 86 個 generated assertion 任務。候選保留原核心的非 M 執行路徑，拿掉乘除法單元；原始檔 3,049 行，候選 2,103 行。</p>
-<p class="notice">這輪沒有跑 Formal、編譯或模擬。程式碼中仍可找到 72 個指令／CSR 任務的對應路徑；這不是「72 個任務已保留」或「已達 80%」的結論。M 的 8 個任務明確失去，另外 6 個跨指令任務仍待判讀。</p>
+<h1>PicoRV32：兩種面向多數 assertion 的簡化</h1>
+<p>固定上游 PicoRV32 核心與 riscv-formal 的 86 個 generated assertion 任務。下面比較的是簡化表示及其代價；本輪沒有跑 Formal、BMC 或模擬。</p>
+<p class="notice">原始檔 3,049 行。候選 01 雖縮到 2,103 行，在上游 RVFI/ALTOPS 設定下通用 cell 只少 7.7%；候選 02 有 2,516 行，通用 cell 卻少 41.8%。行數不能代替模型規模，更不能當成「保留 80% assertion 行為」的證據。</p>
+<table><thead><tr><th>候選</th><th>主要抽象與代價</th><th>結構規模</th><th>對照</th></tr></thead><tbody>
+<tr><td>01</td><td>拿掉 M 乘除法；8 個 M 任務行為失去</td><td>11,460 cells（−7.7%）</td><td><a href="candidate-01/review.html">檢視 01</a></td></tr>
+<tr><td>02</td><td>保留 M，非零暫存器讀值改為每拍自由選取；跨指令讀寫一致性失去</td><td>7,221 cells（−41.8%）</td><td><a href="candidate-02/review.html">檢視 02</a></td></tr>
+</tbody></table>
+<p>候選 02 使用上游原本提供的抽象分支；這不是 LLM 自行發明的新狀態表示。80 個指令／CSR 任務的實作路徑仍在，完整行為關係尚未判定。</p>
+<h2>候選 01 的任務判讀</h2>
 <table><thead><tr><th>範圍</th><th>任務數</th><th>目前判讀</th></tr></thead><tbody>
 <tr><td>RV32I</td><td>37</td><td>相關 decode、資料與 RVFI 路徑仍在</td></tr>
 <tr><td>壓縮指令</td><td>25</td><td>相關 fetch、decode 與執行路徑仍在</td></tr>
@@ -18,5 +24,5 @@ a{color:#145d97}.notice{background:#fff4d4;padding:.7rem;border-left:4px solid #
 <tr><td>乘除法 M</td><td>8</td><td>刻意省略</td></tr>
 <tr><td>暫存器／PC／順序等</td><td>6</td><td>部分路徑仍在，跨指令前史未判定</td></tr>
 </tbody></table>
-<p><a href="candidate-01/review.html">開啟逐行前後對照</a> · <a href="candidate-01/assertion_coverage.md">任務判讀</a> · <a href="assertion_intents.md">上游任務清單</a> · <a href="README.md">來源與限制</a></p>
+<p><a href="structural_size.md">結構規模對照</a> · <a href="candidate-01/assertion_coverage.md">候選 01 任務判讀</a> · <a href="candidate-02/assertion_coverage.md">候選 02 任務判讀</a> · <a href="assertion_intents.md">上游任務清單</a> · <a href="README.md">來源與限制</a></p>
 </html>
