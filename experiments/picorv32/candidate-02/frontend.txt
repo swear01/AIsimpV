@@ -1,0 +1,24 @@
+{
+  "original": {
+    "status": "PASS",
+    "exit_code": 0,
+    "formal_check_cells": 64,
+    "missing_modules": [],
+    "design_sha256": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622"
+  },
+  "candidate": {
+    "status": "PASS",
+    "exit_code": 0,
+    "formal_check_cells": 39,
+    "missing_modules": [
+      "picorv32_axi",
+      "picorv32_axi_adapter",
+      "picorv32_pcpi_div",
+      "picorv32_pcpi_fast_mul",
+      "picorv32_pcpi_mul",
+      "picorv32_regs",
+      "picorv32_wb"
+    ],
+    "design_sha256": "a9e12f3f209cb9eeff4e0d8c7e49a8894022d7e214f22bb100c993f44b632520"
+  }
+}

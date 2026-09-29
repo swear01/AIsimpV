@@ -71,11 +71,15 @@ def main():
             files[f'candidate/{name}'] = (candidate / name).read_text()
         files['candidate/frontend.txt'] = (candidate / 'frontend.txt').read_text()
         if args.mode == 'analyze':
-            design_name = outputs['axilxbar_v']
-            originals = [name for name in files
-                         if name.startswith('original/') and name.endswith('/axilxbar.v')]
+            design_name = task.get('primary_output', outputs.get('axilxbar_v', 'axilxbar.v'))
+            if 'primary_design' in task:
+                original = f'original/{task["primary_design"].removeprefix("original/")}'
+                originals = [name for name in files if name == original]
+            else:
+                originals = [name for name in files
+                             if name.startswith('original/') and name.endswith('/axilxbar.v')]
             if len(originals) != 1 or f'candidate/{design_name}' not in files:
-                parser.error('analysis inputs must contain the original axilxbar.v and '
+                parser.error('analysis inputs must contain the original design and '
                              f'candidate {design_name}')
             original_name = originals[0]
             files['candidate/diff.patch'] = ''.join(unified_diff(

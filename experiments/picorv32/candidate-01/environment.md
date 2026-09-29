@@ -1,0 +1,1 @@
+The core is replaced by a partial ADD-only model. The wrapper parameters and reset are unchanged. The core ignores all parameters except PROGADDR_RESET. Memory interface is simplified to a single-cycle fetch with random mem_ready/mem_rdata. All non-ADD instructions are retired with rvfi_trap=1 and no architectural effect. The check is only meaningful for the ADD instruction.

@@ -34,11 +34,11 @@ def validate(cards, sources):
                     raise ValueError(f'invalid source location: {loc}')
 
 
-def render(candidate, review, output, case=CASE):
-    task = json.loads((case / 'task.json').read_text())
+def render(candidate, review, output, case=CASE, task_path=None):
+    task = json.loads((task_path or case / 'task.json').read_text())
     sources = {f'original/{name.removeprefix("original/")}': (case / name).read_text()
                for name in task['files']}
-    sources['original/task.json'] = (case / 'task.json').read_text()
+    sources['original/task.json'] = (task_path or case / 'task.json').read_text()
     outputs = task.get('candidate_outputs', {
         'axilxbar_v': 'axilxbar.v', 'property_v': 'property.v',
         'explanation': 'explanation.md', 'environment_changes': 'environment.md'})
@@ -52,8 +52,11 @@ def render(candidate, review, output, case=CASE):
         sources['candidate/first-output/axilxbar.txt'] = (candidate / 'first-output/axilxbar.txt').read_text()
     cards = review['changes']
     validate(cards, sources)
-    design_name = outputs['axilxbar_v']
-    primary = next(name for name in sources if name.startswith('original/') and name.endswith('/axilxbar.v'))
+    design_name = task.get('primary_output', outputs.get('axilxbar_v', 'axilxbar.v'))
+    if 'primary_design' in task:
+        primary = f'original/{task["primary_design"].removeprefix("original/")}'
+    else:
+        primary = next(name for name in sources if name.startswith('original/') and name.endswith('/axilxbar.v'))
     candidate_primary = f'candidate/{design_name}'
     sections = [(primary, candidate_primary)]
     used = {primary, candidate_primary}
@@ -115,7 +118,7 @@ summary {{cursor:pointer;font-weight:600}} .pair {{display:grid;grid-template-co
 pre {{white-space:pre-wrap;overflow:auto;background:#eef2f5;padding:.8rem;max-height:60vh}}
 @media(max-width:900px) {{.layout,.pair {{display:block}} .source {{max-height:45vh}}}}
 </style>
-<header><h1>axilxbar：自由改寫審查</h1><div>前端：{status}　{metadata}</div></header>
+<header><h1>{escape(task.get('top', 'axilxbar'))}：自由改寫審查</h1><div>前端：{status}　{metadata}</div></header>
 <main><p class="notice">此頁展示程式碼與解讀；前端通過及人工未見問題都不代表抽象正確。</p>
 <p>{intro}</p><div class="layout"><aside><h2>概念改動</h2><div class="cards">{''.join(change_cards) or '<p>尚無標註</p>'}</div>
 <h2>人工核對</h2><p>{manual}</p><h2>生成者說明</h2><pre>{explanation}</pre><h2>環境變動</h2><pre>{environment}</pre></aside>
@@ -134,5 +137,6 @@ if __name__ == '__main__':
     parser.add_argument('--review', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--case', type=Path, default=CASE)
+    parser.add_argument('--task', type=Path, help='frozen task snapshot for this candidate')
     args = parser.parse_args()
-    render(args.candidate, json.loads(args.review.read_text()), args.out, args.case)
+    render(args.candidate, json.loads(args.review.read_text()), args.out, args.case, args.task)

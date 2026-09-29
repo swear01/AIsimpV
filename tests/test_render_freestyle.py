@@ -41,3 +41,30 @@ class RenderTest(unittest.TestCase):
         self.assertIn('reason text', page)
         self.assertIn('setting text', page)
         self.assertNotIn('candidate/why.txt', page)
+
+    def test_non_axilxbar_primary_design(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            case = root / 'case'
+            candidate = root / 'candidate'
+            (case / 'upstream').mkdir(parents=True)
+            candidate.mkdir()
+            (case / 'upstream/picorv32.v').write_text('module picorv32; endmodule\n')
+            task = {
+                'top': 'picorv32', 'primary_design': 'upstream/picorv32.v',
+                'primary_output': 'picorv32.v', 'files': ['upstream/picorv32.v'],
+                'candidate_outputs': {'picorv32_v': 'picorv32.v', 'explanation': 'why.txt',
+                                      'environment_changes': 'env.txt'},
+            }
+            (case / 'task.json').write_text(json.dumps({**task, 'top': 'wrong'}))
+            snapshot = case / 'task_input.json'
+            snapshot.write_text(json.dumps(task))
+            (candidate / 'picorv32.v').write_text('module picorv32; endmodule\n')
+            (candidate / 'why.txt').write_text('reason')
+            (candidate / 'env.txt').write_text('unchanged')
+            output = root / 'review.html'
+            render(candidate, {'changes': []}, output, case, snapshot)
+            page = output.read_text()
+        self.assertIn('original/upstream/picorv32.v', page)
+        self.assertIn('candidate/picorv32.v', page)
+        self.assertIn('picorv32：自由改寫審查', page)

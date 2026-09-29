@@ -1,0 +1,369 @@
+{
+  "summary": "Candidate picorv32.v is not the upstream core: it is a simplified two-state ADD-only model with stubbed periphery. It can emit an RVFI record for an ADD-like instruction, but it does not preserve original ADD retirement, ordering, trap/halt semantics, memory handshake, parameterized RV32IMC behavior, or CSR/formal behavior under the original wrapper. Frontend PASS only shows elaboration/syntax, not soundness. The narrow insn_add_ch0 checker may still pass because it samples an ADD at CHECK_CYCLE and assumes spec_valid, but that would not mean the original core is represented.",
+  "changes": [
+    {
+      "title": "Entire core replaced by ADD-only two-state model",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 154,
+          "end": 2176
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 15,
+          "end": 255
+        },
+        {
+          "file": "candidate/diff.patch",
+          "start": 17,
+          "end": 19
+        }
+      ],
+      "analysis": "Candidate comments admit a simplified ADD-only partial model, and the body defines only STATE_FETCH/STATE_EXEC, pc, regfile, instr, and a fetch/execute ADD case. The original body contains the full memory interface, decoder, main state machine, IRQ/PCPI, counters, compressed ISA, and RVFI logic.",
+      "property_impact": "Under the original wrapper, RVFI no longer reflects original instruction retirement, traps, memory traffic, ordering, CSRs, or compressed/M-extension execution. The ADD checker may be satisfiable, but the candidate is not the original core.",
+      "concern": "This is a wholesale replacement, not a targeted repair; frontend PASS is not evidence of equivalence."
+    },
+    {
+      "title": "Wrapper parameters ignored by candidate core",
+      "original_locations": [
+        {
+          "file": "original/upstream/wrapper.sv",
+          "start": 14,
+          "end": 18
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 55,
+          "end": 78
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 22,
+          "end": 49
+        },
+        {
+          "file": "candidate/environment.md",
+          "start": 1,
+          "end": 1
+        },
+        {
+          "file": "candidate/property_proposal.md",
+          "start": 1,
+          "end": 1
+        }
+      ],
+      "analysis": "The wrapper enables COMPRESSED_ISA=1, ENABLE_FAST_MUL=1, ENABLE_DIV=1, BARREL_SHIFTER=1. Candidate environment.md states the core ignores all parameters except PROGADDR_RESET, while property_proposal.md claims 'unchanged'. The candidate parameter list is present but unused except for reset PC.",
+      "property_impact": "RV32IMC/barrel-shifter configuration is not modeled; compressed and M-extension behavior is absent.",
+      "concern": "A property described as unchanged cannot be evaluated against the original parameterized core."
+    },
+    {
+      "title": "Reset/regfile initialization changed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 194,
+          "end": 198
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 800,
+          "end": 850
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 139,
+          "end": 186
+        }
+      ],
+      "analysis": "Original only initializes cpuregs if REGS_INIT_ZERO is set; default REGS_INIT_ZERO=0. Candidate clears regfile to zero on every resetn low. Original reset block resets PC/control but not the register file.",
+      "property_impact": "Architectural state at reset differs; candidate can mask unconstrained register initial values and may make ADD operand cases easier.",
+      "concern": "This changes reset semantics outside the apparent target."
+    },
+    {
+      "title": "rvfi_order never increments",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1985,
+          "end": 1990
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 156,
+          "end": 157
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 188,
+          "end": 216
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 230,
+          "end": 250
+        }
+      ],
+      "analysis": "Original increments rvfi_order with rvfi_valid. Candidate only initializes rvfi_order to 0 and never assigns it in normal operation.",
+      "property_impact": "RVFI ordering is invalid; any checker relying on order sees a constant 0.",
+      "concern": "The narrow ADD check may not check order, but the RVFI interface is materially wrong."
+    },
+    {
+      "title": "rvfi_valid asserted unconditionally in EXEC",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1982,
+          "end": 1988
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 230,
+          "end": 234
+        }
+      ],
+      "analysis": "Original rvfi_valid depends on resetn, launch_next_insn or trap, and dbg_valid_insn. Candidate sets rvfi_valid<=1 in STATE_EXEC for every fetched instruction, including non-ADD instructions that it marks as traps.",
+      "property_impact": "Retirement timing and valid/trap qualification differ from the original wrapper contract. A random fetch can produce an RVFI record for a non-ADD instruction.",
+      "concern": "If the checker only samples CHECK_CYCLE, this may still be used to satisfy the ADD property without representing original retirement."
+    },
+    {
+      "title": "rvfi_halt and trap semantics changed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1988,
+          "end": 1992
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 159,
+          "end": 160
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 245,
+          "end": 247
+        }
+      ],
+      "analysis": "Original drives rvfi_halt from trap. Candidate only resets rvfi_halt and never assigns it in normal operation. Candidate also forces rvfi_trap=1 for every instruction other than the 32-bit ADD pattern, whereas original executes many legal non-ADD instructions.",
+      "property_impact": "Trap/halt reporting is not the original behavior; legal instruction sequences are misrepresented.",
+      "concern": "ADD-only target may hide this, but full-core RVFI behavior is lost."
+    },
+    {
+      "title": "Instruction fetch accepts mem_ready without mem_valid",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 332,
+          "end": 520
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 219,
+          "end": 228
+        }
+      ],
+      "analysis": "Original memory transfer uses mem_valid && mem_ready. Candidate STATE_FETCH checks only if (mem_ready) before loading instr from mem_rdata. Concrete reachable sequence: reset releases, state=FETCH, mem_valid=0 before the edge, random mem_ready=1; candidate captures mem_rdata and enters EXEC, while original would not accept the transfer until mem_valid is asserted.",
+      "property_impact": "The memory handshake is violated and can inject a spurious fetch/RVFI record without a valid bus transaction.",
+      "concern": "The wrapper's mem_ready is a free random input, so this is reachable in the target environment."
+    },
+    {
+      "title": "Loads, stores, and memory writes omitted",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 332,
+          "end": 520
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1100,
+          "end": 1300
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 132,
+          "end": 136
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 219,
+          "end": 228
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 245,
+          "end": 247
+        }
+      ],
+      "analysis": "Candidate look-ahead outputs are tied to 0, the state machine only fetches instructions, and there are no mem_do_rdata/mem_do_wdata paths. All non-ADD instructions, including loads/stores, become rvfi_trap=1.",
+      "property_impact": "RVFI mem fields are always zero and memory instructions cannot retire as in the original.",
+      "concern": "Target ADD check does not exercise this, but the core is not a general picorv32."
+    },
+    {
+      "title": "PCPI/MUL/DIV modules stubbed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2205,
+          "end": 2520
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 280,
+          "end": 340
+        }
+      ],
+      "analysis": "Candidate pcpi_mul, fast_mul, and div all drive zero outputs and the core never asserts pcpi_valid. Original implements multiply/divide PCPI. The wrapper enables ENABLE_FAST_MUL and ENABLE_DIV.",
+      "property_impact": "M-extension instructions are not executed; RV32IMC behavior is not represented.",
+      "concern": "Other checks generated from checks.cfg would not be meaningful against this candidate."
+    },
+    {
+      "title": "AXI/WB/regs modules replaced with stubs",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2180,
+          "end": 3400
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 256,
+          "end": 560
+        }
+      ],
+      "analysis": "picorv32_regs returns zero and ignores writes; picorv32_axi, picorv32_axi_adapter, and picorv32_wb are tied off. Original implements these interfaces and adapters.",
+      "property_impact": "Other integration wrappers and memory interfaces are nonfunctional, even if the target wrapper does not instantiate them.",
+      "concern": "Changes outside the apparent target can break other checks or configurations."
+    },
+    {
+      "title": "Compressed ISA support removed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 400,
+          "end": 600
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 15,
+          "end": 19
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 237,
+          "end": 244
+        }
+      ],
+      "analysis": "Wrapper sets COMPRESSED_ISA=1. Candidate ADD detection only recognizes the 32-bit R-type encoding and has no compressed decode; C.ADD and all other compressed instructions are trapped.",
+      "property_impact": "Compressed ADD cannot retire through the candidate as in the original wrapper.",
+      "concern": "The targeted insn_add check may only generate uncompressed ADD, but the configured core is RV32IMC."
+    },
+    {
+      "title": "CSR RVFI behavior removed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2000,
+          "end": 2070
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 177,
+          "end": 184
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 202,
+          "end": 209
+        }
+      ],
+      "analysis": "Original conditionally sets rvfi_csr_mcycle/minstret masks/data for CSR read instructions. Candidate only zeroes these outputs and never sets them based on rvfi_insn.",
+      "property_impact": "CSR-related RVFI checks are not represented.",
+      "concern": "The generated task defines RISCV_FORMAL_CSR_MCYCLE and RISCV_FORMAL_CSR_MINSTRET, so this is part of the formal environment even if the ADD check may not exercise it."
+    },
+    {
+      "title": "Internal FORMAL assertions/restrictions removed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2100,
+          "end": 2176
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 15,
+          "end": 19
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 116,
+          "end": 255
+        }
+      ],
+      "analysis": "Original contains `ifdef FORMAL restrictions/assertions, including memory-stall restrictions and look-ahead assertions. Candidate removes them.",
+      "property_impact": "Internal formal guards are gone; only the external insn_add_ch0 checker remains.",
+      "concern": "Frontend success does not replace removed formal assumptions/assertions."
+    },
+    {
+      "title": "Candidate property claim conflicts with environment",
+      "original_locations": [
+        {
+          "file": "original/upstream/checks.cfg",
+          "start": 1,
+          "end": 20
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/property_proposal.md",
+          "start": 1,
+          "end": 1
+        },
+        {
+          "file": "candidate/environment.md",
+          "start": 1,
+          "end": 1
+        }
+      ],
+      "analysis": "property_proposal.md says 'unchanged', while environment.md admits the core is replaced by a partial ADD-only model. The original check configuration is not unchanged.",
+      "property_impact": "A reviewer trusting the proposal would incorrectly believe the upstream property is being evaluated.",
+      "concern": "Treat property_proposal.md as a candidate claim, not upstream fact."
+    }
+  ],
+  "open_questions": [
+    "Does insn_add_ch0.sby only sample at CHECK_CYCLE=20 (see original/upstream/insn_add_ch0.sby depth/skip and defines), so the candidate can satisfy the property by presenting one synthetic ADD RVFI record rather than executing the original ADD pipeline?",
+    "Can the candidate's `if (mem_ready)` fetch path (candidate/picorv32.v lines 219-228) accept random mem_rdata while mem_valid is low and thereby generate a spurious ADD record at the check cycle?",
+    "Because candidate zeroes regfile on reset (candidate/picorv32.v line 186) while original default REGS_INIT_ZERO=0 leaves registers unconstrained, does the candidate mask ADD operand cases that the original formal check would explore?",
+    "Does rvfi_insn_check ignore all RVFI records before CHECK_CYCLE, making candidate's forced traps for non-ADD instructions before the check cycle irrelevant to PASS?",
+    "Would the checker still pass if rvfi_order remains constant 0 and rvfi_valid is asserted unconditionally in STATE_EXEC (candidate/picorv32.v lines 230-234)?",
+    "Are the stubbed picorv32_regs/pcpi_mul/fast_mul/div/axi/wb modules (candidate/picorv32.v lines 256-560) expected to matter for the target task or only for other checks/configurations?",
+    "Does the target environment define RISCV_FORMAL_CSR_MISA or other CSR macros that would make the removed CSR logic or ADD misa check relevant?"
+  ]
+}

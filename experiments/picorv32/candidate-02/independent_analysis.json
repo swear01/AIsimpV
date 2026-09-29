@@ -1,0 +1,272 @@
+{
+  "summary": "The candidate is not the original PicoRV32 core. It replaces the full RV32IMC CPU with a 4-state ADD-recognition FSM that emits RVFI for any ADD-shaped instruction while forcing rs1_rdata=0, rs2_rdata=0, and rd_wdata=0. Under the original wrapper it can emit rvfi_valid for ADD, but that is fabricated RVFI, not architectural ADD retirement: there is no register file, no execution, no memory data path, no compressed-ISA handling, and no support for any non-ADD instruction. The upstream ADD checker can be satisfied only because it consumes the candidate's fabricated zero operands, making spec_rd_wdata also zero. Frontend PASS and missing-module reports do not establish soundness.",
+  "changes": [
+    {
+      "title": "Full core and submodules removed/replaced by minimal FSM",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 17,
+          "end": 63
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 118,
+          "end": 270
+        }
+      ],
+      "analysis": "Original contains the full picorv32 core plus picorv32_regs, picorv32_pcpi_mul, picorv32_pcpi_fast_mul, picorv32_pcpi_div, picorv32_axi, picorv32_axi_adapter, and picorv32_wb. Candidate contains only a small picorv32 FSM. candidate/frontend.txt lines 14-21 list those seven modules as missing for the candidate.",
+      "property_impact": "Removes all original execution, register file, ALU, memory, IRQ, PCPI, counters, trace, bus wrappers, and internal assertions. Any property depending on those features cannot be represented.",
+      "concern": "Missing modules and no functional CPU core. The candidate is a surrogate, not the upstream design."
+    },
+    {
+      "title": "Instruction support reduced to ADD-only; non-ADD halts",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 131,
+          "end": 135
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 207,
+          "end": 229
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 264,
+          "end": 266
+        }
+      ],
+      "analysis": "Candidate recognizes only opcode 0110011, funct3 000, funct7 0000000. Any other fetched instruction drives state to S_HALT. Original supports RV32IMC, and wrapper.sv sets COMPRESSED_ISA=1. Suspect sequences: a compressed C.ADD, addi, lw, beq, mul, div, CSR, or IRQ instruction will halt the candidate rather than retire.",
+      "property_impact": "The upstream ADD checker targets ADD, but the original wrapper and checks.cfg line 2 configure rv32imc. Candidate cannot execute a program containing non-ADD or compressed instructions.",
+      "concern": "No general instruction execution; compressed instructions and all non-ADD instructions are dropped."
+    },
+    {
+      "title": "ADD RVFI is fabricated with zero operands and zero result",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 230,
+          "end": 260
+        }
+      ],
+      "analysis": "Candidate sets rvfi_valid=1, rvfi_insn=insn, rs1/rs2/rd addresses from insn, but forces rvfi_rs1_rdata=0, rvfi_rs2_rdata=0, rvfi_rd_wdata=0, and rvfi_pc_wdata=pc+4. It has no register file and never computes an ADD result. Original RVFI uses actual register values and writeback data.",
+      "property_impact": "The upstream insn_add model computes result = rvfi_rs1_rdata + rvfi_rs2_rdata. Because candidate supplies zero source operands, the model computes 0 and candidate also writes 0. This can make the local ADD check self-consistently pass without checking real operand semantics.",
+      "concern": "Fabricated RVFI. A real ADD of nonzero operands, e.g. x1=5 and x2=7 writing x3, would need rd_wdata=12; candidate always emits 0."
+    },
+    {
+      "title": "rvfi_valid and rvfi_order are no longer tied to architectural retirement",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 159,
+          "end": 188
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 203,
+          "end": 204
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 230,
+          "end": 232
+        }
+      ],
+      "analysis": "Original rvfi_valid is gated by resetn, launch_next_insn/trap, and dbg_valid_insn; rvfi_order increments when rvfi_valid is asserted. Candidate asserts rvfi_valid for any ADD in S_ADD and never increments rvfi_order beyond its reset value of 0.",
+      "property_impact": "RVFI order is meaningless and valid events are not a real retirement stream. The ADD checker may observe an ADD event, but it is not tied to architectural instruction completion.",
+      "concern": "rvfi_order remains constant; RVFI valid is generated by the surrogate FSM, not by the original core."
+    },
+    {
+      "title": "Memory interface replaced by a single instruction-fetch handshake",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 136,
+          "end": 140
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 207,
+          "end": 229
+        }
+      ],
+      "analysis": "Candidate only drives mem_valid=1, mem_instr=1, mem_addr=pc, and waits for mem_ready in S_IDLE/S_WAIT. Look-ahead outputs are tied to 0. It never writes memory, never performs data reads, and has no compressed second-word handling. Original has mem_state, mem_do_prefetch/rinst/rdata/wdata, look-ahead, and compressed buffering.",
+      "property_impact": "Loads, stores, compressed fetch, and original memory-handshake properties are not represented. If memory returns a non-ADD instruction, candidate halts in S_HALT.",
+      "concern": "Using the original wrapper with random mem_rdata can produce non-ADD fetches and halt the candidate. If mem_ready never asserts, candidate stalls in S_WAIT."
+    },
+    {
+      "title": "Wrapper and checks.cfg parameters are ignored",
+      "original_locations": [
+        {
+          "file": "original/upstream/wrapper.sv",
+          "start": 17,
+          "end": 22
+        },
+        {
+          "file": "original/upstream/checks.cfg",
+          "start": 2,
+          "end": 2
+        },
+        {
+          "file": "original/upstream/checks.cfg",
+          "start": 32,
+          "end": 37
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 23,
+          "end": 48
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 131,
+          "end": 135
+        }
+      ],
+      "analysis": "wrapper.sv sets COMPRESSED_ISA=1, ENABLE_FAST_MUL=1, ENABLE_DIV=1, and BARREL_SHIFTER=1. checks.cfg specifies isa rv32imc and defines RISCV_FORMAL_ALTOPS, RISCV_FORMAL_UMODE, and PICORV32_TESTBUG_NONE. Candidate keeps the parameter names but uses only PROGADDR_RESET; it ignores the configured ISA and extensions.",
+      "property_impact": "Candidate does not implement the configured rv32imc feature set. Any property relying on compressed instructions, multiply, divide, barrel shifts, IRQ, counters, or PCPI is not represented.",
+      "concern": "Configuration mismatch: the original ADD check runs under rv32imc with COMPRESSED_ISA=1, but candidate silently ignores those settings."
+    },
+    {
+      "title": "Formal assertions, debug infrastructure, and testbug hooks removed",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 17,
+          "end": 63
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1,
+          "end": 270
+        }
+      ],
+      "analysis": "Original contains FORMAL-mode assertions, PICORV32_TESTBUG_001..005 hooks, PICORV32_V, debug macros, and internal sanity assertions. Candidate removes them. checks.cfg defines PICORV32_TESTBUG_NONE, which candidate ignores.",
+      "property_impact": "Internal sanity checks and testbug injection are gone. This does not directly prove ADD, but removes substantial verification infrastructure and fault-injection capability.",
+      "concern": "Loss of verification infrastructure; candidate cannot exercise upstream testbug scenarios."
+    },
+    {
+      "title": "CSR and RVFI memory/CSR fields forced to zero",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 161,
+          "end": 3048
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 247,
+          "end": 259
+        }
+      ],
+      "analysis": "Candidate sets all RVFI memory and CSR masks/rdata/wdata to 0 in S_ADD. Original conditionally sets CSR mcycle/minstret masks and data based on rvfi_insn, and handles getq/setq/retirq and memory RVFI specially. For ADD, zero CSR is expected, but candidate never emits RVFI for CSR instructions.",
+      "property_impact": "CSR-related properties cannot pass. The ADD checker may not inspect CSR fields, but the candidate has no CSR execution.",
+      "concern": "CSR RVFI is absent; any future CSR check would fail or be vacuous."
+    },
+    {
+      "title": "Candidate property/environment claims are empty or mismatched",
+      "original_locations": [
+        {
+          "file": "original/upstream/insn_add.v",
+          "start": 45,
+          "end": 51
+        },
+        {
+          "file": "original/upstream/rvfi_insn_check.sv",
+          "start": 150,
+          "end": 200
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/property_proposal.md",
+          "start": 1,
+          "end": 1
+        },
+        {
+          "file": "candidate/environment.md",
+          "start": 1,
+          "end": 1
+        }
+      ],
+      "analysis": "candidate/property_proposal.md contains only 'unchanged' and does not state the upstream ADD property. candidate/environment.md also contains only 'unchanged' despite radical CPU changes. The actual upstream property is in insn_add.v and rvfi_insn_check.sv: spec_rd_wdata = rs1_rdata + rs2_rdata, with assertions that spec_rd_addr/rd_addr, spec_rd_wdata/rd_wdata, and pc_wdata match.",
+      "property_impact": "Treat property_proposal.md as a candidate claim, not as the upstream property. The candidate provides no independent specification, and the real checker is satisfied only by fabricated zero operands.",
+      "concern": "Documentation is inconsistent with the diff and should not be used as evidence of correctness."
+    },
+    {
+      "title": "Frontend PASS does not establish soundness and confirms missing modules",
+      "original_locations": [
+        {
+          "file": "candidate/frontend.txt",
+          "start": 1,
+          "end": 9
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/frontend.txt",
+          "start": 10,
+          "end": 25
+        }
+      ],
+      "analysis": "candidate/frontend.txt reports original PASS with 64 formal check cells and candidate PASS with 39 formal check cells. It explicitly lists picorv32_axi, picorv32_axi_adapter, picorv32_pcpi_div, picorv32_pcpi_fast_mul, picorv32_pcpi_mul, picorv32_regs, and picorv32_wb as missing for the candidate.",
+      "property_impact": "Frontend success only means the candidate elaborates. It does not show that ADD retirement is correctly represented or that the original CPU behavior is preserved.",
+      "concern": "Do not infer soundness from frontend success; the missing modules and fabricated RVFI remain."
+    }
+  ],
+  "open_questions": [
+    "Was the candidate intended as a local ADD-only surrogate rather than a full PicoRV32 replacement? If so, why keep the full parameter and port list and claim the property is unchanged?",
+    "Does the generated formal SBY actually pass on the candidate, and if so, does it pass only because rvfi_rs1_rdata and rvfi_rs2_rdata are forced to zero?",
+    "How is the original wrapper's random mem_rdata constrained to ensure an ADD-shaped instruction is fetched at the check cycle, given that any non-ADD fetch sends the candidate to S_HALT?",
+    "Should the missing core submodules be supplied from the original upstream file during evaluation, or is the candidate expected to be self-contained?",
+    "Is rvfi_order expected to be meaningful for this checker, or is it ignored by the ADD property?"
+  ]
+}
