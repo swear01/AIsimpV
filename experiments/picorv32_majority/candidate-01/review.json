@@ -1,8 +1,8 @@
 {
-  "summary": "單一候選保留原核心多數路徑，明確移除 M 乘除法單元。72 個指令／CSR 任務的對應路徑在程式碼中仍可見，但完整任務涵蓋率未知。",
+  "summary": "候選主要刪除 M 乘除法與未使用模組。完整檔案少 31%，核心模組只少 4.1%；上游 RVFI/ALTOPS 設定下通用 cell 少 7.7%。這是偏弱的簡化基準，任務保留率仍未知。",
   "frontend": "NOT_RUN；本輪不做任何 Formal 或編譯",
-  "metadata": "PicoRV32 ef203c2；riscv-formal c992aa6；Codex GPT-6 直接編輯；無 Formal",
-  "manual_note": "人工檢視差異範圍、上游 wrapper 參數、M path、register/ALU/memory/RVFI 關鍵位置。未逐行確認所有指令，也未執行工具檢查。",
+  "metadata": "PicoRV32 ef203c2；riscv-formal c992aa6；Codex GPT-6 直接編輯；size-only Yosys synthesis；無 Formal",
+  "manual_note": "人工檢視差異範圍、上游 wrapper 參數、M path、register/ALU/memory/RVFI 關鍵位置；另以同參數、同 defines 的 size-only synthesis 比較通用 cells。未逐行確認所有指令，也未執行 Formal、BMC 或模擬。",
   "changes": [
     {
       "title": "移除乘除法 PCPI 執行單元",

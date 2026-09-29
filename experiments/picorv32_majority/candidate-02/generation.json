@@ -1,0 +1,14 @@
+{
+  "author": "Codex assistant (GPT-6), current conversation; selects an existing upstream abstraction branch",
+  "independent_clean_session": false,
+  "source_task": "../task.json",
+  "method": "Enable upstream RISCV_FORMAL_BLACKBOX_REGS; remove unrelated AXI/Wishbone module definitions",
+  "formal_run": false,
+  "size_synthesis_run": true,
+  "simulation_run": false,
+  "upstream_macro_already_existed": true,
+  "rvfi_altops_generic_cells": {
+    "original": 12412,
+    "candidate": 7221
+  }
+}
