@@ -1,0 +1,145 @@
+{
+  "summary": "單一候選保留原核心多數路徑，明確移除 M 乘除法單元。72 個指令／CSR 任務的對應路徑在程式碼中仍可見，但完整任務涵蓋率未知。",
+  "frontend": "NOT_RUN；本輪不做任何 Formal 或編譯",
+  "metadata": "PicoRV32 ef203c2；riscv-formal c992aa6；Codex GPT-6 直接編輯；無 Formal",
+  "manual_note": "人工檢視差異範圍、上游 wrapper 參數、M path、register/ALU/memory/RVFI 關鍵位置。未逐行確認所有指令，也未執行工具檢查。",
+  "changes": [
+    {
+      "title": "移除乘除法 PCPI 執行單元",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 169,
+          "end": 169
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 255,
+          "end": 345
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2197,
+          "end": 2516
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 169,
+          "end": 169
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 255,
+          "end": 261
+        }
+      ],
+      "analysis": "原版的 M 單元接受運算元並回傳結果；新版將 PCPI 內部 ready/wr 固定為 0，WITH_PCPI 固定為 0。",
+      "property_impact": "8 個 M instruction 任務所關心的乘除法結果不再被表示。其他指令路徑大致保留，但 M 前史消失。",
+      "concern": "wrapper 仍設定 ENABLE_FAST_MUL=1、ENABLE_DIV=1；候選刻意忽略它們。",
+      "human_status": "已核對主要差異",
+      "human_note": "比對原版模組實例化、候選常數與 wrapper 參數。"
+    },
+    {
+      "title": "保留真實暫存器與 ALU 資料路徑",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1217,
+          "end": 1287
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1302,
+          "end": 1347
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1982,
+          "end": 1991
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1130,
+          "end": 1200
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1215,
+          "end": 1260
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1895,
+          "end": 1904
+        }
+      ],
+      "analysis": "暫存器讀寫、ALU 及 RVFI 來源值仍由原版程式碼路徑提供，沒有重演 ADD-only 候選的全零運算元。",
+      "property_impact": "37 個 RV32I 指令任務有可讀的實作路徑；不代表每個完整 assertion 已成立或所有合法前史皆保留。",
+      "concern": "尚未逐一審查所有 opcodes 與跨拍關係。",
+      "human_status": "局部程式碼支持",
+      "human_note": "核對暫存器、ALU 和 RVFI 欄位；只審查代表性位置。"
+    },
+    {
+      "title": "保留 compressed、記憶體、PC 與 RVFI 路徑",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 893,
+          "end": 1020
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1740,
+          "end": 1930
+        },
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 1977,
+          "end": 2070
+        }
+      ],
+      "candidate_locations": [
+        {
+          "file": "candidate/picorv32.v",
+          "start": 806,
+          "end": 933
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1653,
+          "end": 1843
+        },
+        {
+          "file": "candidate/picorv32.v",
+          "start": 1890,
+          "end": 1983
+        }
+      ],
+      "analysis": "這些區塊除了行號前移外沒有改寫；compressed decode、load/store、PC 更新與 RVFI 訊號仍存在。",
+      "property_impact": "25 個 C 指令和部分 register/PC/order 任務的關鍵訊號仍在；M 相關前史不在模型中。",
+      "concern": "未證明這些路徑對所有輸入與時間關係均與原版一致。",
+      "human_status": "差異檢視支持",
+      "human_note": "檢視統一 diff，沒有在這些區塊看到改動。"
+    },
+    {
+      "title": "移除未被本次 wrapper 使用的其他頂層模組",
+      "original_locations": [
+        {
+          "file": "original/upstream/picorv32.v",
+          "start": 2517,
+          "end": 3049
+        }
+      ],
+      "candidate_locations": [],
+      "analysis": "AXI、Wishbone adapter 與其他宣告不在候選檔中；本次 wrapper 只實例化 picorv32。",
+      "property_impact": "這部分主要減少原始檔案文字，不代表核心求解狀態變少。",
+      "concern": "候選不再是原檔所有 public module 的替代品。",
+      "human_status": "已核對 module 邊界",
+      "human_note": "只針對固定 upstream wrapper 的 picorv32 頂層。"
+    }
+  ]
+}
