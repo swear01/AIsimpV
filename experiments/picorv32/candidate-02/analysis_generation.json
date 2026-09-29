@@ -1,0 +1,20 @@
+{
+  "provider": "deepseek",
+  "requested_model": "deepseek-flash",
+  "response_model": "deepseek-flash",
+  "request_sha256": "4408c536ae79214d48d459c93d307ae250da17bad63105e8d75697b99d0ec059",
+  "response_sha256": "51793c32e3dd91cba11005fa3de7e3f063c0e7790aee5ba5d72ade9b2fc0d9d7",
+  "usage": {
+    "prompt_tokens": 110410,
+    "completion_tokens": 40373,
+    "total_tokens": 150783,
+    "prompt_tokens_details": {
+      "cached_tokens": 47104
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 37069
+    }
+  },
+  "finish_reason": "stop",
+  "elapsed_seconds": 267.5386199471541
+}

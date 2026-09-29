@@ -1,0 +1,7 @@
+Explore freestyle simplification of a real complete CPU verification task. The frozen inputs are YosysHQ PicoRV32 and the upstream riscv-formal insn_add_ch0 task. The source has the full CPU, not a reduced toy. Focus on the original ADD instruction check in rvfi_insn_check.sv and insn_add.v, with the wrapper and generated SBY configuration supplied as context.
+
+Produce a meaningfully simpler candidate for this target. You may change the CPU's internal representation, propose a different property, or state conditions under which a narrower result is useful. You are not restricted to local statement edits. Keep the original source and check as references so any changed obligation can be identified. Do not quietly remove legal instruction or memory traffic, force rvfi_valid low, disable RISCV_FORMAL, or replace the core with a combinational ADD oracle while claiming it is the same CPU. If you cannot support the original question, identify the exact lost behaviors and claim only a partial model.
+
+Return a complete Verilog replacement for picorv32.v, preserving the file's module declarations and license header. In property_proposal.md, give the precise replacement property or write "unchanged". In environment.md, list any changed assumptions, reset or parameter conditions, or write "unchanged". In explanation.md, identify the main source changes, information removed, and expected relation to the upstream task. These explanations are hypotheses, not proof.
+
+You have no tools. Do not claim compilation, BMC, equivalence, or abstraction soundness was run.

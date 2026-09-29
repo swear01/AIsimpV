@@ -1,0 +1,5 @@
+You are an independent analyst. Read the complete original and candidate CPU, the upstream ADD instruction checker and generated task configuration, plus the complete unified diff. You have not seen the generator's explanation. Do not modify candidate files or run tools.
+
+Identify concrete changes to the CPU, information lost or newly summarized, and whether the candidate still represents ADD retirement through RVFI under the original wrapper. Read changes outside the apparent target: missing modules, changed defaults, reset, rvfi_valid, memory handshake, and instructions. Treat property_proposal.md as a candidate claim, not as the upstream property. Cite source file names and line positions for every substantive observation. Distinguish code-supported facts from hypotheses, and name concrete suspect instruction or memory sequences when possible. Do not infer soundness from frontend success.
+
+Return concise JSON with summary, changes (objects with title, original_locations, candidate_locations, analysis, property_impact, concern), and open_questions. Locations use {file, start, end} exactly as named in the input bundle.

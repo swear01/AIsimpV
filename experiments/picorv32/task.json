@@ -1,0 +1,29 @@
+{
+  "id": "picorv32-upstream-insn-add-ch0-v1",
+  "top": "picorv32",
+  "source": "YosysHQ/picorv32 and YosysHQ/riscv-formal",
+  "picorv32_revision": "ef203c2b0a3fb793280f5114941416c425c5b461",
+  "riscv_formal_revision": "c992aa61fdfe0846c5ed90324c596202a1c69b76",
+  "primary_design": "upstream/picorv32.v",
+  "primary_output": "picorv32.v",
+  "upstream_check": "cores/picorv32/checks.cfg generates insn_add_ch0.sby; the target is rvfi_insn_check using the upstream rvfi_insn_add model",
+  "local_execution_difference": "The generated upstream SBY uses Boolector. The included portable SBY keeps its property, cycle settings and core parameters but uses Z3, which is installed locally.",
+  "files": [
+    "upstream/picorv32.v",
+    "upstream/wrapper.sv",
+    "upstream/checks.cfg",
+    "upstream/rvfi_channel.sv",
+    "upstream/rvfi_testbench.sv",
+    "upstream/rvfi_insn_check.sv",
+    "upstream/insn_add.v",
+    "upstream/insn_add_ch0.sby"
+  ],
+  "frontend_only_files": ["upstream/rvfi_macros.vh"],
+  "candidate_outputs": {
+    "picorv32_v": "picorv32.v",
+    "property_proposal": "property_proposal.md",
+    "explanation": "explanation.md",
+    "environment_changes": "environment.md"
+  },
+  "analysis_inputs": ["picorv32.v", "property_proposal.md", "environment.md"]
+}

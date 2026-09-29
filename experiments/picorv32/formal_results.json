@@ -1,0 +1,20 @@
+{
+  "scope": "Portable insn_add_ch0.sby from this case, Z3 engine, depth 21, skip 20, check cycle 20; original checker and wrapper",
+  "original": {
+    "design_sha256": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622",
+    "frontend": "PASS",
+    "bmc": "INCOMPLETE: solver was manually stopped after approximately 5 minutes 37 seconds while checking assertions at step 20"
+  },
+  "candidate_01": {
+    "design_sha256": "fdce3553039bb5b4eed57086232507f30f9b1590ba7535a084a7e88f3627cce2",
+    "frontend": "PASS",
+    "bmc": "TIMEOUT: 120 seconds, no property verdict"
+  },
+  "candidate_02": {
+    "design_sha256": "a9e12f3f209cb9eeff4e0d8c7e49a8894022d7e214f22bb100c993f44b632520",
+    "frontend": "PASS for target rvfi_testbench; seven source modules are missing",
+    "bmc": "PASS: SBY engine_0 smtbmc z3 returned pass at step 20, elapsed clock time 1 second",
+    "cover": "PASS: with the same sources/checker and SBY mode changed to cover, rvfi_insn_check.sv cover(check && spec_valid && !trap) reached at step 20"
+  },
+  "interpretation": "PASS and cover establish properties of candidate_02 only; they do not establish abstraction soundness, equivalence, or a comparable proof speedup over the unresolved original task."
+}

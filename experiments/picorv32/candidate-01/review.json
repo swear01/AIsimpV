@@ -1,0 +1,67 @@
+{
+  "summary": "完整 PicoRV32 作為輸入，但候選只實作 ADD 指令的兩狀態處理器。這有明顯的結構簡化，也明顯縮窄了原核心行為；目前不能視為原驗證任務的抽象。",
+  "frontend": "原版／候選 PASS；formal check cells 64→39；BMC 均未取得結論",
+  "metadata": "上游 PicoRV32 ef203c2、riscv-formal c992aa6；DeepSeek Flash；Z3",
+  "manual_note": "人工核對了 CPU 狀態、fetch handshake、reset、RVFI 更新與被替換的介面模組。原版 Z3 BMC 求解約 5 分 37 秒後人工停止；候選相同 check 求解 120 秒達到上限。均非 PASS/FAIL 結論。候選沒有提供原始行為包含或等價證據。獨立分析原文另存，但其中一項引用超出原檔行數，所以本頁只列經人工核對的位置。",
+  "changes": [
+    {
+      "title": "完整指令流程改成只處理 ADD 的兩狀態模型",
+      "original_locations": [
+        {"file": "original/upstream/picorv32.v", "start": 1172, "end": 1181},
+        {"file": "original/upstream/picorv32.v", "start": 1486, "end": 1946}
+      ],
+      "candidate_locations": [
+        {"file": "candidate/picorv32.v", "start": 119, "end": 130},
+        {"file": "candidate/picorv32.v", "start": 219, "end": 251}
+      ],
+      "analysis": "候選保留指令提取、兩個來源暫存器、ADD 結果與 RVFI 輸出，但不再實作其他合法指令、load/store、分支、壓縮指令或中斷。",
+      "property_impact": "ADD checker 仍被載入，候選卻只保留能產生 ADD 紀錄的局部處理器；通過單一 ADD check 也不能代表原核心的相關軌跡已保留。",
+      "concern": "上游 wrapper 啟用 COMPRESSED_ISA、乘除法與 barrel shifter；候選保留參數名稱但沒有相應行為。",
+      "human_status": "有具體問題",
+      "human_note": "核對原版 1172–1181、1486–1946 與候選 119–130、219–251。"
+    },
+    {
+      "title": "fetch 可以在尚未提出有效請求時接收資料",
+      "original_locations": [{"file": "original/upstream/picorv32.v", "start": 360, "end": 376}],
+      "candidate_locations": [{"file": "candidate/picorv32.v", "start": 219, "end": 230}],
+      "analysis": "原版的普通記憶體傳輸要求 mem_valid 與 mem_ready 同時成立。候選 reset 後 mem_valid=0；首次進入 FETCH 時仍可因 mem_ready=1 立即鎖存 mem_rdata，因為同拍將 mem_valid 設成 1 的非阻塞賦值尚未生效。",
+      "property_impact": "可能產生沒有對應有效 fetch 握手的 ADD RVFI 紀錄，不能只看 ADD 算式是否正確。",
+      "concern": "reset 後第一個 FETCH cycle，mem_ready=1、mem_valid=0。候選會進 EXEC，原版不會把這個普通記憶體回應算作有效傳輸。",
+      "human_status": "有具體問題",
+      "human_note": "依 Verilog 非阻塞賦值和兩版 mem_xfer/if 條件核對；尚未重播 trace。"
+    },
+    {
+      "title": "reset 把原本不保證為零的暫存器檔歸零",
+      "original_locations": [{"file": "original/upstream/picorv32.v", "start": 203, "end": 211}],
+      "candidate_locations": [{"file": "candidate/picorv32.v", "start": 139, "end": 187}],
+      "analysis": "原版只在 REGS_INIT_ZERO=1 時初始化 cpuregs；預設值是 0。候選每次 reset 都清零 32 個 regfile entries。",
+      "property_impact": "候選排除了原版可能有的來源運算元初值，使 ADD 情況變窄。",
+      "concern": "把未初始化暫存器歸零是環境和初始狀態改動，生成者的 environment.md 未列出此差異。",
+      "human_status": "有具體問題",
+      "human_note": "核對原版參數預設與 203–211、候選 187。"
+    },
+    {
+      "title": "RVFI 順序欄位不再隨退休更新",
+      "original_locations": [{"file": "original/upstream/picorv32.v", "start": 1977, "end": 1985}],
+      "candidate_locations": [
+        {"file": "candidate/picorv32.v", "start": 156, "end": 159},
+        {"file": "candidate/picorv32.v", "start": 230, "end": 250}
+      ],
+      "analysis": "原版每次 rvfi_valid 會遞增 rvfi_order；候選只在 reset 時設為零，正常執行未更新。",
+      "property_impact": "單一 ADD checker 可能沒有涵蓋順序欄位，其他上游 formal checks 會觀察到不同介面。",
+      "concern": "保留 RVFI port 名稱，卻沒有保留其退休順序語意。",
+      "human_status": "有具體問題",
+      "human_note": "核對全部候選 rvfi_order 賦值，僅第 158 行。"
+    },
+    {
+      "title": "其餘完整檔案模組被替換成固定輸出",
+      "original_locations": [{"file": "original/upstream/picorv32.v", "start": 2174, "end": 3049}],
+      "candidate_locations": [{"file": "candidate/picorv32.v", "start": 258, "end": 612}],
+      "analysis": "候選保留 picorv32_regs、PCPI、AXI 與 Wishbone 模組宣告，但主要輸出固定為零。",
+      "property_impact": "目標 wrapper 直接實例化 picorv32，這些模組不是本次 ADD checker 的直接路徑；作為完整檔案改寫，功能仍大幅缺失。",
+      "concern": "檔案表面仍有全部模組名稱，不能據此說完整核心與介面都保留了。",
+      "human_status": "有具體問題",
+      "human_note": "核對候選各模組固定輸出與原版模組邊界。"
+    }
+  ]
+}
