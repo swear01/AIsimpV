@@ -27,7 +27,8 @@ def section(source, name):
 def link_file(path, target):
     if path.is_symlink():
         if path.resolve() != target.resolve():
-            raise ValueError(f"stale input link: {path}")
+            path.unlink()
+            path.symlink_to(target)
     elif path.exists():
         raise ValueError(f"input path is not a link: {path}")
     else:
@@ -48,7 +49,10 @@ def prepare(task, design, checks, output, timeout):
     for line in files.group(1).splitlines():
         if line:
             source_path = Path(line)
-            target = (checks.parents[2] / source_path.parent.name / source_path.name).resolve()
+            source_dir = source_path.parent.name
+            if source_dir not in ("checks", "insns"):
+                raise ValueError(f"unexpected pinned source directory: {source_path}")
+            target = (checks.parents[2] / source_dir / source_path.name).resolve()
             if not target.is_file():
                 raise FileNotFoundError(target)
             if target.suffix in (".sv", ".v"):
