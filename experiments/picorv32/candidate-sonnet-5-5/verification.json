@@ -27,5 +27,24 @@
     "add_result": 12,
     "result": "Original and Sonnet candidate RVFI event sequences matched in Yosys sim; this is one directed path, not equivalence"
   },
-  "interpretation": "No abstraction soundness, whole-core equivalence, or verification speedup established."
+  "interpretation": "No abstraction soundness, whole-core equivalence, or verification speedup established.",
+  "known_candidate_limits": [
+    "The main picorv32 module retains its parameter ports but ignores configurations outside the formal wrapper specialization. The included picorv32_axi and picorv32_wb wrappers still forward parameters, so their default configurations are not preserved.",
+    "The retained picorv32_pcpi_mul module is a tie-off stub. ENABLE_MUL or direct use of this public module does not preserve multiplication behavior.",
+    "Only one directed nonzero ADD trace matched. BMC and whole-core behavioral relation remain unproved."
+  ],
+  "parameter_counterexample": {
+    "setting": "PROGADDR_RESET=4; other sequence-test parameters unchanged",
+    "original_first_retirement": {
+      "pc": "0x4",
+      "insn": "0x00700113",
+      "effect": "ADDI x2,x0,7"
+    },
+    "candidate_first_retirement": {
+      "pc": "0x0",
+      "insn": "0x00500093",
+      "effect": "ADDI x1,x0,5"
+    },
+    "method": "Yosys sim using the same instruction ROM as the directed sequence, with PROGADDR_RESET=4"
+  }
 }

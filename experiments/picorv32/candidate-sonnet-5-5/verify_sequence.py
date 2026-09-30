@@ -58,10 +58,13 @@ def main():
     expected = {'rvfi_insn': '0x2081b3', 'rvfi_pc_rdata': '0x8',
                 'rvfi_rs1_rdata': '0x5', 'rvfi_rs2_rdata': '0x7',
                 'rvfi_rd_addr': '0x3', 'rvfi_rd_wdata': '0xc'}
-    assert traces['candidate'] == traces['original']
-    assert any(all(event.get(key) == value for key, value in expected.items())
-               for event in traces['candidate'])
-    assert not traces['deepseek-02']
+    if traces['candidate'] != traces['original']:
+        raise SystemExit('candidate trace differs from original')
+    if not any(all(event.get(key) == value for key, value in expected.items())
+               for event in traces['candidate']):
+        raise SystemExit('expected nonzero ADD event not found')
+    if traces['deepseek-02']:
+        raise SystemExit('DeepSeek 02 unexpectedly retired an instruction')
     print(json.dumps(traces, indent=2))
 
 

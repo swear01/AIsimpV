@@ -33,3 +33,5 @@
 在 repo 根目錄執行 `python3 experiments/picorv32/candidate-sonnet-5-5/verify_sequence.py`；需要 Yosys 置於 PATH。BMC 使用同一份 `upstream/insn_add_ch0.sby`，本輪工具為 Yosys 0.69、Z3 4.15.4 及 SymbiYosys `b1a1e98`。完整 API request、response 與求解 log 留在本機 `results/picorv32/sonnet-5-5/`，沒有放入 Git。
 
 這個結果顯示：在**這一次**相同任務內容的生成中，Sonnet 避開了 DeepSeek 02 的「只回報零值 ADD」退化，並保留一條真實的非零相依 ADD 路徑。它仍自行限縮了參數範圍，原 ADD BMC 未取得結論，也沒有與原核心的行為包含或等價證明。每個模型只有一個樣本，DeepSeek 使用未釘住實際 checkpoint 的 gateway alias，兩個 API 的結構化輸出機制和 tokenization 不同；目前**不能確認模型能力是差異的唯一原因，或估算成功率**。下一步若要作因果比較，需固定輸入與評分，對每個模型做多次獨立生成，並以非零相依指令及行為關係作為成功條件。
+
+候選雖保留八個 module 宣告，但**不能當通用 PicoRV32 檔案替換**：主核心的參數介面仍存在，實作卻忽略 formal wrapper 以外的配置。另以 `PROGADDR_RESET=4` 重跑同一指令 ROM，原核心第一筆從 PC 4 退休 `ADDI x2,x0,7`，候選卻從 PC 0 退休 `ADDI x1,x0,5`。檔內 AXI/WB wrapper 仍轉送參數，因此其預設配置也不受保證。`picorv32_pcpi_mul` 被改成固定輸出 stub，直接使用或啟用迭代 MUL 不會保留乘法行為。這些是生成產物本身的限制；本報告保留原始回應，不把後續人工修補算進這次模型表現。
