@@ -1,0 +1,44 @@
+{
+  "provider": "anthropic",
+  "requested_model": "claude-opus-5-5",
+  "request_sha256": "3cfdb5a6f38cb7cbd8d32493e3e9451030e0d3649333096377c51efc07a74b5f",
+  "message_sha256": "84d516a711533fba8c1425478a74b9427345252fd8121f02ca4bd5320957e09e",
+  "input_bytes": 132717,
+  "attempts": [
+    {
+      "status": 200,
+      "seconds": 337.21
+    }
+  ],
+  "response_model": "claude-opus-5-5",
+  "response_id": "msg_011CfYzZtNS6A295YMs8oXDj",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 90258,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 43207,
+    "output_tokens_details": {
+      "thinking_tokens": 12552
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+  },
+  "response_sha256": "7d1386dfdb43039b55d53b877ed34762878c34cb245462bef79a7ea304ccbe30",
+  "candidate_sha256": {
+    "picorv32.v": "18127163794b6b0dbd5026ae19964747ffc746e09ebd8cb75010cbb731ab7c9c",
+    "property_proposal.md": "a61eba96a9e27b52f3265a18a84eff89ee8f3f9c3521265ebd93044b20505487",
+    "explanation.md": "1df619b61b6c958dbe0f935fc25e3864965ee164e855bfdc37a70dbace661dbf",
+    "environment.md": "54a304623856674959adc207efc019312a29a8ca57570d9e254af826322fb5a4"
+  },
+  "api_endpoint": "https://api.anthropic.com/v1/messages",
+  "anthropic_version": "2023-06-01",
+  "workspace_id_supplied": true,
+  "input_bundle_equal_to_sonnet": true,
+  "prompt_delta_sha256": "100521b315874fdcc7c282884d1f9872263438542acbf3a4cbf574fef6395894",
+  "request_control": "Same frozen input files and base rewrite prompt as Sonnet 5.5; one appended user refinement requests a more aggressive single-assertion partial model. Model and effort also differ (Opus 5.5 medium versus Sonnet 5.5 high). This is not an isolated model-only comparison."
+}

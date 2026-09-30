@@ -1,0 +1,80 @@
+{
+  "scope": "Frozen upstream insn_add_ch0 property and wrapper; Opus output is a self-declared partial model, not an equivalent replacement.",
+  "frontend": {
+    "original": {
+      "status": "PASS",
+      "formal_check_cells": 64
+    },
+    "candidate": {
+      "status": "PASS",
+      "formal_check_cells": 47,
+      "missing_modules": []
+    }
+  },
+  "directed_sequence": {
+    "program": [
+      "ADDI x1,x0,5",
+      "ADDI x2,x0,7",
+      "ADD x3,x1,x2",
+      "EBREAK"
+    ],
+    "original_events": 4,
+    "candidate_events": 4,
+    "first_three_rvfi_records_equal_ignoring_time": true,
+    "fourth_ebreak_record_differs": true,
+    "add_operands": [
+      5,
+      7
+    ],
+    "add_result": 12,
+    "timing_differs": true
+  },
+  "z3_bmc": {
+    "tool": "yosys-smtbmc / Z3",
+    "depth": 21,
+    "skip": 20,
+    "check_cycle": 20,
+    "status": "PASS",
+    "elapsed_seconds": 2.41,
+    "same_property_as_sonnet": true
+  },
+  "mutation_sanity": {
+    "macro": "PICORV32_TESTBUG_004",
+    "effect": "Invert low bit of RVFI rd_wdata",
+    "status": "FAIL",
+    "elapsed_seconds": 4.51,
+    "failed_assertion": "rvfi_insn_check.sv:177"
+  },
+  "jaspergold": {
+    "version": "2025.03 FCS",
+    "check": "same frozen checker and wrapper",
+    "assertions_proven": 33,
+    "counterexamples": 0,
+    "check_cycle_20_add_cover": "covered",
+    "auxiliary_nonzero_cover": "covered at cycle 20 with rs1=5, rs2=7, rd=12, rvfi_order>=2; auxiliary cover added only for separate run"
+  },
+  "limits": [
+    "No equivalence, refinement, or behavior inclusion to upstream was checked.",
+    "The candidate removes legal compressed, memory, control-flow, M, CSR, and other behavior and changes retirement timing.",
+    "A passing self-reported RVFI ADD property does not independently validate register provenance across all traces.",
+    "This is one generation with a stronger prompt, so the difference from Sonnet cannot be attributed solely to the model."
+  ],
+  "raw_logs": "Full request/response, Yosys, Z3, JasperGold logs and VCD traces are retained locally under Git-ignored results/picorv32/opus-5-5-medium-single-assertion/.",
+  "yosys_flattened_netlist": {
+    "method": "Yosys 0.69+post, same frozen wrapper/checker and same SBY-generated design.ys after prep -flatten, before SMT2; generic IR cell counts, not mapped area or proof complexity.",
+    "sonnet": {
+      "generic_cells": 1203,
+      "dff_cells": 153,
+      "mux_cells": 540,
+      "memory_cells": 1,
+      "check_cells": 39
+    },
+    "opus": {
+      "generic_cells": 248,
+      "dff_cells": 31,
+      "mux_cells": 72,
+      "memory_cells": 1,
+      "check_cells": 39
+    }
+  }
+}
