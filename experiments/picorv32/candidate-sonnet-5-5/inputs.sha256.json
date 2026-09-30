@@ -1,0 +1,11 @@
+{
+  "upstream/picorv32.v": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622",
+  "upstream/wrapper.sv": "3951d564f3532de66961cdf8db8bd9d8b97ac94b1f265b5ee8d62e10201d2523",
+  "upstream/checks.cfg": "fbec7fab3c2a7dfddee4d7b72f5801b95f0d5f1bb45de0d089a5283059f5ee61",
+  "upstream/rvfi_channel.sv": "790ff8b8e5345bc5ac9734c4e3ecfd66809e52613786f86d83fe3247ced74578",
+  "upstream/rvfi_testbench.sv": "b6ca517ddd92a2d4bda6c29d573fb0db5e041dd2fe9081918eeee7f12f035c6f",
+  "upstream/rvfi_insn_check.sv": "a3383a7b27fe29e44ed7148e93b7ba3f7a3061ba7d65e96a100b5d027b21f89b",
+  "upstream/insn_add.v": "d118b62cc257a7a2da676db1ec335caa96cb33bc3736e5ac9f5eb696e80345a1",
+  "upstream/insn_add_ch0.sby": "a92bc2f2435bca9917ea00ac3d65f09e79025e54efb3904b076cff8d642cc0e8",
+  "task.json": "dc70bb1605a219010424e42504d68c158e5a47841ff70e4cc706f074c59149cd"
+}

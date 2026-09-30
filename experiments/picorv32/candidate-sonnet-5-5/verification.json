@@ -1,0 +1,50 @@
+{
+  "scope": "Frozen portable insn_add_ch0.sby, original wrapper/checker, Z3, depth 21, skip 20, check cycle 20",
+  "frontend": {
+    "original": "PASS, 64 formal check cells",
+    "candidate": "PASS, 39 formal check cells",
+    "missing_original_modules": []
+  },
+  "bmc": {
+    "status": "INCOMPLETE",
+    "reason": "Z3 still checking assertions at step 20; manually stopped after approximately 10 minutes 29 seconds; no PASS or FAIL verdict",
+    "log_tail": "engine_0: Checking assertions in step 20; waiting for solver (5 minutes); terminating process"
+  },
+  "directed_sequence": {
+    "instructions": [
+      "ADDI x1,x0,5",
+      "ADDI x2,x0,7",
+      "ADD x3,x1,x2",
+      "EBREAK"
+    ],
+    "original_rvfi_events": 4,
+    "sonnet_rvfi_events": 4,
+    "deepseek_02_rvfi_events": 0,
+    "add_operands": [
+      5,
+      7
+    ],
+    "add_result": 12,
+    "result": "Original and Sonnet candidate RVFI event sequences matched in Yosys sim; this is one directed path, not equivalence"
+  },
+  "interpretation": "No abstraction soundness, whole-core equivalence, or verification speedup established.",
+  "known_candidate_limits": [
+    "The main picorv32 module retains its parameter ports but ignores configurations outside the formal wrapper specialization. The included picorv32_axi and picorv32_wb wrappers still forward parameters, so their default configurations are not preserved.",
+    "The retained picorv32_pcpi_mul module is a tie-off stub. ENABLE_MUL or direct use of this public module does not preserve multiplication behavior.",
+    "Only one directed nonzero ADD trace matched. BMC and whole-core behavioral relation remain unproved."
+  ],
+  "parameter_counterexample": {
+    "setting": "PROGADDR_RESET=4; other sequence-test parameters unchanged",
+    "original_first_retirement": {
+      "pc": "0x4",
+      "insn": "0x00700113",
+      "effect": "ADDI x2,x0,7"
+    },
+    "candidate_first_retirement": {
+      "pc": "0x0",
+      "insn": "0x00500093",
+      "effect": "ADDI x1,x0,5"
+    },
+    "method": "Yosys sim using the same instruction ROM as the directed sequence, with PROGADDR_RESET=4"
+  }
+}
