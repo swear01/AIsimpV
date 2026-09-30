@@ -44,4 +44,22 @@ mkdir -p "$run_dir"
 rg 'MAPPED_CELL_COUNT=|Number of cells:|Total cell area:|Number of macros/black boxes:' "$run_dir/dc.log"
 ```
 
+用 VCS 重跑候選 05 的七條非 M 指令 RVFI smoke test 時，編譯命令必須啟用 `RISCV_FORMAL`，否則核心沒有 `rvfi_*` ports：
+
+```sh
+source /apps/eda/synopsys/vcs.sh 2025.06
+case_root="$PWD/experiments/picorv32_majority"
+run_dir="$PWD/results/picorv32_majority/rvfi_smoke/reproduce"
+mkdir -p "$run_dir"
+(
+  set -e
+  cd "$run_dir"
+  vcs -full64 -sverilog +define+RISCV_FORMAL \
+    "$case_root/candidate-05/picorv32.v" "$case_root/tb_rvfi_trace.sv" \
+    -top tb_rvfi_trace -o simv > build.log 2>&1
+  ./simv > sim.log 2>&1
+)
+rg '^TRACE' "$run_dir/sim.log"
+```
+
 完整 DC/VCS 原始 log 保存在本地被 Git 忽略的 `results/picorv32_majority/`。RTL、DC Tcl 和兩個模擬 testbench 納入版本控制；library 檔不隨 repo 發布。

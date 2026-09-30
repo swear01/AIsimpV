@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+// Compile with +define+RISCV_FORMAL to expose the DUT's RVFI ports.
 module tb_rvfi_trace;
   reg clk = 0;
   always #5 clk = ~clk;

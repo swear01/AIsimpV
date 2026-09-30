@@ -14,7 +14,7 @@ if {[info exists ::env(PICO_DEFINES)]} {
 if {$defines eq ""} {
     set analyzed [analyze -format sverilog $::env(PICO_RTL)]
 } else {
-    set analyzed [analyze -format sverilog -define $defines $::env(PICO_RTL)]
+    set analyzed [analyze -format sverilog -define [split $defines] $::env(PICO_RTL)]
 }
 if {$analyzed != 1} {
     puts stderr "RTL analysis failed."

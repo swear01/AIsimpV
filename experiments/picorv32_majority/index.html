@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PicoRV32 多數 assertion 行為的簡化候選對照</title>
@@ -8,6 +9,8 @@ body{max-width:850px;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui,san
 table{border-collapse:collapse;width:100%;background:white}th,td{border:1px solid #cad3db;padding:.6rem;text-align:left}
 a{color:#145d97}.notice{background:#fff4d4;padding:.7rem;border-left:4px solid #b77b00}
 </style>
+</head>
+<body>
 <h1>PicoRV32：多數 assertion 的簡化候選</h1>
 <p>固定上游 PicoRV32 核心與 riscv-formal 的 86 個 generated assertion 任務。沒有跑 Formal、BMC 或 assertion suite；新增的 VCS 模擬只涵蓋少量指定路徑。</p>
 <p class="notice">原始檔 3,049 行。候選 01 雖縮到 2,103 行，在上游 RVFI/ALTOPS 設定下通用 cell 只少 7.7%；候選 02 有 2,516 行，通用 cell 卻少 41.8%。行數不能代替模型規模，更不能當成「保留 80% assertion 行為」的證據。</p>
@@ -35,4 +38,5 @@ a{color:#145d97}.notice{background:#fff4d4;padding:.7rem;border-left:4px solid #
 <tr><td>暫存器／PC／順序等</td><td>6</td><td>部分路徑仍在，跨指令前史未判定</td></tr>
 </tbody></table>
 <p><a href="mapped_size.md">Design Compiler 方法與限制</a> · <a href="structural_size.md">Yosys 結構規模對照</a> · <a href="candidate-01/assertion_coverage.md">候選 01 任務判讀</a> · <a href="candidate-02/assertion_coverage.md">候選 02 任務判讀</a> · <a href="assertion_intents.md">上游任務清單</a> · <a href="README.md">來源與限制</a></p>
+</body>
 </html>
