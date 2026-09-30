@@ -1,0 +1,27 @@
+{
+  "id": "picorv32-upstream-majority-intent-v1",
+  "top": "picorv32",
+  "source": "YosysHQ/picorv32 and YosysHQ/riscv-formal",
+  "picorv32_revision": "ef203c2b0a3fb793280f5114941416c425c5b461",
+  "riscv_formal_revision": "c992aa61fdfe0846c5ed90324c596202a1c69b76",
+  "primary_design": "upstream/picorv32.v",
+  "primary_output": "picorv32.v",
+  "files": [
+    "upstream/picorv32.v",
+    "upstream/wrapper.sv",
+    "upstream/checks.cfg",
+    "upstream/rvfi_insn_check.sv",
+    "assertion_intents.md"
+  ],
+  "candidate_outputs": {
+    "picorv32_v": "picorv32.v",
+    "property_proposal": "assertion_coverage.md",
+    "explanation": "explanation.md",
+    "environment_changes": "environment.md"
+  },
+  "analysis_inputs": [
+    "picorv32.v",
+    "assertion_coverage.md",
+    "environment.md"
+  ]
+}
