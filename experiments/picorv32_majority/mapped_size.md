@@ -19,10 +19,10 @@ Area 欄採用 library 的 `Total cell area`；括號內百分比只比較同一
 - 候選 01 移除了 M 乘除法；8 個 M 指令任務的行為直接失去。其他 72 個指令／CSR 任務的相關路徑還在，但完整任務行為未判定。
 - 候選 03 只把核心預設 `ENABLE_REGS_DUALPORT` 從 1 改成 0。上游已有單埠讀取與額外 `cpu_state_ld_rs2` 狀態；暫存器內容仍由寫入決定，但指令延遲會變。
 - 候選 04 在固定 `ENABLE_FAST_MUL=1` 介面下選用上游 8 步迭代乘法器，並在 `RISCV_FORMAL_ALTOPS` 時輸出與原 fast engine 相同的替代算式。M 指令運算仍可進行，延遲則改變；上游 ALTOPS 版的 mapped cells **沒有減少**。
-- 候選 05 結合候選 01 與 03，得到此輪最小的 mapped netlist。它適合展示「多數非 M 任務意圖」的縮減嘗試，**不能宣稱已保留 80% assertion**：除 M 的 8 項以外，額外 cycle 也可能影響 liveness、PC 或其他檢查。
+- 候選 05 結合候選 01 與 03，得到此輪最小的 mapped netlist。後續 JasperGold 對照有 72/86 題 bounded assertion pass，但**不能據此宣稱保留 80% 原設計行為**；8 題 M 和 6 題 CSR 有反例。面積量測本身也不能代替 Formal 結果。
 - 候選 02 的 `$anyseq` 在 DC 前端報 `VER-110: Function '$anyseq' not defined`，沒有可比較的 mapped-cell 數。先前的 41.8% 是 Yosys 對驗證模型的 generic-cell 統計。
 
-沒有跑 Formal、BMC 或 assertion suite。VCS 2025.06 的小型模擬顯示：候選 05 與原版在同一段 7 條非 M 指令上的 RVFI 退休紀錄相同；候選 04 的 fast／8 步乘法器在一般算術和 ALTOPS 模式各通過 16 組 MUL、MULH、MULHSU、MULHU 對照，且在 20 cycles 內回覆。這些只支持所測路徑，不足以估計 assertion 保留率。
+這個 DC/VCS 階段沒有跑 Formal、BMC 或 assertion suite；後續的 [JasperGold assertion 對照](jasper_results.md)另行記錄。VCS 2025.06 的小型模擬顯示：候選 05 與原版在同一段 7 條非 M 指令上的 RVFI 退休紀錄相同；候選 04 的 fast／8 步乘法器在一般算術和 ALTOPS 模式各通過 16 組 MUL、MULH、MULHSU、MULHU 對照，且在 20 cycles 內回覆。這些只支持所測路徑，不足以估計 assertion 保留率。
 
 ## 重現
 
