@@ -35,3 +35,11 @@
 這個結果顯示：在**這一次**相同任務內容的生成中，Sonnet 避開了 DeepSeek 02 的「只回報零值 ADD」退化，並保留一條真實的非零相依 ADD 路徑。它仍自行限縮了參數範圍，原 ADD BMC 未取得結論，也沒有與原核心的行為包含或等價證明。每個模型只有一個樣本，DeepSeek 使用未釘住實際 checkpoint 的 gateway alias，兩個 API 的結構化輸出機制和 tokenization 不同；目前**不能確認模型能力是差異的唯一原因，或估算成功率**。下一步若要作因果比較，需固定輸入與評分，對每個模型做多次獨立生成，並以非零相依指令及行為關係作為成功條件。
 
 候選雖保留八個 module 宣告，但**不能當通用 PicoRV32 檔案替換**：主核心的參數介面仍存在，實作卻忽略 formal wrapper 以外的配置。另以 `PROGADDR_RESET=4` 重跑同一指令 ROM，原核心第一筆從 PC 4 退休 `ADDI x2,x0,7`，候選卻從 PC 0 退休 `ADDI x1,x0,5`。檔內 AXI/WB wrapper 仍轉送參數，因此其預設配置也不受保證。`picorv32_pcpi_mul` 被改成固定輸出 stub，直接使用或啟用迭代 MUL 不會保留乘法行為。這些是生成產物本身的限制；本報告保留原始回應，不把後續人工修補算進這次模型表現。
+
+## 2026-09-30：Opus 5.5 medium 的單一 assertion 改寫
+
+使用相同 frozen 輸入檔和原 rewrite prompt，另加[單一 assertion 提示詞](../../experiments/picorv32/candidate-opus-5-5-medium/prompt_delta.txt)，要求比參數特化更激進，但明示失去的原核心行為。這輪使用 `claude-opus-5-5`、`medium` effort；Sonnet 輪使用 high effort 且沒有新增指示，所以不能把兩份結果的差異只歸因於模型。完整[候選與人工評估](../../experiments/picorv32/candidate-opus-5-5-medium/review.md)、[生成紀錄](../../experiments/picorv32/candidate-opus-5-5-medium/generation.json)和[驗證摘要](../../experiments/picorv32/candidate-opus-5-5-medium/verification.json)已保存。
+
+Opus 把主核心從原版 2,106 行、Sonnet 1,349 行，縮為 370 行；全檔為 1,319 行。它保留取指、暫存器檔、部分 RV32I ALU 與 RVFI，移除 compressed、load/store、branch/jump、PCPI MUL/DIV、CSR 等合法執行路徑，並改變退休時序。模型自己將產物定義為 partial model，不宣稱替代原核心。
+
+同一個 Yosys 展開流程下，Sonnet／Opus 的 generic cells 為 1,203／248，`$dff` cells 為 153／31；這是結構縮減的證據，並非面積或證明速度。原 `insn_add_ch0` checker 在 Opus 候選上的 Yosys frontend PASS；同一個 Z3 BMC 設定約 2.41 秒 PASS。`ADDI 5; ADDI 7; ADD` 的非零相依軌跡回報 `5 + 7 = 12`；JasperGold 在原 checker 下證明 33/33 assertions，並找到第 20 拍 ADD cover。另一個只增加 cover 的檢查找到第 20 拍非零 `5 + 7 = 12` 且此前至少兩筆退休紀錄。RVFI 結果低位突變會讓原 Z3 checker FAIL，排除了對該欄位完全不敏感的解讀。這些結果證明**受限模型自己的** ADD check 可達且通過；沒有原核心與受限模型的等價、行為包含或 refinement 證明。由於 Opus 排除大量原核心可達歷史，不能把它與 Sonnet 的未完成 BMC 當作同一義務的速度比較。

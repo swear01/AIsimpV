@@ -1,0 +1,116 @@
+{
+  "original": [
+    {
+      "time": 80,
+      "rvfi_insn": "0x500093",
+      "rvfi_pc_rdata": "0x0",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x1",
+      "rvfi_rd_wdata": "0x5"
+    },
+    {
+      "time": 110,
+      "rvfi_insn": "0x700113",
+      "rvfi_pc_rdata": "0x4",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x2",
+      "rvfi_rd_wdata": "0x7"
+    },
+    {
+      "time": 140,
+      "rvfi_insn": "0x2081b3",
+      "rvfi_pc_rdata": "0x8",
+      "rvfi_rs1_rdata": "0x5",
+      "rvfi_rs2_rdata": "0x7",
+      "rvfi_rd_addr": "0x3",
+      "rvfi_rd_wdata": "0xc"
+    },
+    {
+      "time": 170,
+      "rvfi_insn": "0x100073",
+      "rvfi_pc_rdata": "0xc",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x5",
+      "rvfi_rd_addr": "0x0",
+      "rvfi_rd_wdata": "0x0"
+    }
+  ],
+  "opus": [
+    {
+      "time": 40,
+      "rvfi_insn": "0x500093",
+      "rvfi_pc_rdata": "0x0",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x1",
+      "rvfi_rd_wdata": "0x5"
+    },
+    {
+      "time": 70,
+      "rvfi_insn": "0x700113",
+      "rvfi_pc_rdata": "0x4",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x2",
+      "rvfi_rd_wdata": "0x7"
+    },
+    {
+      "time": 100,
+      "rvfi_insn": "0x2081b3",
+      "rvfi_pc_rdata": "0x8",
+      "rvfi_rs1_rdata": "0x5",
+      "rvfi_rs2_rdata": "0x7",
+      "rvfi_rd_addr": "0x3",
+      "rvfi_rd_wdata": "0xc"
+    },
+    {
+      "time": 130,
+      "rvfi_insn": "0x100073",
+      "rvfi_pc_rdata": "0xc",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x0",
+      "rvfi_rd_wdata": "0x0"
+    }
+  ],
+  "sonnet": [
+    {
+      "time": 80,
+      "rvfi_insn": "0x500093",
+      "rvfi_pc_rdata": "0x0",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x1",
+      "rvfi_rd_wdata": "0x5"
+    },
+    {
+      "time": 110,
+      "rvfi_insn": "0x700113",
+      "rvfi_pc_rdata": "0x4",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x0",
+      "rvfi_rd_addr": "0x2",
+      "rvfi_rd_wdata": "0x7"
+    },
+    {
+      "time": 140,
+      "rvfi_insn": "0x2081b3",
+      "rvfi_pc_rdata": "0x8",
+      "rvfi_rs1_rdata": "0x5",
+      "rvfi_rs2_rdata": "0x7",
+      "rvfi_rd_addr": "0x3",
+      "rvfi_rd_wdata": "0xc"
+    },
+    {
+      "time": 170,
+      "rvfi_insn": "0x100073",
+      "rvfi_pc_rdata": "0xc",
+      "rvfi_rs1_rdata": "0x0",
+      "rvfi_rs2_rdata": "0x5",
+      "rvfi_rd_addr": "0x0",
+      "rvfi_rd_wdata": "0x0"
+    }
+  ]
+}

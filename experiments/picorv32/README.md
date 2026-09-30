@@ -28,3 +28,5 @@ python3 scripts/freestyle_pilot.py analyze --case experiments/picorv32 --candida
 ```
 
 The frontend check compiles the candidate against the **original** property. It is not an abstraction soundness or equivalence check. An alternate property proposed in `property_proposal.md` is recorded for review and never silently replaces the upstream checker. Candidate generation and analysis have no tools and are separate API requests. The complete API requests and solver logs are kept outside Git in `results/` and `artifacts/`.
+
+The [Opus 5.5 medium single-assertion follow-up](candidate-opus-5-5-medium/review.md) retains real nonzero ADD dependencies in a 370-line partial core. Its original-checker PASS and nonzero cover apply only to that reduced model; omitted legal instruction paths and changed retirement timing prevent an upstream-core claim.
