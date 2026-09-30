@@ -34,3 +34,4 @@
 ## Project Docs
 
 - When changing `README.md`, `docs/`, or experiment documentation, follow [docs/wiki.md](docs/wiki.md) to review and update the affected GitHub Wiki pages in the same task.
+- Prefer JasperGold for RTL assertion verification when available; the pinned PicoRV32 setup is documented in [experiments/picorv32_majority/README.md](experiments/picorv32_majority/README.md).
