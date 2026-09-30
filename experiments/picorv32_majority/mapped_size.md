@@ -62,4 +62,4 @@ mkdir -p "$run_dir"
 rg '^TRACE' "$run_dir/sim.log"
 ```
 
-完整 DC/VCS 原始 log 保存在本地被 Git 忽略的 `results/picorv32_majority/`。RTL、DC Tcl 和兩個模擬 testbench 納入版本控制；library 檔不隨 repo 發布。
+DC/VCS 重現命令會把原始 log 寫入 Git 忽略的 `results/picorv32_majority/`；這些 log 不隨 repo 發布。RTL、DC Tcl 和兩個模擬 testbench 已納入版本控制；library 檔也不隨 repo 發布。
