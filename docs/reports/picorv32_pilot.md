@@ -17,4 +17,19 @@
 
 第二個乾淨分析 session 未看到生成者說明，指出兩份候選均把完整 CPU 縮成 ADD-only，並辨識出多個具體行為缺口。人工再核對了本頁五項代表性改動。分析原文保留在各候選目錄；候選 01 的分析有一處行號超出原檔末行，因此網頁只採用人工確認、且經位置檢查的卡片。網頁中的程式碼取自固定快照，生成者的說明與人工判讀分開顯示。
 
-下一步若要檢驗「模型不夠強」而非繼續擴大 design，應固定第 02 次的完整輸入、同一上游 ADD task 與檢查方式，換一個**版本明確**的更強模型做相同次數的獨立生成。成功門檻至少要包含非零來源運算元與先前合法指令造成的狀態；單看 ADD checker PASS 會獎勵這次的錯誤簡化。
+## 2026-09-30：換 Claude Sonnet 5.5 的單次對照
+
+以 [Claude API `claude-sonnet-5-5`](https://platform.claude.com/docs/en/models/sonnet-5-5/overview) 重跑第 02 次的**同一份 user message 與 frozen input bundle**，沒有模型工具。重建舊 DeepSeek request 的 SHA-256 為 `227354af914a2f0b587432db25bff33adff9ddc30e572fec62c056d6ea89f378`，與[舊生成紀錄](../../experiments/picorv32/candidate-02/generation.json)一致；兩次的 user message SHA-256 均為 `4606973177bfdb2e8b9c6059897492d6d7495f22b2f77021da95d5bc7bd9a3f6`。Sonnet 設為 high effort，使用 Anthropic 的 JSON schema 輸出；DeepSeek 原請求使用 `json_object`。這是相同任務內容的換模型試跑，API 輸出約束仍有差別。
+
+| 觀察 | DeepSeek Flash 候選 02 | [Sonnet 5.5 候選](../../experiments/picorv32/candidate-sonnet-5-5/picorv32.v) |
+| --- | --- | --- |
+| 產物 | 270 行、只有主核心 module；無暫存器檔，RVFI ADD 運算元與結果固定為零 | 2,125 行；保留原檔八個 module 宣告、暫存器檔、ALU 加法和 RVFI 寫回路徑；針對 formal wrapper 的參數組合特化，其他參數組合不再保證 |
+| 原 checker 的 frontend | PASS，64→39 check cells | PASS，64→39 check cells，八個 module 均存在 |
+| 原 checker 的 Z3 BMC | 約 1 秒 PASS；另有 ADD cover | 第 20 拍 assertion 求解約 10 分 29 秒後仍無結論，人工停止；**沒有 PASS/FAIL** |
+| 相依、非零 ADD 軌跡 | 同一指令序列沒有退休事件 | 與原核心的四筆 RVFI 事件一致；`ADDI x1,5`、`ADDI x2,7` 後，`ADD x3,x1,x2` 回報 `5 + 7 = 12` |
+
+[可重跑的序列檢查](../../experiments/picorv32/candidate-sonnet-5-5/verify_sequence.py)用 Yosys `sim` 對原版、兩個候選送入相同四條指令，並比對 RVFI。其[完整軌跡](../../experiments/picorv32/candidate-sonnet-5-5/directed_trace.json)和[生成、驗證紀錄](../../experiments/picorv32/candidate-sonnet-5-5/verification.json)保留在 repo。原始檔為 3,049 行，Sonnet 產物為 2,125 行（少約 30.3%），但行數與 frontend check cells 都不是硬體面積或證明速度。
+
+在 repo 根目錄執行 `python3 experiments/picorv32/candidate-sonnet-5-5/verify_sequence.py`；需要 Yosys 置於 PATH。BMC 使用同一份 `upstream/insn_add_ch0.sby`，本輪工具為 Yosys 0.69、Z3 4.15.4 及 SymbiYosys `b1a1e98`。完整 API request、response 與求解 log 留在本機 `results/picorv32/sonnet-5-5/`，沒有放入 Git。
+
+這個結果顯示：在**這一次**相同任務內容的生成中，Sonnet 避開了 DeepSeek 02 的「只回報零值 ADD」退化，並保留一條真實的非零相依 ADD 路徑。它仍自行限縮了參數範圍，原 ADD BMC 未取得結論，也沒有與原核心的行為包含或等價證明。每個模型只有一個樣本，DeepSeek 使用未釘住實際 checkpoint 的 gateway alias，兩個 API 的結構化輸出機制和 tokenization 不同；目前**不能確認模型能力是差異的唯一原因，或估算成功率**。下一步若要作因果比較，需固定輸入與評分，對每個模型做多次獨立生成，並以非零相依指令及行為關係作為成功條件。

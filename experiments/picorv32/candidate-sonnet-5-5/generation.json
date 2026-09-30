@@ -1,0 +1,42 @@
+{
+  "provider": "anthropic",
+  "requested_model": "claude-sonnet-5-5",
+  "request_sha256": "d25c28de3cce8f1eb3e8f1ddbab430344d34db11a2913d57e3ba16b4fdcadfba",
+  "message_sha256": "4606973177bfdb2e8b9c6059897492d6d7495f22b2f77021da95d5bc7bd9a3f6",
+  "input_bytes": 132005,
+  "attempts": [
+    {
+      "status": 200,
+      "seconds": 331.73
+    }
+  ],
+  "response_model": "claude-sonnet-5-5",
+  "response_id": "msg_011CfYsf43Rg2LoX3vMHRKbb",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 90030,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 65293,
+    "output_tokens_details": {
+      "thinking_tokens": 13318
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+  },
+  "response_sha256": "8e476a1fca5487689026baa17b4c45571c7932cd537bf8dffb19b6fc53214a8c",
+  "candidate_sha256": {
+    "picorv32.v": "99770faaa32e69f2db48f2139c775d7d536578d39b3ae728715f2253343fc17c",
+    "property_proposal.md": "a8ca15fe10bcfb331c1c366aa5a274897bb20305f4913646d3df4d1b18834fa6",
+    "explanation.md": "01ca9d77c37cd27170cad358c22a8d35f1d367352ca23f10b3d575b98b9144af",
+    "environment.md": "81e0294a547d90754acbc606d2024cb10367d686ee071f060d4049eee5fc912c"
+  },
+  "api_endpoint": "https://api.anthropic.com/v1/messages",
+  "anthropic_version": "2023-06-01",
+  "workspace_id_supplied": true,
+  "request_control": "Identical user message and frozen file bundle to DeepSeek candidate 02; reconstructed DeepSeek request SHA-256 matches archived generation.json. Anthropic uses output_config JSON schema; DeepSeek uses response_format json_object."
+}
