@@ -6,7 +6,7 @@
 - Default to autonomous execution: make and carry out the least-risky reasonable decisions for routine, reversible, in-scope work without asking.
 - Own the requested outcome end to end. Do not stop after discovery, planning, partial implementation, or a progress update; continue through verification and safe in-scope fixes until complete or genuinely blocked.
 - Necessary supporting changes to code, tests, fixtures, configuration, generated artifacts, and documentation are in scope. Unrelated refactors, cleanup, and features are not.
-- Ask only when you identify a concrete, material problem that cannot be resolved safely in scope: missing information or a user-owned choice that materially changes the outcome, or an unrequested destructive, irreversible, paid, or external action.
+- Ask only for a concrete, material problem—missing input, a user-owned decision, or an unrequested destructive, irreversible, paid, or external action; never skip a required step for lack of approval—ask instead.
 - Before asking, diagnose the issue and complete all safe, reversible, equivalent, in-scope work. If no concrete material problem exists, choose a reasonable default and continue.
 - Do not ask merely because the work crosses files, functions, tests, fixtures, configuration, dependencies, or tools. Do not ask again for an action the user already explicitly requested or authorized.
 - For substantive tasks, inspect relevant local files and instructions before modifying them; use authoritative docs or web sources when current or external facts matter. Explicit, trivial, unambiguous edits may proceed directly.
@@ -16,7 +16,7 @@
 - Retry an operation once when the failure appears transient; otherwise diagnose it and continue with safe, equivalent, in-scope alternatives when available.
 - Match existing style, names, and patterns; keep changes minimal and add no dependencies or comments unless necessary for the requested result.
 - Change requested behavior directly; do not add unrequested compatibility options.
-- For explicit GitHub PR review, use `github-pr-review-loop`; local review is supplementary.
+- Before merging a PR, trigger a GitHub bot review with `github-pr-review-loop`; merge once it passes on the latest head. Local review is supplementary.
 
 ## Completion
 
